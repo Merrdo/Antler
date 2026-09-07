@@ -9,6 +9,10 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2b2f4a">
 
+<!-- Favicon ve uygulama ikonları -->
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+
 <!-- PWA: iOS "Ana Ekrana Ekle" desteği -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -306,27 +310,26 @@
     animation-delay: 0.32s;
   }
 
-  /* Ana Sayfa sekmesi seçildiğinde artık ikon zıplamıyor; çatı ve
-     gövde çizgileri sanki elle çiziliyormuş gibi sırayla (önce çatı,
-     ardından gövde) baştan sona "belirir". */
-  @keyframes navHomeDraw {
-    to {
-      stroke-dashoffset: 0;
+  /* Ana Sayfa sekmesi seçildiğinde ikon küçük bir sıçrama animasyonuyla
+     canlanır; sekme her yeniden seçildiğinde (:checked eşleşmesi baştan
+     başladığı için) animasyon tazelenip tekrar oynar. */
+  @keyframes navHomeBounce {
+    0% {
+      transform: scale(0.55) translateY(3px) rotate(-8deg);
+    }
+    55% {
+      transform: scale(1.2) translateY(-3px) rotate(5deg);
+    }
+    78% {
+      transform: scale(0.92) translateY(0) rotate(-2deg);
+    }
+    100% {
+      transform: scale(1) translateY(0) rotate(0deg);
     }
   }
 
-  .nav-input[value="page-1"]:checked + .nav-btn .nav-icon-home path {
-    stroke-dasharray: 40;
-    stroke-dashoffset: 40;
-    animation: navHomeDraw 0.45s ease-out both;
-  }
-
-  .nav-input[value="page-1"]:checked + .nav-btn .nav-icon-home path:nth-of-type(1) {
-    animation-delay: 0s;
-  }
-
-  .nav-input[value="page-1"]:checked + .nav-btn .nav-icon-home path:nth-of-type(2) {
-    animation-delay: 0.22s;
+  .nav-input[value="page-1"]:checked + .nav-btn .nav-icon-home {
+    animation: navHomeBounce 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   /* Kronometre sekmesi seçildiğinde ikon, saniye kolu tık-tık sallanıyormuş
@@ -414,73 +417,50 @@
     animation: navGearSpin 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* Gündelik sekmesi seçildiğinde tik işaretleri, zar noktalarında
-     olduğu gibi sıçramadan, sadece opaklıkla belirir. */
-  @keyframes navGunlukTickAppear {
+  /* Gündelik sekmesi seçildiğinde ikon, bir görev tikleniyormuş gibi
+     kısa bir sıçrama + hafif eğilme hareketi yapar. */
+  @keyframes navGunlukCheck {
     0% {
-      opacity: 0;
+      transform: scale(0.55) rotate(-6deg);
+    }
+    55% {
+      transform: scale(1.22) rotate(4deg);
+    }
+    78% {
+      transform: scale(0.92) rotate(-2deg);
     }
     100% {
-      opacity: 1;
+      transform: scale(1) rotate(0deg);
     }
   }
 
-  .nav-input[value="page-8"]:checked + .nav-btn .nav-icon-gunluk path {
-    animation: navGunlukTickAppear 0.15s linear both;
+  .nav-input[value="page-8"]:checked + .nav-btn .nav-icon-gunluk {
+    animation: navGunlukCheck 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* Markup sırasında alttaki tik (m3 17...) önce, üstteki tik (m3 7...)
-     sonra geldiği için; ekranda üstten alta doğru sıralı oynaması adına
-     üstteki path'e gecikme verilmez, alttaki path'e gecikme eklenir. */
-  .nav-input[value="page-8"]:checked + .nav-btn .nav-icon-gunluk path:nth-of-type(1) {
-    animation-delay: 0.16s;
-  }
-
-  .nav-input[value="page-8"]:checked + .nav-btn .nav-icon-gunluk path:nth-of-type(2) {
-    animation-delay: 0s;
-  }
-
-  /* Soru Takibi sekmesi artık büyüteç yerine panolu bir kontrol
-     listesi (checklist) ikonuyla temsil edilir: üstteki klips
-     hafifçe zıplayarak belirir, ardından içindeki tik işareti
-     sanki elle çiziliyormuş gibi "çizilerek" tamamlanır. */
-  @keyframes navChecklistClipPop {
+  /* Soru Takibi sekmesi seçildiğinde hedef ikonu, tam ortasına isabet
+     edilmiş gibi kısa bir "vuruş" hareketiyle küçülüp büyüyerek
+     yerine oturur. */
+  @keyframes navTargetHit {
     0% {
-      opacity: 0;
-      transform: scale(0.5);
+      transform: scale(0.4);
     }
-    60% {
-      opacity: 1;
-      transform: scale(1.15);
+    40% {
+      transform: scale(1.35);
+    }
+    62% {
+      transform: scale(0.82);
+    }
+    82% {
+      transform: scale(1.08);
     }
     100% {
-      opacity: 1;
       transform: scale(1);
     }
   }
 
-  .nav-input[value="page-9"]:checked + .nav-btn .nav-icon-checklist .nav-checklist-clip {
-    animation: navChecklistClipPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  }
-
-  @keyframes navChecklistCheckDraw {
-    0% {
-      opacity: 0;
-      stroke-dashoffset: 11;
-    }
-    30% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 1;
-      stroke-dashoffset: 0;
-    }
-  }
-
-  .nav-input[value="page-9"]:checked + .nav-btn .nav-icon-checklist .nav-checklist-check {
-    stroke-dasharray: 11;
-    stroke-dashoffset: 11;
-    animation: navChecklistCheckDraw 0.3s ease-out 0.18s both;
+  .nav-input[value="page-9"]:checked + .nav-btn .nav-icon-target {
+    animation: navTargetHit 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   /* Denemelerim sekmesi seçildiğinde kağıt ikonu, bir sınav kağıdı
@@ -5335,7 +5315,7 @@
         <span class="nav-tooltip">Ana Sayfa</span>
         <svg class="nav-icon nav-icon-home" viewBox="0 0 24 24">
           <path d="M4 11.5L12 4l8 7.5"/>
-          <path d="M6 9.625v9.375a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9.375"/>
+          <path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/>
         </svg>
       </div>
     </div>
@@ -5394,10 +5374,10 @@
       <input class="nav-input" type="radio" name="nav" value="page-9">
       <div class="nav-btn">
         <span class="nav-tooltip">Soru Takibi</span>
-        <svg class="nav-icon nav-icon-checklist" viewBox="0 0 24 24">
-          <rect x="5" y="4" width="14" height="17" rx="2"/>
-          <rect class="nav-checklist-clip" x="9" y="2" width="6" height="3" rx="1"/>
-          <polyline class="nav-checklist-check" points="8.5 12.5 11 15 16 9.5"/>
+        <svg class="nav-icon nav-icon-target" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="8"/>
+          <circle cx="12" cy="12" r="4.8"/>
+          <circle cx="12" cy="12" r="1.6"/>
         </svg>
       </div>
     </div>
