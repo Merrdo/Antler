@@ -2,14 +2,14 @@
 // Uygulamayı "Ana Ekrana Ekle" ile açıldığında çevrimdışı da çalışır hale
 // getirmek için temel bir cache-first stratejisi uygular.
 
-const CACHE_VERSION = 'takvimim-v3';
+const CACHE_VERSION = 'takvimim-v4';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './favicon.png',
-  './icon-192.png',
-  './icon-512.png'
+  './icons/favicon.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
