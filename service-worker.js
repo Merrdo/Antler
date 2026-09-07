@@ -2,7 +2,7 @@
 // Uygulamayı "Ana Ekrana Ekle" ile açıldığında çevrimdışı da çalışır hale
 // getirmek için temel bir cache-first stratejisi uygular.
 
-const CACHE_VERSION = 'takvimim-v4';
+const CACHE_VERSION = 'takvimim-v5';
 const CORE_ASSETS = [
   './',
   './index.html',
