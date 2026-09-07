@@ -4920,6 +4920,21 @@
             </label>
           </div>
 
+          <div class="settings-divider" id="settingsFullscreenDivider"></div>
+
+          <div class="settings-row" id="settingsFullscreenRow">
+            <div class="settings-row-text">
+              <span class="settings-row-title">Tam ekran</span>
+              <span class="settings-row-desc">Tarayıcı arayüzünü gizleyip tam ekranda aç</span>
+            </div>
+            <label class="toggle brutal-toggle settings-toggle" id="settingsFullscreenToggleWrap">
+              <input type="checkbox" id="settingsFullscreenToggle" />
+              <span class="track">
+                <span class="thumb"></span>
+              </span>
+            </label>
+          </div>
+
           <div class="settings-divider"></div>
 
           <div class="settings-row settings-row-column">
@@ -4941,24 +4956,6 @@
               </svg>
             </div>
           </button>
-        </div>
-      </div>
-
-      <div class="settings-section" id="settingsFullscreenSection">
-        <span class="settings-section-label">Ekran</span>
-        <div class="settings-card">
-          <div class="settings-row">
-            <div class="settings-row-text">
-              <span class="settings-row-title">Tam ekran modu</span>
-              <span class="settings-row-desc">Uygulamayı tam ekranda açar (yalnızca Android)</span>
-            </div>
-            <label class="toggle brutal-toggle settings-toggle" id="settingsFullscreenToggleWrap">
-              <input type="checkbox" id="settingsFullscreenToggle" />
-              <span class="track">
-                <span class="thumb"></span>
-              </span>
-            </label>
-          </div>
         </div>
       </div>
 
@@ -5616,94 +5613,64 @@
 </script>
 
 <script>
-  // ---------- Ayarlar: "Tam ekran modu" anahtarı (yalnızca Android) ----------
-  // Bu satır yalnızca Android cihazlarda gösterilir (User-Agent kontrolüyle).
-  // Anahtar açıldığında tarayıcının Fullscreen API'si üzerinden doğrudan tam
-  // ekran moduna geçilir; hiçbir bildirim (Notification API) gönderilmez.
-  // Kapatıldığında da yine bildirim göndermeden tam ekran modundan çıkılır.
-  const settingsFullscreenSection = document.getElementById('settingsFullscreenSection');
+  // Ayarlar sayfasındaki "Tam ekran" anahtarı: Fullscreen API üzerinden
+  // tarayıcı arayüzünü (adres çubuğu vb.) gizleyip belgeyi tam ekrana alır.
+  // Kullanıcı tam ekrandan Esc/geri tuşuyla veya sistem üzerinden çıkarsa
+  // (fullscreenchange olayı) anahtar otomatik olarak kapalı konuma döner.
   const fullscreenToggle = document.getElementById('settingsFullscreenToggle');
-  const isAndroidDevice = /android/i.test(navigator.userAgent || '');
+  const fullscreenRow = document.getElementById('settingsFullscreenRow');
+  const fullscreenDivider = document.getElementById('settingsFullscreenDivider');
 
-  if (settingsFullscreenSection && fullscreenToggle) {
-    if (!isAndroidDevice) {
-      // Android dışındaki cihazlarda bu bölüm tamamen gizlenir.
-      settingsFullscreenSection.style.display = 'none';
-    } else {
-      // Daha önce kaydedilmiş bir tercih varsa anahtarı ona göre ayarla.
-      if (typeof APP_STATE.fullscreenEnabled === 'boolean') {
-        fullscreenToggle.checked = APP_STATE.fullscreenEnabled;
+  // iOS Safari (ve genel olarak desteklemeyen tarayıcılar), <html> elementi
+  // için Fullscreen API'sini uygulamaz; sadece <video> için kısmi destek
+  // vardır. Bu yüzden anahtarı yalnızca API gerçekten kullanılabiliyorsa
+  // (pratikte Android tarayıcıları) gösteriyoruz; desteklenmiyorsa satır
+  // ve üstündeki ayırıcı tamamen gizlenir.
+  const fsSupported = !!(
+    document.documentElement.requestFullscreen ||
+    document.documentElement.webkitRequestFullscreen
+  );
+
+  if (!fsSupported) {
+    if (fullscreenRow) fullscreenRow.style.display = 'none';
+    if (fullscreenDivider) fullscreenDivider.style.display = 'none';
+  }
+
+  if (fullscreenToggle && fsSupported) {
+    const isFs = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+
+    const requestFs = () => {
+      const el = document.documentElement;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) return req.call(el);
+      return Promise.reject(new Error('Fullscreen API desteklenmiyor'));
+    };
+    const exitFs = () => {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) return exit.call(document);
+      return Promise.resolve();
+    };
+
+    fullscreenToggle.checked = isFs();
+
+    fullscreenToggle.addEventListener('change', () => {
+      if (fullscreenToggle.checked) {
+        requestFs().catch(() => {
+          // Tarayıcı izin vermediyse (ör. kullanıcı etkileşimi olmadan
+          // tetiklenmiş olabilir) anahtarı eski haline geri al.
+          fullscreenToggle.checked = false;
+        });
+      } else {
+        exitFs();
       }
+    });
 
-      const enterFullscreenMode = () => {
-        const el = document.documentElement;
-        const request = el.requestFullscreen
-          || el.webkitRequestFullscreen
-          || el.mozRequestFullScreen
-          || el.msRequestFullscreen;
-        if (!request) return;
-        try {
-          const result = request.call(el);
-          if (result && typeof result.catch === 'function') {
-            result.catch(() => {
-              // Tarayıcı tam ekranı reddederse sessizce yok sayılır.
-            });
-          }
-        } catch (err) {
-          // Sessizce yok say; herhangi bir bildirim gösterilmez.
-        }
-      };
-
-      const exitFullscreenMode = () => {
-        const isCurrentlyFullscreen = !!(
-          document.fullscreenElement
-          || document.webkitFullscreenElement
-          || document.mozFullScreenElement
-          || document.msFullscreenElement
-        );
-        if (!isCurrentlyFullscreen) return;
-        const exit = document.exitFullscreen
-          || document.webkitExitFullscreen
-          || document.mozCancelFullScreen
-          || document.msExitFullscreen;
-        if (!exit) return;
-        try {
-          const result = exit.call(document);
-          if (result && typeof result.catch === 'function') {
-            result.catch(() => {});
-          }
-        } catch (err) {
-          // Sessizce yok say.
-        }
-      };
-
-      fullscreenToggle.addEventListener('change', () => {
-        if (fullscreenToggle.checked) {
-          enterFullscreenMode();
-        } else {
-          exitFullscreenMode();
-        }
-        saveAppState({ fullscreenEnabled: fullscreenToggle.checked });
-      });
-
-      // Kullanıcı sistem geri tuşu ya da başka bir yolla (anahtara
-      // dokunmadan) tam ekrandan çıkarsa, anahtarı da bu duruma göre
-      // senkronize tutuyoruz.
-      const syncToggleWithFullscreenState = () => {
-        const isFs = !!(
-          document.fullscreenElement
-          || document.webkitFullscreenElement
-          || document.mozFullScreenElement
-          || document.msFullscreenElement
-        );
-        fullscreenToggle.checked = isFs;
-        saveAppState({ fullscreenEnabled: isFs });
-      };
-      document.addEventListener('fullscreenchange', syncToggleWithFullscreenState);
-      document.addEventListener('webkitfullscreenchange', syncToggleWithFullscreenState);
-      document.addEventListener('mozfullscreenchange', syncToggleWithFullscreenState);
-      document.addEventListener('MSFullscreenChange', syncToggleWithFullscreenState);
-    }
+    document.addEventListener('fullscreenchange', () => {
+      fullscreenToggle.checked = isFs();
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+      fullscreenToggle.checked = isFs();
+    });
   }
 </script>
 
