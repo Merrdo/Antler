@@ -109,16 +109,6 @@
     opacity: 0;
   }
 
-  /* ---------- Kar Yağışı Animasyonu ---------- */
-  /* Tema katmanlarının üzerinde, uygulama içeriğinin altında duran
-     hafif bir canvas katmanı. Dokunma/etkileşimi engellemez. */
-  #snowCanvas {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-  }
-
   /* ---------- Sayfalar ---------- */
 
   .app {
@@ -153,12 +143,6 @@
     pointer-events: none;
   }
 
-  /* Sayfa 2: yapılacaklar listesi dikeyde ortalanmak yerine üste hizalı */
-  #page-2 {
-    align-items: flex-start;
-    padding-top: calc(48px + env(safe-area-inset-top));
-  }
-
   .page h1 {
     color: var(--theme-text, #f2f2f7);
     font-size: 22px;
@@ -186,36 +170,43 @@
     --main-color: #121212;
     position: relative;
     width: 340px;
-    height: 44px;
+    height: 50px;
     background-color: var(--bg-color);
     border: 2px solid var(--main-color);
-    border-radius: 34px;
+    border-radius: 20px;
     display: flex;
     flex-direction: row;
+    /* En uçtaki (ilk/son) sekmenin seçili gösterge karesi köşelere flush
+       olunca, pilin 20px'lik köşe kavisi 13px'lik göstergeden daha keskin
+       kıvrıldığı için gösterge köşesi pilin dışına taşıyordu. Soldan ve
+       sağdan küçük bir iç boşluk bırakarak (nav-slider'daki karşılık gelen
+       inset ile birlikte) göstergeyi kavisin içinde tutuyoruz. */
+    padding: 0 3px;
     box-shadow: 4px 4px var(--main-color);
     pointer-events: auto;
   }
 
-  /* Seçili sekmeyi takip eden, yumuşak kayan siyah alan */
+  /* Seçili sekmeyi takip eden, yumuşak kayan siyah alan. Artık tam yuvarlak
+     değil, köşeleri yumuşatılmış kare (squircle) bir kart. */
   .nav-slider {
     position: absolute;
-    top: 2px;
-    left: 2px;
-    width: calc((340px - 8px) / 9);
-    height: 36px;
+    top: 3px;
+    left: 3px;
+    width: calc((100% - 6px) / 8);
+    height: 40px;
     background-color: var(--main-color);
-    border-radius: 50px;
+    border-radius: 13px;
     transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
     will-change: transform;
     z-index: 0;
   }
 
   .option {
-    width: calc((340px - 8px) / 9);
-    height: 36px;
+    width: calc(100% / 8);
+    height: 40px;
     position: relative;
-    top: 2px;
-    left: 2px;
+    top: 3px;
+    left: 0;
     z-index: 1;
   }
 
@@ -237,22 +228,327 @@
     width: 100%;
     height: 100%;
     background-color: transparent;
-    border-radius: 50px;
+    border-radius: 13px;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 4px;
+    position: relative;
+    /* Sadece tooltip'in konumlanması için ihtiyaç duyulan bir referans
+       noktası; tıklamalar altındaki .nav-input'a ulaşabilsin diye bu
+       katman kendisi hiçbir işaretçi (fare/dokunma) olayı yakalamaz. */
+    pointer-events: none;
   }
 
-  .nav-span {
-    color: var(--font-color-dark);
-    font-size: 13px;
-    font-weight: 600;
-    transition: color 0.25s ease;
+  /* İkonlar: ince çizgi (outline) stil, seçili sekmede beyaza döner. */
+  .nav-icon {
+    width: 21px;
+    height: 21px;
+    stroke: var(--font-color-dark);
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.25s ease;
+    pointer-events: none;
+    transform-box: fill-box;
+    transform-origin: center;
   }
 
-  .nav-input:checked + .nav-btn .nav-span {
+  .nav-input:checked + .nav-btn .nav-icon {
+    stroke: var(--font-color-light);
+  }
+
+  /* Zar (mini oyun) ikonundaki dolgulu noktalar da seçili sekmede
+     beyaza döner; bunlar stroke değil fill ile çizildiği için ayrı bir
+     kuralla eşlenir. */
+  .nav-icon .dice-dot {
+    fill: var(--font-color-dark);
+    transition: fill 0.25s ease;
+  }
+
+  .nav-input:checked + .nav-btn .nav-icon .dice-dot {
+    fill: var(--font-color-light);
+  }
+
+  /* Mini Oyunlar sekmesine gelindiğinde zarın üzerindeki noktalar hepsi
+     birden değil, sırayla küçükten belirip yerine oturarak (kısa bir
+     "pıt pıt" hissiyle) görünür hale gelir. */
+  @keyframes diceDotAppear {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .nav-input[value="page-4"]:checked + .nav-btn .nav-icon-dice .dice-dot {
+    animation: diceDotAppear 0.15s linear both;
+  }
+
+  .nav-input[value="page-4"]:checked + .nav-btn .nav-icon-dice .dice-dot:nth-of-type(1) {
+    animation-delay: 0s;
+  }
+
+  .nav-input[value="page-4"]:checked + .nav-btn .nav-icon-dice .dice-dot:nth-of-type(2) {
+    animation-delay: 0.08s;
+  }
+
+  .nav-input[value="page-4"]:checked + .nav-btn .nav-icon-dice .dice-dot:nth-of-type(3) {
+    animation-delay: 0.16s;
+  }
+
+  .nav-input[value="page-4"]:checked + .nav-btn .nav-icon-dice .dice-dot:nth-of-type(4) {
+    animation-delay: 0.24s;
+  }
+
+  .nav-input[value="page-4"]:checked + .nav-btn .nav-icon-dice .dice-dot:nth-of-type(5) {
+    animation-delay: 0.32s;
+  }
+
+  /* Ana Sayfa sekmesi seçildiğinde artık ikon zıplamıyor; çatı ve
+     gövde çizgileri sanki elle çiziliyormuş gibi sırayla (önce çatı,
+     ardından gövde) baştan sona "belirir". */
+  @keyframes navHomeDraw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .nav-input[value="page-1"]:checked + .nav-btn .nav-icon-home path {
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: navHomeDraw 0.45s ease-out both;
+  }
+
+  .nav-input[value="page-1"]:checked + .nav-btn .nav-icon-home path:nth-of-type(1) {
+    animation-delay: 0s;
+  }
+
+  .nav-input[value="page-1"]:checked + .nav-btn .nav-icon-home path:nth-of-type(2) {
+    animation-delay: 0.22s;
+  }
+
+  /* Kronometre sekmesi seçildiğinde ikon, saniye kolu tık-tık sallanıyormuş
+     gibi kısa bir sağa-sola salınım yapar; Ana Sayfa'nın dikey zıplamasından
+     farklı olarak burada dönüş (rotate) hareketi öne çıkar. */
+  @keyframes navStopwatchTick {
+    0% {
+      transform: scale(0.6) rotate(0deg);
+    }
+    35% {
+      transform: scale(1.15) rotate(14deg);
+    }
+    55% {
+      transform: scale(1.05) rotate(-10deg);
+    }
+    72% {
+      transform: scale(1.02) rotate(6deg);
+    }
+    86% {
+      transform: scale(1) rotate(-3deg);
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
+  .nav-input[value="page-5"]:checked + .nav-btn .nav-icon-stopwatch {
+    animation: navStopwatchTick 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Takvim ikonundaki gün numarası: rakam olduğu için stroke değil dolgu
+     (fill) ile çizilir; .nav-icon'un stroke'unu miras almaması için
+     stroke burada ayrıca kapatılır (Zar ikonundaki dice-dot ile aynı
+     mantık). Seçili sekmede diğer ikonlarla aynı anda beyaza döner. */
+  .nav-calendar-daynum {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 9.6px;
+    fill: var(--font-color-dark);
+    stroke: none;
+    transition: fill 0.25s ease;
+  }
+
+  .nav-input:checked + .nav-btn .nav-calendar-daynum {
+    fill: var(--font-color-light);
+  }
+
+  /* Referans alınan CalendarCheckIcon'daki tikin "çizilerek" belirmesiyle
+     aynı süre ve easing (0.4s, ease-in-out): rakam yukarıdan aşağıya
+     doğru yazılıyormuş gibi bir clip-path taraması + opaklık geçişiyle
+     belirir. */
+  @keyframes navCalendarDayDraw {
+    0% {
+      opacity: 0;
+      clip-path: inset(0 0 100% 0);
+    }
+    100% {
+      opacity: 1;
+      clip-path: inset(0 0 0% 0);
+    }
+  }
+
+  .nav-input[value="page-6"]:checked + .nav-btn .nav-calendar-daynum {
+    animation: navCalendarDayDraw 0.4s ease-in-out both;
+  }
+
+  /* Yeni çark ikonu artık diğer nav ikonlarıyla aynı çizgi (stroke)
+     tekniğiyle çizildiği için ayrı bir renk kuralına gerek yok;
+     .nav-icon'un varsayılan stroke geçişi otomatik olarak uygulanır. */
+
+  /* Referans alınan Cog6ToothIcon'daki gibi, sekme seçildiğinde çark yay
+     (spring) hissiyle 0°'den 180°'ye döner (stiffness/damping'in verdiği
+     hafif fazla dönüp geri toparlanma hissi cubic-bezier ile taklit
+     edilir). */
+  @keyframes navGearSpin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(180deg);
+    }
+  }
+
+  .nav-input[value="page-settings"]:checked + .nav-btn .nav-icon-gear {
+    animation: navGearSpin 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Gündelik sekmesi seçildiğinde tik işaretleri, zar noktalarında
+     olduğu gibi sıçramadan, sadece opaklıkla belirir. */
+  @keyframes navGunlukTickAppear {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .nav-input[value="page-8"]:checked + .nav-btn .nav-icon-gunluk path {
+    animation: navGunlukTickAppear 0.15s linear both;
+  }
+
+  /* Markup sırasında alttaki tik (m3 17...) önce, üstteki tik (m3 7...)
+     sonra geldiği için; ekranda üstten alta doğru sıralı oynaması adına
+     üstteki path'e gecikme verilmez, alttaki path'e gecikme eklenir. */
+  .nav-input[value="page-8"]:checked + .nav-btn .nav-icon-gunluk path:nth-of-type(1) {
+    animation-delay: 0.16s;
+  }
+
+  .nav-input[value="page-8"]:checked + .nav-btn .nav-icon-gunluk path:nth-of-type(2) {
+    animation-delay: 0s;
+  }
+
+  /* Soru Takibi sekmesi artık büyüteç yerine panolu bir kontrol
+     listesi (checklist) ikonuyla temsil edilir: üstteki klips
+     hafifçe zıplayarak belirir, ardından içindeki tik işareti
+     sanki elle çiziliyormuş gibi "çizilerek" tamamlanır. */
+  @keyframes navChecklistClipPop {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .nav-input[value="page-9"]:checked + .nav-btn .nav-icon-checklist .nav-checklist-clip {
+    animation: navChecklistClipPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  @keyframes navChecklistCheckDraw {
+    0% {
+      opacity: 0;
+      stroke-dashoffset: 11;
+    }
+    30% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .nav-input[value="page-9"]:checked + .nav-btn .nav-icon-checklist .nav-checklist-check {
+    stroke-dasharray: 11;
+    stroke-dashoffset: 11;
+    animation: navChecklistCheckDraw 0.3s ease-out 0.18s both;
+  }
+
+  /* Denemelerim sekmesi seçildiğinde kağıt ikonu, bir sınav kağıdı
+     çekmeceden çıkarılıp masaya bırakılıyormuş gibi yukarıdan hafif
+     dönerek kayar. */
+  @keyframes navExamSlide {
+    0% {
+      transform: translateY(7px) scale(0.7) rotate(-8deg);
+    }
+    50% {
+      transform: translateY(-3px) scale(1.16) rotate(5deg);
+    }
+    75% {
+      transform: translateY(1px) scale(0.94) rotate(-2deg);
+    }
+    100% {
+      transform: translateY(0) scale(1) rotate(0deg);
+    }
+  }
+
+  .nav-input[value="page-11"]:checked + .nav-btn .nav-icon-exam {
+    animation: navExamSlide 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Sayfa adını kısaca gösteren baloncuk: butonun hemen üstünde belirir.
+     Hem fareyle üzerine gelince (önizleme) hem de dokunulduğunda (kısa
+     süreli, JS ile) görünür olur. */
+  .nav-tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background-color: var(--main-color);
     color: var(--font-color-light);
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    white-space: nowrap;
+    padding: 5px 10px;
+    border-radius: 9px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 2;
+  }
+
+  .nav-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--main-color);
+  }
+
+  /* Fare ile (veya işaretçiyle) üzerine gelince sayfa adı önizlemesi. */
+  .option:hover .nav-tooltip,
+  .nav-input:hover + .nav-btn .nav-tooltip,
+  .nav-input:focus-visible + .nav-btn .nav-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Dokunma/tıklama sonrası JS'in eklediği sınıf: kısa süreliğine göster. */
+  .nav-tooltip.is-flashing {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 
   /* From Uiverse.io by Voxybuns */
@@ -352,20 +648,10 @@
     --button_outline_color: #000;
   }
 
-  /* Sayfa 2: anahtar aktifken görev listesindeki beyaz yüzeyler
-     (Görev Ekle / Düzenle butonları, checkbox daireleri, silme
-     butonları) da aynı antresit tonuna geçer — Sayfa 1'deki
-     button_top ile birebir aynı mantık. Kenarlık siyah kaldığı
-     için 3D gölge farkı burada da okunur kalıyor. */
   body.is-anthracite .add-task-btn {
     background-color: #3b3e42;
     border-color: #000;
     color: #f2f2f4;
-  }
-
-  body.is-anthracite .brutal-radio-custom {
-    background-color: #3b3e42;
-    border-color: #000;
   }
 
   body.is-anthracite .delete-btn {
@@ -545,17 +831,17 @@
   }
 
   body.is-anthracite .page9-subject-badge {
-    background-color: #2b2f4a;
+    background-color: #3b3e42;
     color: #f2f2f4;
   }
 
   body.is-anthracite .page9-count-input {
-    background-color: #2b2f4a;
+    background-color: #3b3e42;
     color: #f2f2f4;
   }
 
   body.is-anthracite .page9-stepper-btn {
-    background-color: #2b2f4a;
+    background-color: #3b3e42;
     color: #f2f2f4;
   }
 
@@ -570,7 +856,7 @@
   }
 
   body.is-anthracite .page9-summary-bar-track {
-    background-color: #2b2f4a;
+    background-color: #3b3e42;
   }
 
   body.is-anthracite .page9-add-subject-btn.add-task-btn {
@@ -614,6 +900,24 @@
 
   body.is-anthracite .calendar-day.is-outside {
     color: rgba(242, 242, 244, 0.25);
+  }
+
+  /* Hafta sonu (Cmt/Paz) vurgusu koyu modda da korunur: yukarıdaki
+     genel .calendar-day / .calendar-weekday kuralları tüm günleri tek
+     tip açık renge çeviriyordu, bu da açık moddaki kırmızı hafta sonu
+     ayrımını koyu modda görünmez kılıyordu. Aşağıdaki kurallar iki
+     sınıflı (.is-weekend) olduğu için daha spesifik ve üsttekileri
+     ezip hafta sonu rengini geri getiriyor. */
+  body.is-anthracite .calendar-weekday.is-weekend {
+    color: #ff5c72;
+  }
+
+  body.is-anthracite .calendar-day.is-weekend {
+    color: #ff5c72;
+  }
+
+  body.is-anthracite .calendar-day.is-outside.is-weekend {
+    color: rgba(255, 92, 114, 0.4);
   }
 
   body.is-anthracite .laps-page-card {
@@ -682,222 +986,6 @@
     gap: 24px;
   }
 
-  /* ---------- Kar Yağışı Açma/Kapama Anahtarı ---------- */
-  .snow-toggle-wrap {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .snow-toggle-caption {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--theme-text, #fff);
-    transition: color 0.5s ease;
-    user-select: none;
-  }
-
-  .snow-toggle {
-    position: relative;
-    display: inline-flex;
-    width: 56px;
-    height: 32px;
-    cursor: pointer;
-  }
-
-  .snow-toggle input {
-    position: absolute;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    cursor: pointer;
-  }
-
-  .snow-toggle-track {
-    position: absolute;
-    inset: 0;
-    background-color: rgba(255, 255, 255, 0.18);
-    border: 2px solid rgba(255, 255, 255, 0.35);
-    border-radius: 999px;
-    transition: background-color 0.25s ease, border-color 0.25s ease;
-  }
-
-  .snow-toggle-thumb {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 24px;
-    height: 24px;
-    background-color: #fff;
-    border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    line-height: 1;
-    transform: translateX(0);
-    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  .snow-toggle input:checked ~ .snow-toggle-track {
-    background-color: #7fc4ff;
-    border-color: #7fc4ff;
-  }
-
-  .snow-toggle input:checked ~ .snow-toggle-track .snow-toggle-thumb {
-    transform: translateX(24px);
-  }
-
-  .snow-toggle input:focus-visible ~ .snow-toggle-track {
-    outline: 2px solid #ff90e8;
-    outline-offset: 2px;
-  }
-
-  /* From Uiverse.io by ratue1256 (checkbox'a uyarlandı, bağımsız işaretlenebilir) */
-  .brutal-radio-group {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    font-family: "Space Grotesk", sans-serif;
-    /* Silinen satır kendi yerinde konumlandırılırken (position: absolute)
-       referans noktası bu kapsayıcı olsun diye. */
-    position: relative;
-  }
-
-  .brutal-radio-label {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: 1.25rem;
-    font-weight: 800;
-    cursor: pointer;
-    color: var(--theme-text, #fff);
-    transition: color 0.5s ease;
-  }
-
-  /* Metin esnek alanı doldurur, böylece silme butonu her satırda
-     sağa yaslanmış şekilde hizalı kalır. */
-  .brutal-radio-text,
-  .brutal-task-input {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-
-  .brutal-radio {
-    display: none;
-  }
-
-  .brutal-radio-custom {
-    width: 2rem;
-    height: 2rem;
-    background-color: #fff;
-    border: 4px solid #000;
-    border-radius: 50%;
-    box-shadow: 4px 4px 0px 0px #000;
-    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    flex-shrink: 0;
-  }
-
-  .brutal-radio-label:hover .brutal-radio-custom {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px 0px #000;
-  }
-
-  .brutal-radio:checked + .brutal-radio-custom {
-    background-color: #ff90e8;
-    animation: brutalPop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  /* İç nokta her zaman DOM'da; işaretle/kaldır geçişi transform+opacity ile animasyonlu */
-  .brutal-radio-custom::after {
-    content: "";
-    width: 1rem;
-    height: 1rem;
-    background-color: #000;
-    border-radius: 50%;
-    opacity: 0;
-    transform: scale(0);
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease;
-  }
-
-  .brutal-radio:checked + .brutal-radio-custom::after {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .brutal-radio:active + .brutal-radio-custom {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0px 0px #000;
-  }
-
-  @keyframes brutalPop {
-    0% { transform: scale(1); }
-    40% { transform: scale(1.18); }
-    100% { transform: scale(1); }
-  }
-
-  /* İşaretlenen görevin metni yumuşakça üstü çizilir.
-     Not: Eskiden tek bir ::after çubuğuyla (top: 50%, width animasyonlu)
-     çizim yapılıyordu; bu, metin birden fazla satıra sarıldığında sadece
-     kutunun ortasında sabit bir yere çizgi çekiyor, gerçek satırların
-     üzerinden geçmiyordu. Native text-decoration-line kullanmak, metin
-     kaç satıra sarılırsa sarılsın her satırın kendi üzerinden çizgi
-     çizilmesini otomatik olarak sağlar; rengi şeffaftan currentColor'a
-     geçirerek yumuşak bir "çiziliyor" animasyonu korunur. */
-  .brutal-radio-text {
-    position: relative;
-    text-decoration-line: line-through;
-    text-decoration-thickness: 2px;
-    text-decoration-color: transparent;
-    transition: opacity 0.25s ease, text-decoration-color 0.25s ease;
-  }
-
-  .brutal-radio:checked ~ .brutal-radio-text {
-    opacity: 0.55;
-    text-decoration-color: currentColor;
-  }
-
-  /* ---------- Görev satırları için yumuşak giriş/çıkış animasyonu ---------- */
-  .brutal-radio-label {
-    transition: opacity 0.32s ease, transform 0.32s ease, color 0.5s ease;
-  }
-
-  .brutal-radio-label.task-enter {
-    opacity: 0;
-    transform: translateY(10px) scale(0.97);
-  }
-
-  .brutal-radio-label.task-leave {
-    opacity: 0;
-    transform: translateY(-6px) scale(0.97);
-  }
-
-  /* Yazı yazılan alan; görsel olarak diğer görev metinleriyle birebir aynı */
-  .brutal-task-input {
-    background: transparent;
-    border: none;
-    outline: none;
-    padding: 0;
-    font-family: inherit;
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: inherit;
-    min-width: 4ch;
-    width: 100%;
-  }
-
-  .brutal-task-input::placeholder {
-    color: currentColor;
-    opacity: 0.45;
-  }
-
   /* ---------- Görev silme butonu (satırın sağında, brutalist stile uyumlu) ---------- */
   .delete-btn {
     flex-shrink: 0;
@@ -933,38 +1021,7 @@
     background-color: #ff5c5c;
   }
 
-  /* Görev listesindeki silme butonları biraz daha küçük ve, düzenleme
-     modu açılana kadar tamamen gizli: satır normalde sade kalır, sadece
-     "Düzenle" ile niyet belirtilince ortaya çıkar. */
-  #taskList .delete-btn {
-    width: 1.5rem;
-    height: 1.5rem;
-    font-size: 0.92rem;
-    border-width: 2.5px;
-    box-shadow: 2px 2px 0px 0px #000;
-    opacity: 0;
-    transform: scale(0.6);
-    pointer-events: none;
-    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease,
-      box-shadow 0.2s ease, background-color 0.2s ease;
-  }
-
-  #taskList .delete-btn:hover {
-    box-shadow: 3px 3px 0px 0px #000;
-  }
-
-  #taskList .delete-btn:active,
-  #taskList .delete-btn.is-pressed {
-    box-shadow: 1px 1px 0px 0px #000;
-  }
-
-  #taskList.is-edit-mode .delete-btn {
-    opacity: 1;
-    transform: scale(1);
-    pointer-events: auto;
-  }
-
-  /* ---------- Görev ekleme butonu (brutalist stile uyumlu) ---------- */
+  /* ---------- Ekle/Düzenle butonu (brutalist stile uyumlu; Sayfa 4/5/8/9/11'de paylaşılan bileşen) ---------- */
   .add-task-btn {
     padding: 0.55rem 1.1rem;
     font-family: "Space Grotesk", sans-serif;
@@ -991,33 +1048,9 @@
     background-color: #ff90e8;
   }
 
-  /* ---------- Sayfa 2 düzeni: üstte tarih + buton, altta kaydırmalı liste ---------- */
-  .task-page {
-    display: flex;
-    flex-direction: column;
-    gap: 1.1rem;
-    width: 100%;
-    max-width: 340px;
-  }
-
-  .task-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    width: 100%;
-  }
-
-  .task-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-shrink: 0;
-  }
-
-  /* Düzenleme butonu: metni/silme tuşlarını göster-gizle açan yuvarlak
-     ikon butonu. Aktifken (düzenleme modu açıkken) uygulamanın vurgu
-     rengiyle (pembe) dolarak "açık" olduğunu belli eder. */
+  /* Düzenleme butonu: yuvarlak ikon butonu. Aktifken (düzenleme modu
+     açıkken) uygulamanın vurgu rengiyle (pembe) dolarak "açık" olduğunu
+     belli eder. */
   .edit-task-btn {
     width: 2.5rem;
     height: 2.5rem;
@@ -1031,36 +1064,6 @@
 
   .edit-task-btn.is-active {
     background-color: #ff90e8;
-  }
-
-  .task-date {
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 800;
-    font-size: 0.95rem;
-    line-height: 1.3;
-    color: var(--theme-text, #fff);
-    transition: color 0.5s ease;
-    text-transform: capitalize;
-  }
-
-  .task-scroll {
-    width: 100%;
-    max-height: 46vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    /* İşaretleme kutularının box-shadow'u, hover'daki kayma efekti ve
-       işaretlenirken oynayan büyüme animasyonu (brutalPop, scale 1.18)
-       kenarlarda kesilmesin diye kaydırma alanına boşluk bırakılıyor. */
-    padding: 6px 10px 12px 6px;
-    margin: -6px -10px -12px -6px;
-    /* Görünümde değişiklik yaratmadan sadece kaydırmayı sağlamak için
-       scrollbar gizleniyor; içerik hâlâ tekerlek/dokunuşla kayabiliyor. */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .task-scroll::-webkit-scrollbar {
-    display: none;
   }
 
   /* ---------- Sayfa 3: tema renk paleti kartı ---------- */
@@ -1115,46 +1118,6 @@
      butonların tıklamalarını "çalmaz". */
   .page.is-active .theme-swatch-slide.is-active {
     pointer-events: auto;
-  }
-
-  .swatch-color {
-    flex: 1;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 0.9rem;
-    transition: flex 0.25s ease;
-  }
-
-  .swatch-color span {
-    font-family: "Space Grotesk", sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    color: rgba(255, 255, 255, 0.92);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-  }
-
-  .swatch-color:hover {
-    flex: 1.4;
-  }
-
-  /* Üst katman: temanın gerçek gradient önizlemesi. Ok tuşlarıyla gezinirken
-     varsayılan görünüm budur; tıklanınca solup altındaki hex kod şeritlerini
-     ortaya çıkarır, kısa süre sonra tekrar yumuşakça üzerine kapanır. */
-  .swatch-gradient-overlay {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    opacity: 1;
-    border-radius: inherit;
-    background-size: 100% 100% !important;
-    background-repeat: no-repeat !important;
-    transition: opacity 0.4s ease;
   }
 
   /* Seçili temayı gösteren tik işareti: her gradyanın tam ortasında durur,
@@ -1716,7 +1679,7 @@
     flex-shrink: 0;
   }
 
-  /* ---------- Sayfa 8: Planlayıcı (Görevler / Rutinler) ----------
+  /* ---------- Sayfa 8: Gündelik (Görevler / Rutinler) ----------
      Sayfa 2'den farklı olarak başlık burada sabit kalmaz: tüm sayfa
      (başlık + segmented control + kart listesi) tek parça halinde birlikte
      kayar. Bu yüzden iç içe ayrı bir kaydırma kutusu yok; kaydırma
@@ -1935,28 +1898,62 @@
     align-items: center;
     justify-content: center;
     position: relative;
+    overflow: visible;
     box-shadow: 2px 2px 0px 0px #000;
     transition: background-color 0.18s ease;
   }
 
-  .page8-item-box::after {
-    content: "✓";
-    font-size: 0.85rem;
-    line-height: 1;
-    font-weight: 900;
-    color: #000;
-    opacity: 0;
-    transform: scale(0.4);
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease;
+  /* Tik işareti artık sabit bir "✓" karakteri değil, çizilerek beliren bir
+     SVG yol (path); işaretlenince kalem çiziyormuş gibi stroke-dashoffset
+     ile açılır, işaret kaldırılınca aynı çizgi geri kapanır. */
+  .page8-item-box svg {
+    width: 0.9rem;
+    height: 0.9rem;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .page8-item-box svg path {
+    fill: none;
+    stroke: #000;
+    stroke-width: 3.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 26;
+    stroke-dashoffset: 26;
+    transition: stroke-dashoffset 0.28s ease 0.04s;
   }
 
   .page8-item-check:checked + .page8-item-box {
     background: var(--item-color, #ff90e8);
   }
 
-  .page8-item-check:checked + .page8-item-box::after {
-    opacity: 1;
-    transform: scale(1);
+  .page8-item-check:checked + .page8-item-box svg path {
+    stroke-dashoffset: 0;
+  }
+
+  /* Kutu işaretlenince gerçekten tıklanmış gibi hoplayıp hafifçe dönerek
+     yerine oturur; işaret her kaldırılıp yeniden konulduğunda tazelenir. */
+  @keyframes page8BoxPop {
+    0% {
+      transform: scale(1) rotate(0deg);
+    }
+    35% {
+      transform: scale(1.32) rotate(-10deg);
+    }
+    62% {
+      transform: scale(0.9) rotate(6deg);
+    }
+    82% {
+      transform: scale(1.05) rotate(-2deg);
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
+  .page8-item-check:checked + .page8-item-box {
+    animation: page8BoxPop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .page8-item-text {
@@ -2403,6 +2400,1210 @@
     padding: 0.3rem 0;
   }
 
+  /* ---------- Sayfa 10: Kronometre Geçmişi ----------
+     Sayfa 9'daki (Soru Takibi) görsel dili ve tarih gezinme/Gün-Hafta-Ay
+     özet mantığı birebir yeniden kullanılır; kronometrenin her gün 00:00'da
+     kendiliğinden kapanıp arşivlediği günlük süre kayıtları burada listelenir. */
+  .page10-wrap {
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .page10-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 100%;
+  }
+
+  .page10-subtitle {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--theme-text, #fff);
+    opacity: 0.75;
+    transition: color 0.5s ease;
+  }
+
+  .page10-date-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+  }
+
+  .page10-date-label {
+    flex: 1 1 auto;
+    text-align: center;
+    background: #fff;
+    border: 3px solid #000;
+    border-radius: 0.85rem;
+    box-shadow: 3px 3px 0px 0px #000;
+    padding: 0.5rem 0.6rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: #121212;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .calendar-nav-btn.page10-date-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+    box-shadow: 2px 2px 0px 0px #000;
+    transform: none;
+  }
+
+  /* Ana özet kartı: seçili aralıktaki (gün/hafta/ay) toplam kronometre süresi */
+  .page10-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.1em;
+    box-shadow: 6px 6px 0px 0px #000;
+    padding: 0.9rem 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .page10-summary-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .page10-summary-title {
+    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.74rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #121212;
+    opacity: 0.6;
+  }
+
+  .page10-summary-range-label {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: #121212;
+    opacity: 0.55;
+  }
+
+  #page10RangeSegmented .settings-segmented-slider {
+    width: calc(33.333% - 3px);
+  }
+
+  .page10-summary-total {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 2.1rem;
+    color: #121212;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .page10-summary-total span {
+    font-size: 0.95rem;
+    font-weight: 700;
+    opacity: 0.55;
+  }
+
+  .page10-summary-hint {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: #121212;
+    opacity: 0.5;
+  }
+
+  /* Geçmiş kayıtlar listesi: seçili aralığa (gün/hafta/ay) düşen her günün
+     kartı, en yeni tarih en üstte olacak şekilde listelenir. */
+  .page10-log-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.1em;
+    box-shadow: 6px 6px 0px 0px #000;
+    padding: 0.9rem 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .page10-log-title {
+    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.74rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #121212;
+    opacity: 0.6;
+  }
+
+  .page10-log-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .page10-log-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    background: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.75em;
+    padding: 0.55rem 0.7rem;
+  }
+
+  .page10-log-row.is-today {
+    background: #ff90e8;
+  }
+
+  .page10-log-date {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .page10-log-day {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #121212;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .page10-log-weekday {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.72rem;
+    color: #121212;
+    opacity: 0.55;
+  }
+
+  .page10-log-duration {
+    flex-shrink: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.92rem;
+    color: #121212;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .page10-log-empty {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #121212;
+    opacity: 0.5;
+    padding: 0.3rem 0;
+  }
+
+  /* ---------- Sayfa 10: Koyu mod (anthracite) ---------- */
+  body.is-anthracite .page10-date-label {
+    background-color: #3b3e42;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page10-card,
+  body.is-anthracite .page10-log-card {
+    background-color: #3b3e42;
+  }
+
+  body.is-anthracite .settings-segmented.page10-segmented {
+    background-color: #3b3e42;
+  }
+
+  body.is-anthracite .page10-segmented .settings-segmented-option {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page10-segmented .settings-segmented-option.is-active {
+    color: #fff;
+  }
+
+  body.is-anthracite .page10-summary-title,
+  body.is-anthracite .page10-summary-range-label,
+  body.is-anthracite .page10-summary-total,
+  body.is-anthracite .page10-summary-hint,
+  body.is-anthracite .page10-log-title,
+  body.is-anthracite .page10-log-empty,
+  body.is-anthracite .page10-log-day,
+  body.is-anthracite .page10-log-weekday,
+  body.is-anthracite .page10-log-duration {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page10-log-row {
+    background-color: #3b3e42;
+  }
+
+  body.is-anthracite .page10-log-row.is-today {
+    background-color: #ff90e8;
+  }
+
+  body.is-anthracite .page10-log-row.is-today .page10-log-day,
+  body.is-anthracite .page10-log-row.is-today .page10-log-weekday,
+  body.is-anthracite .page10-log-row.is-today .page10-log-duration {
+    color: #121212;
+  }
+
+  /* ---------- Sayfa 11: Denemelerim ----------
+     Sayfa 8/9 ile aynı üstte-hizalı, kaydırmalı düzen ve brüt beyaz kart
+     dili. Deneme kartları bilinçli olarak büyük ve yatay tutulur (sıkışık
+     değil, ferah); dokununca Sayfa 6/7'deki gibi tam ekran bir detay
+     sayfası açılır. */
+  #page-11 {
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: calc(48px + env(safe-area-inset-top));
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  #page-11::-webkit-scrollbar {
+    display: none;
+  }
+
+  .page11-wrap {
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .page11-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 100%;
+  }
+
+  .page11-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .page11-subtitle {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--theme-text, #fff);
+    opacity: 0.75;
+    transition: color 0.5s ease;
+  }
+
+  .page11-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .page11-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .page11-empty {
+    text-align: center;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--theme-text, #fff);
+    opacity: 0.6;
+    padding: 1.4rem 0;
+    transition: color 0.5s ease;
+  }
+
+  /* Büyükçe, yatay şekilli deneme kartı: sıkışık değil, ferah. */
+  .page11-exam-card {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.2em;
+    box-shadow: 6px 6px 0px 0px #000;
+    padding: 1.05rem 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .page11-exam-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0px 0px #000;
+  }
+
+  .page11-exam-card:active {
+    transform: translate(1px, 1px);
+    box-shadow: 3px 3px 0px 0px #000;
+  }
+
+  .page11-exam-accent {
+    flex-shrink: 0;
+    width: 8px;
+    align-self: stretch;
+    border-radius: 6px;
+    background: #3f5aa8;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .page11-exam-accent:active {
+    filter: brightness(0.85);
+  }
+
+  .page11-exam-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .page11-exam-name {
+    display: block;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: #121212;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .page11-exam-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .page11-exam-date {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: rgba(18, 18, 18, 0.55);
+  }
+
+  .page11-exam-type-badge {
+    flex-shrink: 0;
+    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.66rem;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: #121212;
+    border-radius: 1rem;
+    padding: 0.18rem 0.5rem;
+  }
+
+  .page11-exam-side {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .page11-exam-net {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1.35rem;
+    color: #121212;
+    line-height: 1;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .page11-exam-net span {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+
+  /* Silme butonu normalde tamamen gizli; sadece başlıktaki kalem
+     ikonuyla ("Düzenle") niyet belirtilince ortaya çıkar (Sayfa 2'deki
+     görev listesiyle aynı mantık). */
+  /* Silme butonu normalde tamamen gizli; sadece başlıktaki kalem
+     ikonuyla ("Düzenle") niyet belirtilince kartın tam sağ üst
+     köşesinde bir rozet gibi ortaya çıkar (Sayfa 2'deki görev
+     listesiyle aynı mantık). Net artık akıştan bağımsız olduğu için
+     kendi sütununda dikeyde tam ortalı kalır. */
+  .page11-exam-delete {
+    position: absolute;
+    top: -0.6rem;
+    right: -0.6rem;
+    width: 1.7rem;
+    height: 1.7rem;
+    font-size: 0.85rem;
+    border-width: 2.5px;
+    box-shadow: 2px 2px 0px 0px #000;
+    opacity: 0;
+    transform: scale(0.6);
+    pointer-events: none;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease,
+      box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  .page11-list.is-edit-mode .page11-exam-delete {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+
+  /* ---------- Sayfa 11: Deneme ekleme pop-up'ı (settings-confirm-backdrop
+     ile aynı dil, kendi form alanlarıyla) ---------- */
+  .page11-modal-card {
+    width: 100%;
+    max-width: 320px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.1em;
+    box-shadow: 6px 6px 0px 0px #000;
+    padding: 1.3rem 1.2rem;
+    text-align: left;
+    transform: translateY(14px) scale(0.96);
+    opacity: 0;
+    transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.22s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .settings-confirm-backdrop.is-open .page11-modal-card {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  .page11-modal-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #121212;
+  }
+
+  .page11-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .page11-field-label {
+    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.66rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: rgba(18, 18, 18, 0.55);
+  }
+
+  .page11-field-input {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #121212;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.7rem;
+    padding: 0.55rem 0.7rem;
+  }
+
+  .page11-modal-actions {
+    margin-top: 0.2rem;
+  }
+
+  .page11-modal-confirm {
+    background: #121212;
+    color: #fff;
+  }
+
+  .page11-modal-confirm:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px 0px #000;
+  }
+
+  /* ---------- Sayfa 11: Tarih alanı için kendi tasarımımız olan,
+     pop-up şeklinde açılan takvim (native <input type="date"> yerine).
+     Kart içinde alanın hemen altına açılır; büyük takvimle (Sayfa 6)
+     aynı görsel dili (kalın çerçeve, katı gölge, yuvarlak nav butonları)
+     paylaşır ama kendi sınıflarıyla izole edilmiştir. ---------- */
+  .page11-date-field {
+    position: relative;
+  }
+
+  .page11-date-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    cursor: pointer;
+    text-align: left;
+    text-transform: capitalize;
+  }
+
+  .page11-date-btn svg {
+    flex-shrink: 0;
+    opacity: 0.55;
+  }
+
+  /* Tarih takvimi kendi backdrop'unda, page11AddBackdrop'ın (z-index 40)
+     üstünde durur, böylece "Deneme Ekle" pop-up'ı açıkken bile ekranın
+     tam ortasında görünür. */
+  .page11-datepicker-backdrop {
+    z-index: 60;
+  }
+
+  .page11-datepicker {
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 3px solid #000;
+    border-radius: 1.1em;
+    box-shadow: 6px 6px 0px 0px #000;
+    padding: 0.9rem 0.85rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    transform: translateY(14px) scale(0.96);
+    opacity: 0;
+    transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.22s ease;
+  }
+
+  .page11-datepicker-backdrop.is-open .page11-datepicker {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  .page11-datepicker-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .page11-datepicker-nav-btn {
+    flex-shrink: 0;
+    width: 1.9rem;
+    height: 1.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 50%;
+    box-shadow: 2px 2px 0px 0px #000;
+    color: #121212;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  }
+
+  .page11-datepicker-nav-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px 0px #000;
+  }
+
+  .page11-datepicker-nav-btn:active,
+  .page11-datepicker-nav-btn.is-pressed {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
+    background-color: #ff90e8;
+  }
+
+  .page11-datepicker-month {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: #121212;
+    text-align: center;
+    text-transform: capitalize;
+  }
+
+  .page11-datepicker-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.15rem;
+  }
+
+  .page11-datepicker-weekday {
+    text-align: center;
+    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.56rem;
+    letter-spacing: 0.01em;
+    color: rgba(18, 18, 18, 0.45);
+    text-transform: uppercase;
+  }
+
+  .page11-datepicker-weekday.is-weekend {
+    color: rgba(217, 4, 41, 0.85);
+  }
+
+  .page11-datepicker-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.2rem;
+  }
+
+  .page11-datepicker-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    color: #121212;
+    background: transparent;
+    border-radius: 0.5em;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .page11-datepicker-day:hover {
+    border-color: #000;
+  }
+
+  .page11-datepicker-day.is-weekend {
+    color: #d90429;
+  }
+
+  .page11-datepicker-day.is-outside {
+    color: rgba(18, 18, 18, 0.25);
+    cursor: default;
+  }
+
+  .page11-datepicker-day.is-outside.is-weekend {
+    color: rgba(217, 4, 41, 0.4);
+  }
+
+  .page11-datepicker-day.is-outside:hover {
+    border-color: transparent;
+  }
+
+  .page11-datepicker-day.is-today {
+    border-color: #000;
+    font-weight: 900;
+  }
+
+  .page11-datepicker-day.is-selected {
+    background-color: #ff90e8;
+    border-color: #000;
+    box-shadow: 2px 2px 0px 0px #000;
+    transform: translate(-1px, -1px);
+  }
+
+  .page11-datepicker-today-btn {
+    align-self: center;
+    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.64rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #121212;
+    background: #f2f2f2;
+    border: 2px solid #000;
+    border-radius: 0.6rem;
+    padding: 0.3rem 0.75rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  }
+
+  .page11-datepicker-today-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0px 0px #000;
+  }
+
+  .page11-datepicker-today-btn:active {
+    transform: translate(1px, 1px);
+    background-color: #ff90e8;
+  }
+
+  .page11-modal-confirm:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
+  }
+
+  /* ---------- Sayfa 11 Detay: Deneme netlerim (tam ekran) ----------
+     Sayfa 6/7'nin üst çubuğuyla (.calendar-topbar) aynı bileşeni kullanır;
+     yalnızca Sayfa 11'deki bir deneme kartına dokununca açılır. */
+  #page-11-detail {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .exam-detail-wrap {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .exam-detail-summary-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    border: 5px solid #000;
+    border-radius: 1.3em;
+    box-shadow: 8px 8px 0px 0px #000;
+    padding: 1.25rem 1.3rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .exam-detail-summary-label {
+    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: rgba(18, 18, 18, 0.55);
+  }
+
+  .exam-detail-summary-total {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 2.6rem;
+    color: #121212;
+    line-height: 1;
+  }
+
+  .exam-detail-summary-total span {
+    font-size: 1.05rem;
+    font-weight: 700;
+    opacity: 0.5;
+    margin-left: 0.2rem;
+  }
+
+  .exam-detail-summary-meta {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: rgba(18, 18, 18, 0.5);
+  }
+
+  .exam-detail-summary-stats {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.7rem;
+    flex-wrap: wrap;
+  }
+
+  /* Uygulamanın imza dili: beyaz/dolgu zemin + kalın siyah çerçeve +
+     yumuşatılmamış, kaydırılmış "sert" gölge (görev tikleme kutusuyla
+     birebir aynı tarif). Doğru/Yanlış/Boş burada da bu dile uyuyor:
+     gradyan yok, sadece durum rengiyle düz bir dolgu. */
+  .exam-detail-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 0.32rem;
+    padding: 0.3rem 0.6rem;
+    border: 2px solid #000;
+    border-radius: 0.7rem;
+    background: #fff;
+    box-shadow: 2px 2px 0px 0px #000;
+  }
+
+  .exam-detail-stat-value {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    line-height: 1;
+    color: #121212;
+  }
+
+  .exam-detail-stat-label {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+
+  .exam-detail-stat.is-correct {
+    background: #5cd68a;
+  }
+
+  .exam-detail-stat.is-correct .exam-detail-stat-value,
+  .exam-detail-stat.is-correct .exam-detail-stat-label {
+    color: #0d3d20;
+  }
+
+  .exam-detail-stat.is-wrong {
+    background: #ff5c5c;
+  }
+
+  .exam-detail-stat.is-wrong .exam-detail-stat-value,
+  .exam-detail-stat.is-wrong .exam-detail-stat-label {
+    color: #5c0011;
+  }
+
+  .exam-detail-stat.is-blank {
+    background: #ececec;
+  }
+
+  .exam-detail-stat.is-blank .exam-detail-stat-value,
+  .exam-detail-stat.is-blank .exam-detail-stat-label {
+    color: #121212;
+  }
+
+  /* Topbar'daki silme butonu, geri butonuyla aynı yuvarlak kalıp; hem
+     üzerine gelince hem basınca doğrudan "tehlike" kırmızısına
+     (delete-btn ile aynı ton) dönüyor, araya beyaz bir an girmiyor. */
+  .calendar-back-btn.is-danger:hover,
+  .calendar-back-btn.is-danger:active,
+  .calendar-back-btn.is-danger.is-pressed {
+    background-color: #ff5c5c;
+  }
+
+  /* Tümünü doğru işaretle / tüm işaretleri kaldır: küçük, yan yana iki
+     buton; add-task-btn ile aynı sert-gölge dilinde ama daha kompakt. */
+  .exam-detail-bulk-actions {
+    display: flex;
+    gap: 0.55rem;
+    width: 100%;
+  }
+
+  .exam-detail-bulk-btn {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.32rem;
+    padding: 0.55rem 0.4rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.68rem;
+    line-height: 1.15;
+    color: #121212;
+    background-color: #fff;
+    border: 2.5px solid #000;
+    border-radius: 0.8rem;
+    box-shadow: 3px 3px 0px 0px #000;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  .exam-detail-bulk-btn svg {
+    flex-shrink: 0;
+  }
+
+  .exam-detail-bulk-btn.is-correct svg {
+    color: #0f9d58;
+  }
+
+  .exam-detail-bulk-btn.is-clear svg {
+    color: #6b6b76;
+  }
+
+  .exam-detail-bulk-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px 0px #000;
+  }
+
+  .exam-detail-bulk-btn:active,
+  .exam-detail-bulk-btn.is-pressed {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
+    background-color: #f2f2f2;
+  }
+
+  .exam-detail-subject-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .exam-detail-subject-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.1em;
+    box-shadow: 6px 6px 0px 0px #000;
+    overflow: hidden;
+  }
+
+  .exam-detail-subject-accent {
+    height: 7px;
+    border-bottom: 2.5px solid #000;
+  }
+
+  .exam-detail-subject-body {
+    padding: 0.85rem 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .exam-detail-subject-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .exam-detail-subject-name {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #121212;
+  }
+
+  .exam-detail-subject-net {
+    flex-shrink: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.92rem;
+    color: #121212;
+    white-space: nowrap;
+  }
+
+  .exam-detail-subject-net span {
+    font-size: 0.66rem;
+    font-weight: 600;
+    opacity: 0.5;
+  }
+
+  .exam-detail-bubble-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(2rem, 1fr));
+    gap: 0.4rem;
+  }
+
+  /* Görev tikleme kutusuyla (page8-item-box) birebir aynı dil: beyaz
+     zemin, kalın siyah çerçeve, kaydırılmış sert gölge; işaretlenince
+     gradyan değil DÜZ bir durum rengiyle dolduruluyor. */
+  .exam-detail-bubble {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    color: #121212;
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 0.55rem;
+    cursor: pointer;
+    box-shadow: 2px 2px 0px 0px #000;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease,
+      background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .exam-detail-bubble:active {
+    transform: translate(1px, 1px) scale(0.94);
+    box-shadow: 1px 1px 0px 0px #000;
+  }
+
+  .exam-detail-bubble.is-correct {
+    background: #5cd68a;
+    color: #0d3d20;
+  }
+
+  .exam-detail-bubble.is-wrong {
+    background: #ff5c5c;
+    color: #5c0011;
+  }
+
+  /* "Boş" durumu artık görsel olarak hiç işaretlenmemiş kutucuktan
+     farksız: sadece veri tarafında (toplam/branş netlerinde) sayılır,
+     kutucuğun kendisinde çizgi/kesikli çerçeve gibi bir iz kalmaz. */
+  .exam-detail-bubble.is-blank {
+    background: #fff;
+    color: #121212;
+  }
+
+  /* ---------- Sayfa 11: anahtar aktifken beyaz yüzeyler antresit tonuna geçer ---------- */
+  body.is-anthracite .page11-exam-card,
+  body.is-anthracite .page11-modal-card,
+  body.is-anthracite .exam-detail-summary-card,
+  body.is-anthracite .exam-detail-subject-card {
+    background-color: #3b3e42;
+  }
+
+  body.is-anthracite .page11-exam-name,
+  body.is-anthracite .page11-exam-net,
+  body.is-anthracite .page11-modal-title,
+  body.is-anthracite .exam-detail-summary-total,
+  body.is-anthracite .exam-detail-subject-name,
+  body.is-anthracite .exam-detail-subject-net,
+  body.is-anthracite .exam-detail-stat-value {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page11-exam-date,
+  body.is-anthracite .exam-detail-summary-label,
+  body.is-anthracite .exam-detail-summary-meta,
+  body.is-anthracite .exam-detail-stat-label,
+  body.is-anthracite .page11-field-label {
+    color: rgba(242, 242, 244, 0.6);
+  }
+
+  body.is-anthracite .page11-field-input,
+  body.is-anthracite .exam-detail-bubble {
+    background-color: #3b3e42;
+    color: #f2f2f4;
+  }
+
+  /* Sayfa 11: tarih seçme pop-up'ı koyu modda — büyük takvimdeki
+     (Sayfa 6) antresit kurallarıyla aynı mantık, hafta sonu kırmızısı
+     burada da korunuyor. */
+  body.is-anthracite .page11-datepicker {
+    background: #3b3e42;
+  }
+
+  body.is-anthracite .page11-datepicker-nav-btn {
+    background-color: #2c2e31;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page11-datepicker-nav-btn:active,
+  body.is-anthracite .page11-datepicker-nav-btn.is-pressed {
+    background-color: #ff90e8;
+  }
+
+  body.is-anthracite .page11-datepicker-month,
+  body.is-anthracite .page11-datepicker-day {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page11-datepicker-weekday {
+    color: rgba(242, 242, 244, 0.45);
+  }
+
+  body.is-anthracite .page11-datepicker-weekday.is-weekend,
+  body.is-anthracite .page11-datepicker-day.is-weekend {
+    color: #ff5c72;
+  }
+
+  body.is-anthracite .page11-datepicker-day.is-outside {
+    color: rgba(242, 242, 244, 0.25);
+  }
+
+  body.is-anthracite .page11-datepicker-day.is-outside.is-weekend {
+    color: rgba(255, 92, 114, 0.4);
+  }
+
+  body.is-anthracite .page11-datepicker-today-btn {
+    background: #2c2e31;
+    color: #f2f2f4;
+    border-color: #000;
+  }
+
+  /* Görev tikleme kutusunda olduğu gibi: işaretli durumun rengi temadan
+     bağımsız aynı kalır, sadece işaretsiz zemin antresite döner. */
+  body.is-anthracite .exam-detail-bubble.is-correct {
+    background: #5cd68a;
+    color: #0d3d20;
+  }
+
+  body.is-anthracite .exam-detail-bubble.is-wrong {
+    background: #ff5c5c;
+    color: #5c0011;
+  }
+
+  body.is-anthracite .exam-detail-bubble.is-blank {
+    background-color: #3b3e42;
+    color: #f2f2f4;
+  }
+
+  /* Karanlık temada Doğru/Yanlış rozetleri de aynı düz renkte sabit
+     kalır; sadece Boş rozeti antresit zemine geçer. */
+  body.is-anthracite .exam-detail-stat.is-correct {
+    background: #5cd68a;
+  }
+
+  body.is-anthracite .exam-detail-stat.is-correct .exam-detail-stat-value,
+  body.is-anthracite .exam-detail-stat.is-correct .exam-detail-stat-label {
+    color: #0d3d20;
+  }
+
+  body.is-anthracite .exam-detail-stat.is-wrong {
+    background: #ff5c5c;
+  }
+
+  body.is-anthracite .exam-detail-stat.is-wrong .exam-detail-stat-value,
+  body.is-anthracite .exam-detail-stat.is-wrong .exam-detail-stat-label {
+    color: #5c0011;
+  }
+
+  body.is-anthracite .exam-detail-stat.is-blank {
+    background: #3b3e42;
+  }
+
+  body.is-anthracite .exam-detail-stat.is-blank .exam-detail-stat-value,
+  body.is-anthracite .exam-detail-stat.is-blank .exam-detail-stat-label {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .exam-detail-bulk-btn {
+    background-color: #3b3e42;
+    border-color: #000;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .exam-detail-bulk-btn:active,
+  body.is-anthracite .exam-detail-bulk-btn.is-pressed {
+    background-color: #2f3236;
+  }
+
+  body.is-anthracite .calendar-back-btn.is-danger:hover,
+  body.is-anthracite .calendar-back-btn.is-danger:active,
+  body.is-anthracite .calendar-back-btn.is-danger.is-pressed {
+    background-color: #ff5c5c;
+  }
+
   /* ---------- Sayfa 5: Kronometre ---------- */
   .stopwatch-page {
     display: flex;
@@ -2519,6 +3720,14 @@
     opacity: 0;
     transform: scale(0.85);
     pointer-events: none;
+  }
+
+  /* Kronometre Geçmişi (Sayfa 10) sayfasını açan buton; Turlarım/Sıfırla'nın
+     aksine süre sıfır olsa da her zaman görünür, çünkü geçmiş kayıtlara
+     sayaç çalışmıyorken de bakılabilmeli. */
+  .stopwatch-history-btn {
+    padding: 0.75rem 1.6rem;
+    font-size: 1.05rem;
   }
 
   /* Sayaç çalışırken devreye giren tam ekran görünüm: sayı sayacı,
@@ -2678,53 +3887,42 @@
     opacity: 0.5;
   }
 
-  /* Sayaç çalışırken veya takvim açıkken alt nav bar tamamen gizlenir. */
+  /* Sayaç çalışırken alt nav bar tamamen gizlenir. */
   .navbar {
     transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
   body.is-stopwatch-running .navbar,
-  body.is-calendar-open .navbar,
   body.is-laps-open .navbar,
-  body.is-patterns-open .navbar {
+  body.is-patterns-open .navbar,
+  body.is-exam-detail-open .navbar,
+  body.is-page10-open .navbar {
     opacity: 0;
     transform: translateY(28px);
   }
 
   body.is-stopwatch-running .navbar .wrapper,
-  body.is-calendar-open .navbar .wrapper,
   body.is-laps-open .navbar .wrapper,
-  body.is-patterns-open .navbar .wrapper {
+  body.is-patterns-open .navbar .wrapper,
+  body.is-exam-detail-open .navbar .wrapper,
+  body.is-page10-open .navbar .wrapper {
     pointer-events: none;
-  }
-
-  /* ---------- Sayfa 5: Takvime geçiş butonu ---------- */
-  .stopwatch-calendar-btn {
-    width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.55rem;
-    padding: 0.85rem 1rem;
-  }
-
-  .stopwatch-calendar-btn svg {
-    flex-shrink: 0;
   }
 
   /* ---------- Sayfa 6: Büyük Takvim Sayfası ----------
      Diğer sayfalar (.page) gibi tema katmanının (theme-layer) üzerinde
      şeffaf durur; kendine ait koyu/opak bir zemini veya bulanıklık
      efekti yoktur — geçiş animasyonu da diğer sayfalarla birebir aynıdır
-     (bkz. .page / .page.is-active / .page.is-leaving). Nav bar'da sekmesi
-     olmadığından yalnızca Sayfa 5'teki "Takvim" butonuyla erişilir. */
+     (bkz. .page / .page.is-active / .page.is-leaving). Artık nav bar'da
+     kendi sekmesi var; diğer sekme sayfaları gibi alt nav bar görünür
+     kalır, o yüzden alt padding'i de diğerleriyle aynı (96px) olacak
+     şekilde ayarlanmıştır. */
   #page-6 {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(96px + env(safe-area-inset-bottom));
     overflow-y: auto;
   }
 
@@ -2943,6 +4141,17 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  /* Artık nav bar'da kendi sekmesi olmadığından (Sayfa 5'teki "Geçmiş"
+     butonuyla açılıyor), Turlarım sayfasıyla aynı şekilde nav bar
+     kapalıyken alt boşluk küçültülür. */
+  #page-10 {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
   }
@@ -3180,7 +4389,7 @@
   }
 
   /* ---------- "Desenler" satırı: Ayarlar'dan alt sayfaya geçiş ----------
-     Sayfa 5'teki "Takvim" butonuyla aynı fikir: dokunulabilir bir satır,
+     Sayfa 7 (Turlarım) ile aynı fikir: dokunulabilir bir satır,
      seçili deseni gösteren küçük bir rozet ve yön oku ile bir alt sayfaya
      açılır. */
   .settings-row-link {
@@ -3537,7 +4746,6 @@
 <div class="theme-layer is-visible" id="themeLayerA"></div>
 <div class="theme-layer" id="themeLayerB"></div>
 <div class="pattern-layer" id="patternLayer"></div>
-<canvas id="snowCanvas"></canvas>
 
 <div class="app">
 
@@ -3547,72 +4755,6 @@
       <button>
         <span class="button_top"> Button </span>
       </button>
-
-      <div class="snow-toggle-wrap">
-        <span class="snow-toggle-caption">❄️ Kar Yağışı</span>
-        <label class="snow-toggle">
-          <input type="checkbox" id="snowToggle" checked aria-label="Kar yağışı animasyonunu aç/kapat">
-          <span class="snow-toggle-track">
-            <span class="snow-toggle-thumb"></span>
-          </span>
-        </label>
-      </div>
-    </div>
-  </section>
-
-  <section class="page" id="page-2">
-    <!-- From Uiverse.io by ratue1256 -->
-    <div class="task-page">
-      <div class="task-header">
-        <span class="task-date" id="taskDate"></span>
-        <div class="task-header-actions">
-          <button type="button" class="add-task-btn edit-task-btn" id="editTaskBtn" aria-label="Görevleri düzenle" aria-pressed="false">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-              <path d="M4 20l4.5-1 10.2-10.2-3.5-3.5L5 15.5 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M13.3 6.8l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </button>
-          <button type="button" class="add-task-btn" id="addTaskBtn">+ Görev Ekle</button>
-        </div>
-      </div>
-      <div class="task-scroll" id="taskScroll">
-        <div class="brutal-radio-group" id="taskList">
-          <label class="brutal-radio-label">
-            <input type="checkbox" class="brutal-radio" checked />
-            <span class="brutal-radio-custom"></span>
-            <span class="brutal-radio-text">Aggressive Design</span>
-            <button type="button" class="delete-btn" aria-label="Görevi sil">×</button>
-          </label>
-          <label class="brutal-radio-label">
-            <input type="checkbox" class="brutal-radio" />
-            <span class="brutal-radio-custom"></span>
-            <span class="brutal-radio-text">Boring Design</span>
-            <button type="button" class="delete-btn" aria-label="Görevi sil">×</button>
-          </label>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="page" id="page-3">
-    <!-- İlham: Uiverse.io by arshshaikh06 (uygulamamızın gradient temalarına uyarlandı) -->
-    <div class="theme-swatch-card">
-      <div class="theme-swatch-viewport" id="themeSwatchViewport">
-        <!-- Her tema için bir .theme-swatch-slide, JS tarafından ekleniyor -->
-      </div>
-      <div class="theme-swatch-bar">
-        <button type="button" class="swatch-arrow" id="themeSwatchPrev" aria-label="Önceki tema">
-          <svg viewBox="0 0 24 24" width="16" height="16">
-            <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <div class="theme-swatch-dots" id="themeSwatchDots"></div>
-        <button type="button" class="swatch-arrow" id="themeSwatchNext" aria-label="Sonraki tema">
-          <svg viewBox="0 0 24 24" width="16" height="16">
-            <path d="M9 4l8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
     </div>
   </section>
 
@@ -3674,18 +4816,9 @@
 
       <div class="stopwatch-controls" id="stopwatchControls">
         <button type="button" class="add-task-btn stopwatch-laps-btn is-hidden" id="stopwatchLapsBtn">Turlarım</button>
+        <button type="button" class="add-task-btn stopwatch-history-btn" id="stopwatchHistoryBtn">Geçmiş</button>
         <button type="button" class="add-task-btn stopwatch-reset-btn is-hidden" id="stopwatchResetBtn">Sıfırla</button>
       </div>
-
-      <!-- Büyük takvim arayüzüne geçiş butonu -->
-      <button type="button" class="add-task-btn stopwatch-calendar-btn" id="calendarOpenBtn">
-        <svg viewBox="0 0 24 24" width="18" height="18">
-          <rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
-          <path d="M3.5 9.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <path d="M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        Takvim
-      </button>
     </div>
 
     <!-- Sayaç çalışırken beliren, ekranı tam kaplayan büyük görünüm.
@@ -3707,18 +4840,10 @@
   </section>
 
   <!-- Sayfa 6: Büyük Takvim. Diğer sayfalar gibi tema katmanının üstünde
-       şeffaf durur (kendine ait koyu/opak bir zemini yok). Nav bar'da
-       sekmesi yok; yalnızca Sayfa 5'teki "Takvim" butonuyla açılır. -->
+       şeffaf durur (kendine ait koyu/opak bir zemini yok). Artık nav
+       bar'da kendi sekmesi üzerinden doğrudan erişiliyor. -->
   <section class="page" id="page-6">
-    <div class="calendar-topbar">
-      <button type="button" class="calendar-back-btn" id="calendarBackBtn" aria-label="Geri dön">
-        <svg viewBox="0 0 24 24" width="18" height="18">
-          <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <span class="calendar-topbar-title">Takvim</span>
-      <span class="calendar-topbar-spacer" aria-hidden="true"></span>
-    </div>
+    <h1>Takvim</h1>
 
     <div class="calendar-card">
       <div class="calendar-nav">
@@ -3876,7 +5001,7 @@
   <section class="page" id="page-8">
     <div class="page8-wrap">
       <div class="page8-header">
-        <h1>Planlayıcı</h1>
+        <h1>Gündelik</h1>
         <span class="page8-subtitle">Kategorilere ve rutinlere ayır, renklendir</span>
         <div class="settings-segmented page8-segmented" id="page8Segmented">
           <div class="settings-segmented-slider" id="page8SegmentedSlider"></div>
@@ -3948,9 +5073,206 @@
     </div>
   </section>
 
-  <!-- Sayfa 10: şimdilik boş, içerik sonra eklenecek. -->
+  <!-- Sayfa 10: Kronometre Geçmişi. Sayfa 5'teki kronometre her gün 00:00'da
+       otomatik olarak arşivlenir; burada geçmiş günlerin süreleri Gün/Hafta/Ay
+       bazında (Sayfa 9'daki Soru Takibi ile aynı tarih gezinme mantığıyla)
+       listelenir. -->
   <section class="page" id="page-10">
+    <div class="page10-wrap">
+      <div class="calendar-topbar">
+        <button type="button" class="calendar-back-btn" id="page10BackBtn" aria-label="Geri dön">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <span class="calendar-topbar-title">Kronometre Geçmişi</span>
+        <span class="calendar-topbar-spacer" aria-hidden="true"></span>
+      </div>
+      <div class="page10-header">
+        <span class="page10-subtitle">Her gün 00:00'da kaydedilen süreleri buradan takip et</span>
+      </div>
+
+      <div class="page10-date-row">
+        <button type="button" class="calendar-nav-btn page10-date-btn" id="page10PrevBtn" aria-label="Önceki">
+          <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <span class="page10-date-label" id="page10DateLabel">Bugün</span>
+        <button type="button" class="calendar-nav-btn page10-date-btn" id="page10NextBtn" aria-label="Sonraki">
+          <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M9 4l8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="page10-card">
+        <div class="page10-summary-header">
+          <span class="page10-summary-title">Toplam Süre</span>
+          <div class="settings-segmented page10-segmented" id="page10RangeSegmented">
+            <div class="settings-segmented-slider" id="page10RangeSlider"></div>
+            <button type="button" class="settings-segmented-option is-active" data-value="day">Gün</button>
+            <button type="button" class="settings-segmented-option" data-value="week">Hafta</button>
+            <button type="button" class="settings-segmented-option" data-value="month">Ay</button>
+          </div>
+          <span class="page10-summary-range-label" id="page10RangeLabel"></span>
+        </div>
+        <div class="page10-summary-total" id="page10SummaryTotal">00:00:00</div>
+        <span class="page10-summary-hint" id="page10SummaryHint"></span>
+      </div>
+
+      <div class="page10-log-card">
+        <span class="page10-log-title">Günlük Kayıtlar</span>
+        <div class="page10-log-list" id="page10LogList"></div>
+      </div>
+    </div>
   </section>
+
+  <!-- Sayfa 11: Denemelerim. Eklenen TYT/AYT denemeleri büyük, yatay
+       kartlar halinde listelenir; bir karta dokununca Sayfa 6/7 ile aynı
+       dilde tam ekran bir detay sayfası (#page-11-detail) açılır. -->
+  <section class="page" id="page-11">
+    <div class="page11-wrap">
+      <div class="page11-header">
+        <div class="page11-header-top">
+          <h1>Denemelerim</h1>
+          <button type="button" class="add-task-btn edit-task-btn" id="page11EditBtn" aria-label="Denemeleri düzenle" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path d="M4 20l4.5-1 10.2-10.2-3.5-3.5L5 15.5 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13.3 6.8l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <span class="page11-subtitle">Deneme ekle, branşına göre netlerini işaretle</span>
+      </div>
+
+      <button type="button" class="add-task-btn page11-add-btn" id="page11AddExamBtn">+ Deneme Ekle</button>
+
+      <div class="page11-list" id="page11ExamList"></div>
+    </div>
+  </section>
+
+  <!-- Sayfa 11 Detay: bir denemenin branş bazlı netleri, tam ekran.
+       Nav bar'da sekmesi yok; yalnızca Sayfa 11'deki bir deneme kartına
+       dokununca açılır, geri butonu her zaman Sayfa 11'e döner. -->
+  <section class="page" id="page-11-detail">
+    <div class="exam-detail-wrap">
+      <div class="calendar-topbar">
+        <button type="button" class="calendar-back-btn" id="examDetailBackBtn" aria-label="Geri dön">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <span class="calendar-topbar-title" id="examDetailTitle">Deneme</span>
+        <button type="button" class="calendar-back-btn is-danger" id="examDetailDeleteBtn" aria-label="Denemeyi sil">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path d="M4 7h16M9.5 7V4.8a1.3 1.3 0 0 1 1.3-1.3h2.4a1.3 1.3 0 0 1 1.3 1.3V7M6.5 7l.9 12.4A2 2 0 0 0 9.4 21h5.2a2 2 0 0 0 2-1.6L17.5 7M10.2 11v6M13.8 11v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="exam-detail-summary-card">
+        <span class="exam-detail-summary-label">Toplam Net</span>
+        <div class="exam-detail-summary-total" id="examDetailTotalNet">0<span>net</span></div>
+        <span class="exam-detail-summary-meta" id="examDetailMeta"></span>
+        <div class="exam-detail-summary-stats">
+          <div class="exam-detail-stat is-correct">
+            <span class="exam-detail-stat-value" id="examDetailCorrectCount">0</span>
+            <span class="exam-detail-stat-label">Doğru</span>
+          </div>
+          <div class="exam-detail-stat is-wrong">
+            <span class="exam-detail-stat-value" id="examDetailWrongCount">0</span>
+            <span class="exam-detail-stat-label">Yanlış</span>
+          </div>
+          <div class="exam-detail-stat is-blank">
+            <span class="exam-detail-stat-value" id="examDetailBlankCount">0</span>
+            <span class="exam-detail-stat-label">Boş</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="exam-detail-bulk-actions">
+        <button type="button" class="exam-detail-bulk-btn is-correct" id="examDetailMarkAllBtn">
+          <svg viewBox="0 0 24 24" width="15" height="15">
+            <path d="M4 12.5l5 5L20 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Tümünü Doğru İşaretle
+        </button>
+        <button type="button" class="exam-detail-bulk-btn is-clear" id="examDetailClearAllBtn">
+          <svg viewBox="0 0 24 24" width="15" height="15">
+            <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Tüm İşaretleri Kaldır
+        </button>
+      </div>
+
+      <div class="exam-detail-subject-list" id="examDetailSubjectList"></div>
+    </div>
+  </section>
+
+  <!-- Sayfa 11: Deneme ekleme pop-up'ı (settings-confirm-backdrop ile aynı dil). -->
+  <div class="settings-confirm-backdrop" id="page11AddBackdrop">
+    <div class="page11-modal-card">
+      <span class="page11-modal-title">Yeni Deneme</span>
+
+      <div class="page11-field">
+        <label class="page11-field-label" for="page11ExamNameInput">Deneme Adı</label>
+        <input type="text" id="page11ExamNameInput" class="page11-field-input" placeholder="Örn. 3D Yayınları TYT-1" maxlength="40">
+      </div>
+
+      <div class="page11-field page11-date-field">
+        <label class="page11-field-label" for="page11ExamDateBtn">Tarih</label>
+        <button type="button" class="page11-field-input page11-date-btn" id="page11ExamDateBtn" aria-haspopup="true" aria-expanded="false">
+          <span id="page11ExamDateBtnText">Tarih seç</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M3.5 9.5h17" stroke="currentColor" stroke-width="2"/>
+            <path d="M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="page11-field">
+        <span class="page11-field-label">Tür</span>
+        <div class="settings-segmented" id="page11TypeSegmented">
+          <div class="settings-segmented-slider" id="page11TypeSlider"></div>
+          <button type="button" class="settings-segmented-option is-active" data-value="tyt">TYT</button>
+          <button type="button" class="settings-segmented-option" data-value="ayt">AYT</button>
+        </div>
+      </div>
+
+      <div class="settings-confirm-actions page11-modal-actions">
+        <button type="button" class="settings-confirm-cancel" id="page11AddCancelBtn">Vazgeç</button>
+        <button type="button" class="page11-modal-confirm" id="page11AddConfirmBtn">Ekle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sayfa 11: Tarih seçme takvimi — ekranın tam ortasında açılan kendi
+       pop-up'ı. Ayrı bir backdrop üzerinde durur (page11AddBackdrop'ın
+       üstünde, z-index ile), böylece hem "Deneme Adı" hem "Tür" alanlarının
+       üzerine değil, tüm ekranın merkezine gelir. -->
+  <div class="settings-confirm-backdrop page11-datepicker-backdrop" id="page11DatePickerBackdrop">
+    <div class="page11-datepicker" id="page11DatePicker">
+      <div class="page11-datepicker-nav">
+        <button type="button" class="page11-datepicker-nav-btn" id="page11DatePrevBtn" aria-label="Önceki ay">
+          <svg viewBox="0 0 24 24" width="13" height="13">
+            <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <span class="page11-datepicker-month" id="page11DatePickerMonthLabel">Eylül 2026</span>
+        <button type="button" class="page11-datepicker-nav-btn" id="page11DateNextBtn" aria-label="Sonraki ay">
+          <svg viewBox="0 0 24 24" width="13" height="13">
+            <path d="M9 4l8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="page11-datepicker-weekdays" id="page11DatePickerWeekdays"></div>
+      <div class="page11-datepicker-grid" id="page11DatePickerGrid"></div>
+      <button type="button" class="page11-datepicker-today-btn" id="page11DateTodayBtn">Bugün</button>
+    </div>
+  </div>
+
 
   <!-- Ayarlar > Desenler: nav bar'ın dışında, Sayfa 6/7 gibi yalnızca
        "Desenler" satırıyla açılan bağımsız bir alt sayfa. Katalog kartı
@@ -4009,45 +5331,115 @@
     <div class="nav-slider"></div>
     <div class="option">
       <input class="nav-input" type="radio" name="nav" value="page-1" checked>
-      <div class="nav-btn"><span class="nav-span">1</span></div>
-    </div>
-    <div class="option">
-      <input class="nav-input" type="radio" name="nav" value="page-2">
-      <div class="nav-btn"><span class="nav-span">2</span></div>
-    </div>
-    <div class="option">
-      <input class="nav-input" type="radio" name="nav" value="page-3">
-      <div class="nav-btn"><span class="nav-span">3</span></div>
+      <div class="nav-btn">
+        <span class="nav-tooltip">Ana Sayfa</span>
+        <svg class="nav-icon nav-icon-home" viewBox="0 0 24 24">
+          <path d="M4 11.5L12 4l8 7.5"/>
+          <path d="M6 9.625v9.375a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9.375"/>
+        </svg>
+      </div>
     </div>
     <div class="option">
       <input class="nav-input" type="radio" name="nav" value="page-4">
-      <div class="nav-btn"><span class="nav-span">4</span></div>
+      <div class="nav-btn">
+        <span class="nav-tooltip">Mini Oyunlar</span>
+        <svg class="nav-icon nav-icon-dice" viewBox="0 0 24 24">
+          <rect x="4" y="4" width="16" height="16" rx="4.5"/>
+          <circle class="dice-dot" cx="8.3" cy="8.3" r="1.15" stroke="none"/>
+          <circle class="dice-dot" cx="15.7" cy="8.3" r="1.15" stroke="none"/>
+          <circle class="dice-dot" cx="12" cy="12" r="1.15" stroke="none"/>
+          <circle class="dice-dot" cx="8.3" cy="15.7" r="1.15" stroke="none"/>
+          <circle class="dice-dot" cx="15.7" cy="15.7" r="1.15" stroke="none"/>
+        </svg>
+      </div>
     </div>
     <div class="option">
       <input class="nav-input" type="radio" name="nav" value="page-5">
-      <div class="nav-btn"><span class="nav-span">5</span></div>
+      <div class="nav-btn">
+        <span class="nav-tooltip">Kronometre</span>
+        <svg class="nav-icon nav-icon-stopwatch" viewBox="0 0 24 24">
+          <circle cx="12" cy="13" r="8"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="9" y1="3" x2="15" y2="3"/>
+          <line x1="12" y1="3" x2="12" y2="5"/>
+        </svg>
+      </div>
     </div>
     <div class="option">
-      <input class="nav-input" type="radio" name="nav" value="page-settings">
-      <div class="nav-btn"><span class="nav-span">7</span></div>
+      <input class="nav-input" type="radio" name="nav" value="page-6">
+      <div class="nav-btn">
+        <span class="nav-tooltip">Takvim</span>
+        <svg class="nav-icon nav-icon-calendar" viewBox="0 0 24 24">
+          <path d="M8 2v4"/>
+          <path d="M16 2v4"/>
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <path d="M3 10h18"/>
+          <text class="nav-calendar-daynum" x="12" y="16.3" text-anchor="middle" dominant-baseline="central">1</text>
+        </svg>
+      </div>
     </div>
     <div class="option">
       <input class="nav-input" type="radio" name="nav" value="page-8">
-      <div class="nav-btn"><span class="nav-span">8</span></div>
+      <div class="nav-btn">
+        <span class="nav-tooltip">Gündelik</span>
+        <svg class="nav-icon nav-icon-gunluk" viewBox="0 0 24 24">
+          <path d="m3 17 2 2 4-4"/>
+          <path d="m3 7 2 2 4-4"/>
+          <line x1="13" y1="6" x2="21" y2="6"/>
+          <line x1="13" y1="18" x2="21" y2="18"/>
+        </svg>
+      </div>
     </div>
     <div class="option">
       <input class="nav-input" type="radio" name="nav" value="page-9">
-      <div class="nav-btn"><span class="nav-span">9</span></div>
+      <div class="nav-btn">
+        <span class="nav-tooltip">Soru Takibi</span>
+        <svg class="nav-icon nav-icon-checklist" viewBox="0 0 24 24">
+          <rect x="5" y="4" width="14" height="17" rx="2"/>
+          <rect class="nav-checklist-clip" x="9" y="2" width="6" height="3" rx="1"/>
+          <polyline class="nav-checklist-check" points="8.5 12.5 11 15 16 9.5"/>
+        </svg>
+      </div>
     </div>
     <div class="option">
-      <input class="nav-input" type="radio" name="nav" value="page-10">
-      <div class="nav-btn"><span class="nav-span">10</span></div>
+      <input class="nav-input" type="radio" name="nav" value="page-11">
+      <div class="nav-btn">
+        <span class="nav-tooltip">Denemelerim</span>
+        <svg class="nav-icon nav-icon-exam" viewBox="0 0 24 24">
+          <rect x="5" y="3" width="14" height="18" rx="2"/>
+          <line x1="8" y1="8" x2="16" y2="8"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+          <line x1="8" y1="16" x2="13" y2="16"/>
+        </svg>
+      </div>
+    </div>
+    <div class="option">
+      <input class="nav-input" type="radio" name="nav" value="page-settings">
+      <div class="nav-btn">
+        <span class="nav-tooltip">Ayarlar</span>
+        <svg class="nav-icon nav-icon-gear" viewBox="0 0 24 24">
+          <path d="M9.59356 3.94014C9.68397 3.39768 10.1533 3.00009 10.7033 3.00009H13.2972C13.8472 3.00009 14.3165 3.39768 14.4069 3.94014L14.6204 5.22119C14.6828 5.59523 14.9327 5.9068 15.2645 6.09045C15.3387 6.13151 15.412 6.17393 15.4844 6.21766C15.8095 6.41393 16.2048 6.47495 16.5604 6.34175L17.7772 5.88587C18.2922 5.69293 18.8712 5.9006 19.1462 6.37687L20.4432 8.6233C20.7181 9.09957 20.6085 9.70482 20.1839 10.0544L19.1795 10.8812C18.887 11.122 18.742 11.4938 18.7491 11.8726C18.7498 11.915 18.7502 11.9575 18.7502 12.0001C18.7502 12.0427 18.7498 12.0852 18.7491 12.1275C18.742 12.5064 18.887 12.8782 19.1795 13.119L20.1839 13.9458C20.6085 14.2953 20.7181 14.9006 20.4432 15.3769L19.1462 17.6233C18.8712 18.0996 18.2922 18.3072 17.7772 18.1143L16.5604 17.6584C16.2048 17.5252 15.8095 17.5862 15.4844 17.7825C15.412 17.8263 15.3387 17.8687 15.2645 17.9097C14.9327 18.0934 14.6828 18.4049 14.6204 18.779L14.4069 20.06C14.3165 20.6025 13.8472 21.0001 13.2972 21.0001H10.7033C10.1533 21.0001 9.68397 20.6025 9.59356 20.06L9.38005 18.779C9.31771 18.4049 9.06774 18.0934 8.73597 17.9097C8.66179 17.8687 8.58847 17.8263 8.51604 17.7825C8.19101 17.5863 7.79568 17.5252 7.44011 17.6584L6.22325 18.1143C5.70826 18.3072 5.12926 18.0996 4.85429 17.6233L3.55731 15.3769C3.28234 14.9006 3.39199 14.2954 3.81657 13.9458L4.82092 13.119C5.11343 12.8782 5.25843 12.5064 5.25141 12.1276C5.25063 12.0852 5.25023 12.0427 5.25023 12.0001C5.25023 11.9575 5.25063 11.915 5.25141 11.8726C5.25843 11.4938 5.11343 11.122 4.82092 10.8812L3.81657 10.0544C3.39199 9.70484 3.28234 9.09958 3.55731 8.62332L4.85429 6.37688C5.12926 5.90061 5.70825 5.69295 6.22325 5.88588L7.4401 6.34176C7.79566 6.47496 8.19099 6.41394 8.51603 6.21767C8.58846 6.17393 8.66179 6.13151 8.73597 6.09045C9.06774 5.9068 9.31771 5.59523 9.38005 5.22119L9.59356 3.94014Z"/>
+          <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3432 10.3431 9.00001 12 9.00001C13.6569 9.00001 15 10.3432 15 12Z"/>
+        </svg>
+      </div>
     </div>
   </div>
 </nav>
 
 <script>
   // Alt nav bar: seçili radio'ya göre ilgili sayfayı gösterir.
+  // Takvim ikonunun içindeki rakam her zaman bugünün gün numarasını
+  // gösterir; gece yarısını geçtiğinde sayfa açık kalsa bile güncel
+  // kalsın diye kısa aralıklarla kontrol edilir.
+  const navCalendarDayNum = document.querySelector('.nav-calendar-daynum');
+  if (navCalendarDayNum) {
+    const updateNavCalendarDayNum = () => {
+      navCalendarDayNum.textContent = new Date().getDate();
+    };
+    updateNavCalendarDayNum();
+    setInterval(updateNavCalendarDayNum, 60000);
+  }
+
   const navInputs = document.querySelectorAll('.nav-input');
   const navSlider = document.querySelector('.nav-slider');
   const navOptions = Array.from(document.querySelectorAll('.wrapper .option'));
@@ -4111,6 +5503,34 @@
       if (!input.checked) return;
       goToPage(input.value);
       moveSlider(input);
+    });
+  });
+
+  // Bir sekmeye her dokunulduğunda/tıklandığında (zaten seçili olsa bile),
+  // sayfa adını taşıyan baloncuk kısa süreliğine belirir. Fareyle üzerine
+  // gelindiğinde zaten CSS ile (hover) sürekli görünüyor; bu ise dokunmatik
+  // cihazlar için anlık bir geri bildirim sağlıyor.
+  navInputs.forEach((input) => {
+    input.addEventListener('click', () => {
+      const tooltip = input.nextElementSibling && input.nextElementSibling.querySelector('.nav-tooltip');
+      if (!tooltip) return;
+
+      // Başka bir ikonda hâlâ açık duran bir önizleme varsa, yenisi
+      // seçilir seçilmez onu anında kapat.
+      document.querySelectorAll('.nav-tooltip.is-flashing').forEach((other) => {
+        if (other !== tooltip) {
+          other.classList.remove('is-flashing');
+          clearTimeout(other._flashTimer);
+        }
+      });
+
+      tooltip.classList.remove('is-flashing');
+      void tooltip.offsetWidth; // reflow: art arda tıklamalarda animasyonu sıfırdan başlat
+      tooltip.classList.add('is-flashing');
+      clearTimeout(tooltip._flashTimer);
+      tooltip._flashTimer = setTimeout(() => {
+        tooltip.classList.remove('is-flashing');
+      }, 1100);
     });
   });
 </script>
@@ -4311,20 +5731,8 @@
 </script>
 
 <script>
-  // Sayfa 3: mevcut temaları (yukarıdaki "themes" dizisi, tek kaynak) gösteren
-  // kart. Her seferinde sadece bir tema görünür; sağ/sol ok tuşlarıyla
-  // aralarında yumuşak, yönlü bir kayma animasyonuyla geçiş yapılır.
-  // Her kartta iki katman var: altta hex kodlu renk şeritleri, üstte o
-  // temanın gerçek gradient önizlemesi. Karta tıklanınca üstteki gradient
-  // katmanı solup 2 saniye boyunca hex şeritlerini açık bırakır, ardından
-  // yumuşakça tekrar üzerine kapanır.
-  const SWATCH_OVERLAY_FADE_MS = 400;
-  const SWATCH_DETAIL_VISIBLE_MS = 2000;
-
-  const themeSwatchViewport = document.getElementById('themeSwatchViewport');
-  const themeSwatchDots = document.getElementById('themeSwatchDots');
-  const themeSwatchPrev = document.getElementById('themeSwatchPrev');
-  const themeSwatchNext = document.getElementById('themeSwatchNext');
+  // Ortak tema yardımcı fonksiyonları: Ayarlar sayfasındaki mini tema
+  // seçici ve Desenler alt sayfasındaki önizlemeler tarafından kullanılır.
 
   // Bir gradient string'inden (#rrggbb) hex renk kodlarını çıkarır.
   const extractHexStops = (gradient) => gradient.match(/#[0-9a-fA-F]{6}/g) || [];
@@ -4353,164 +5761,15 @@
   const getCheckColorForGradient = (gradient) =>
     getGradientLuminance(gradient) < 0.4 ? '#ffffff' : '#000000';
 
-  let swatchIndex = 0;
   // Sayfa 1'deki arka planla eşleşen, o an "seçili" olan tema; başlangıçta
   // themeIndex (0) ile aynı temadır.
   let selectedSwatchIndex = 0;
 
-  themes.forEach((theme, i) => {
-    const slide = document.createElement('div');
-    slide.className = 'theme-swatch-slide' + (i === 0 ? ' is-active' : '');
-
-    // Alt katman: hex kodlu renk şeritleri (detay görünüm).
-    // Aynı renk birden fazla kez tekrar ediyorsa (geçişsiz/düz temalarda
-    // olduğu gibi) sadece tek bir şerit gösterilir; bu da flex sayesinde
-    // otomatik olarak tam ortada durur.
-    const uniqueHexes = [...new Set(extractHexStops(theme.gradient))];
-    uniqueHexes.forEach((hex) => {
-      const colorEl = document.createElement('div');
-      colorEl.className = 'swatch-color';
-      colorEl.style.background = hex;
-      const span = document.createElement('span');
-      span.textContent = hex.replace('#', '').toUpperCase();
-      const labelColor = getCheckColorForGradient(hex);
-      span.style.color = labelColor;
-      span.style.textShadow = labelColor === '#ffffff'
-        ? '0 1px 2px rgba(0, 0, 0, 0.35)'
-        : '0 1px 2px rgba(255, 255, 255, 0.35)';
-      colorEl.appendChild(span);
-      slide.appendChild(colorEl);
-    });
-
-    // Üst katman: gerçek gradient önizlemesi (varsayılan görünüm).
-    const overlay = document.createElement('button');
-    overlay.type = 'button';
-    overlay.className = 'swatch-gradient-overlay';
-    overlay.style.background = theme.gradient;
-    overlay.style.setProperty('--swatch-check-color', getCheckColorForGradient(theme.gradient));
-    overlay.setAttribute('aria-label', theme.name + ' temasını seç');
-
-    // Gradyanın tam ortasında duran, o temanın seçili olup olmadığını
-    // gösteren tik işareti (referans tasarımdaki gibi sade bir "✓"
-    // karakteri). Rengi gradyanın koyuluğuna göre belirlenir.
-    // NOT: overlay'in DIŞINA, slide'a doğrudan eklenir. Overlay solup hex
-    // kodlarını gösterirken tik de görünür kalırsa (overlay'in İÇİNDE
-    // olsaydı, ebeveynin opacity'siyle çarpılıp "hayalet" gibi hafifçe
-    // görünürdü) bu istenmiyor; bu yüzden hex açılma/kapanma sırasında
-    // tik'i .is-hidden ile ayrıca, overlay'den bağımsız olarak gizliyoruz.
-    const check = document.createElement('span');
-    check.className = 'swatch-check' + (i === themeIndex ? ' is-selected' : '');
-    check.style.setProperty('--swatch-check-color', getCheckColorForGradient(theme.gradient));
-    check.textContent = '✓';
-    slide.appendChild(check);
-
-    let swatchTimers = [];
-    const clearSwatchTimers = () => {
-      swatchTimers.forEach(clearTimeout);
-      swatchTimers = [];
-      overlay.dataset.revealing = 'false';
-      check.classList.remove('is-hidden');
-    };
-
-    overlay.addEventListener('click', () => {
-      // Bu temayı seçili yap: sayfanın arka planını bu temaya uygula ve
-      // tüm swatch'lardaki tik işaretlerini güncelle.
-      selectTheme(i);
-
-      if (overlay.dataset.revealing === 'true') return;
-      overlay.dataset.revealing = 'true';
-
-      // Gradient katmanı solar, altındaki hex şeritleri açığa çıkar; tik
-      // de aynı anda tamamen gizlenir (animasyon bitene kadar görünmez).
-      overlay.style.opacity = '0';
-      check.classList.add('is-hidden');
-
-      const holdTimer = setTimeout(() => {
-        // 2 saniye açık kaldıktan sonra gradient katmanı yumuşakça geri döner.
-        overlay.style.opacity = '1';
-        const cooldownTimer = setTimeout(() => {
-          overlay.dataset.revealing = 'false';
-          // Overlay geçişi tamamen bittikten sonra tik tekrar gösterilir.
-          check.classList.remove('is-hidden');
-        }, SWATCH_OVERLAY_FADE_MS);
-        swatchTimers.push(cooldownTimer);
-      }, SWATCH_DETAIL_VISIBLE_MS);
-      swatchTimers.push(holdTimer);
-    });
-
-    slide.appendChild(overlay);
-    slide._clearSwatchTimers = clearSwatchTimers;
-
-    themeSwatchViewport.appendChild(slide);
-
-    const dot = document.createElement('span');
-    dot.className = 'swatch-dot' + (i === 0 ? ' is-active' : '');
-    themeSwatchDots.appendChild(dot);
-  });
-
-  const updateSwatchDots = () => {
-    Array.from(themeSwatchDots.children).forEach((dot, i) => {
-      dot.classList.toggle('is-active', i === swatchIndex);
-    });
-  };
-
-  // direction: 1 = sağa (sonraki tema), -1 = sola (önceki tema)
-  const goToSwatch = (newIndex, direction) => {
-    const slides = Array.from(themeSwatchViewport.children);
-    const total = slides.length;
-    newIndex = (newIndex + total) % total; // dairesel gezinme
-    if (newIndex === swatchIndex) return;
-
-    const current = slides[swatchIndex];
-    const next = slides[newIndex];
-
-    // Ayrılan kart varsa açık kalmış bir hex önizlemesi olabilir; sayfadan
-    // ayrılmadan önce zamanlayıcıları temizleyip gradient katmanını anında
-    // (animasyonsuz) eski hâline sıfırlıyoruz.
-    if (current._clearSwatchTimers) current._clearSwatchTimers();
-    const currentOverlay = current.querySelector('.swatch-gradient-overlay');
-    if (currentOverlay) {
-      currentOverlay.style.transition = 'none';
-      currentOverlay.style.opacity = '1';
-      currentOverlay.getBoundingClientRect();
-      currentOverlay.style.transition = '';
-    }
-
-    // Ayrılan kart, geldiği yönün tersine doğru kayarak kaybolur.
-    current.style.setProperty('--slide-offset', direction === 1 ? '-24px' : '24px');
-    current.classList.remove('is-active');
-
-    // Gelen kart, ok yönüne uygun taraftan kayarak belirir.
-    next.style.setProperty('--slide-offset', direction === 1 ? '24px' : '-24px');
-    next.style.transition = 'none';
-    next.getBoundingClientRect(); // reflow'u zorla, sonra animasyonu başlat
-    requestAnimationFrame(() => {
-      next.style.transition = '';
-      next.classList.add('is-active');
-    });
-
-    swatchIndex = newIndex;
-    updateSwatchDots();
-  };
-
-  themeSwatchPrev.addEventListener('click', () => goToSwatch(swatchIndex - 1, -1));
-  themeSwatchNext.addEventListener('click', () => goToSwatch(swatchIndex + 1, 1));
-
-  // Tüm swatch'lardaki tik işaretini verilen index'e göre günceller
-  // (sadece bir tanesi seçili görünür: o gradyanın tam ortasındaki tik).
-  // Hem Sayfa 3'teki bir gradyana tıklanınca hem de Sayfa 1'deki butonla
-  // tema değiştirilince çağrılır, böylece tik hiçbir zaman eski/pasif
-  // gradyanın üzerinde asılı kalmaz.
+  // Tema seçimini duyurur (Ayarlar sayfasındaki mini tema seçici bu kancaya
+  // bağlanır); böylece tema Sayfa 1'in butonu veya Ayarlar'dan değiştirilse
+  // bile ikisi de anında senkron kalır.
   const syncSwatchSelection = (index) => {
     selectedSwatchIndex = index;
-    Array.from(themeSwatchViewport.children).forEach((slide, i) => {
-      const check = slide.querySelector('.swatch-check');
-      if (check) check.classList.toggle('is-selected', i === index);
-    });
-    // Ayarlar sayfasındaki mini tema seçici (henüz tanımlanmamış olabilir,
-    // bu script'ten sonra oluşturuluyor) kendini bu kancaya bağlar; böylece
-    // tema Sayfa 1, Sayfa 3 veya Ayarlar'ın herhangi birinden değiştirilse
-    // bile üçü de anında senkron kalır.
     if (typeof window.onThemeSelectionChanged === 'function') {
       window.onThemeSelectionChanged(index);
     }
@@ -4519,350 +5778,14 @@
   // tanımlandığı için ona window üzerinden erişiyor.
   window.syncSwatchSelection = syncSwatchSelection;
 
-  // Bir gradyana tıklanınca: sayfanın arka planını o temaya uygular ve
-  // tik işaretini senkronize eder.
+  // Bir temayı seçili yapar (Ayarlar sayfasındaki tema toplarına tıklanınca
+  // kullanılır): sayfanın arka planını o temaya uygular ve tik işaretini
+  // senkronize eder.
   const selectTheme = (index) => {
     if (index === selectedSwatchIndex) return;
     applyTheme(index);
     syncSwatchSelection(index);
   };
-</script>
-
-<script>
-  // Sayfa 2: "+ Görev Ekle" butonu, mevcut checkbox satırlarıyla aynı
-  // görsel dile sahip yeni bir işaretlenebilir satır oluşturur.
-  // Satır önce görünmez/kaymış halde eklenir, ardından bir sonraki
-  // frame'de normal haline animasyonla döner (yumuşak/soft geçiş).
-  const taskList = document.getElementById('taskList');
-  const addTaskBtn = document.getElementById('addTaskBtn');
-  const taskScroll = document.getElementById('taskScroll');
-  const taskDateEl = document.getElementById('taskDate');
-
-  // Sayfa 2 başlığındaki tarih: Türkiye'ye göre yazım biçimiyle (gün, ay adı, yıl, gün adı).
-  if (taskDateEl) {
-    const bugun = new Date();
-    taskDateEl.textContent = bugun.toLocaleDateString('tr-TR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      weekday: 'long'
-    });
-  }
-
-  // Görev listesini (metin + işaretli/işaretsiz durumu) localStorage'a kaydeder.
-  const saveTasks = () => {
-    const tasks = Array.from(taskList.children).map((label) => {
-      const textEl = label.querySelector('.brutal-radio-text, .brutal-task-input');
-      const checkbox = label.querySelector('.brutal-radio');
-      return {
-        text: textEl ? (textEl.value !== undefined && textEl.tagName === 'INPUT' ? textEl.value : textEl.textContent) : '',
-        checked: !!(checkbox && checkbox.checked)
-      };
-    });
-    saveAppState({ tasks });
-  };
-
-  // Sayfa açılışında daha önce kaydedilmiş görevler varsa, örnek (demo)
-  // görevlerin yerine onları yükler.
-  const restoreTasks = () => {
-    const savedTasks = APP_STATE.tasks;
-    if (!Array.isArray(savedTasks)) return;
-
-    taskList.innerHTML = '';
-    savedTasks.forEach((task) => {
-      const label = document.createElement('label');
-      label.className = 'brutal-radio-label';
-
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.className = 'brutal-radio';
-      checkbox.checked = !!task.checked;
-
-      const custom = document.createElement('span');
-      custom.className = 'brutal-radio-custom';
-
-      const span = document.createElement('span');
-      span.className = 'brutal-radio-text';
-      span.textContent = task.text || '';
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.type = 'button';
-      deleteBtn.className = 'delete-btn';
-      deleteBtn.setAttribute('aria-label', 'Görevi sil');
-      deleteBtn.textContent = '×';
-
-      label.appendChild(checkbox);
-      label.appendChild(custom);
-      label.appendChild(span);
-      label.appendChild(deleteBtn);
-      taskList.appendChild(label);
-    });
-  };
-
-  const TASK_TRANSITION_MS = 320;
-  // FLIP kaymasının kendi süresi/eğrisi: satırların yeniden hizalanması
-  // opacity/renk geçişlerinden bağımsız, kendi başına yumuşak ve net olsun.
-  const FLIP_DURATION_MS = 380;
-  const FLIP_EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';
-
-  // Tek bir öğeyi eski konumundan (deltaY) şimdiki konumuna yumuşakça kaydırır.
-  const flipElement = (el, deltaY) => {
-    if (Math.abs(deltaY) < 0.5) return;
-
-    el.style.transition = 'none';
-    el.style.transform = `translateY(${deltaY}px)`;
-    el.getBoundingClientRect(); // reflow'u zorla, sonra animasyonu başlat
-    requestAnimationFrame(() => {
-      el.style.transition = `transform ${FLIP_DURATION_MS}ms ${FLIP_EASING}`;
-      el.style.transform = '';
-      el.addEventListener('transitionend', () => {
-        // Geçici satır-içi transition'ı temizle ki normal hover/işaretlenme
-        // animasyonları (CSS'teki varsayılan kurallar) tekrar devreye girsin.
-        el.style.transition = '';
-      }, { once: true });
-    });
-  };
-
-  // FLIP (First-Last-Invert-Play): liste boyu değiştiğinde (satır eklenip/
-  // silinince) mevcut satırların ve butonun yeni konumuna aniden "zıplaması"
-  // yerine yumuşakça kaymasını sağlar.
-  const withFlip = (mutate) => {
-    const items = Array.from(taskList.children);
-    const firstRects = items.map((el) => el.getBoundingClientRect());
-
-    mutate();
-
-    Array.from(taskList.children).forEach((el) => {
-      const idx = items.indexOf(el);
-      if (idx === -1) return; // yeni eklenen öğe; kendi giriş animasyonu var
-      const firstRect = firstRects[idx];
-      const lastRect = el.getBoundingClientRect();
-      flipElement(el, firstRect.top - lastRect.top);
-    });
-  };
-
-  // Halihazırda açık (henüz onaylanmamış) bir yazı alanı varsa,
-  // yeni görev eklemeden önce onu kapatır (boşsa siler, doluysa onaylar).
-  const commitOpenInputs = () => {
-    taskList.querySelectorAll('.brutal-task-input').forEach((input) => {
-      commitTaskInput(input);
-    });
-  };
-
-  // Bir görev satırını siler. Silinen satır kendi soluma/kayma animasyonuyla
-  // olduğu yerde kaybolurken, alttaki satırlar TAM O ANDA (arka arkaya değil,
-  // eşzamanlı) boşalan yere doğru kaymaya başlar — tek, kesintisiz bir hareket.
-  const removeTask = (label) => {
-    if (!label || label.dataset.removing === 'true') return;
-    label.dataset.removing = 'true';
-    label.classList.remove('task-enter');
-
-    const listRect = taskList.getBoundingClientRect();
-    const labelRect = label.getBoundingClientRect();
-    const siblings = Array.from(taskList.children).filter((el) => el !== label);
-    const firstRects = siblings.map((el) => el.getBoundingClientRect());
-
-    // En alttaki satır yukarı kayarken, kayma animasyonu sırasında geçici olarak
-    // eski (daha aşağıdaki) konumundan geliyor; bu, kaydırma alanının o anki
-    // yüksekliğini aşıp kenardan kesilmesine yol açabilir. Bunu önlemek için,
-    // silinen satırın kapladığı boşluk kadar alt boşluğu animasyon süresince
-    // geçici olarak artırıyor, animasyon bitince eski haline döndürüyoruz.
-    const extraClearance = labelRect.height + 16; // satır yüksekliği + satır arası boşluk (1rem)
-    const previousPaddingBottom = taskScroll.style.paddingBottom;
-    taskScroll.style.paddingBottom = `calc(12px + ${extraClearance}px)`;
-    setTimeout(() => {
-      taskScroll.style.paddingBottom = previousPaddingBottom;
-    }, FLIP_DURATION_MS + 60);
-
-    // Silinen satırı normal akıştan çıkarıp bulunduğu yere sabitliyoruz;
-    // böylece diğer satırlar akış boşluğunu hemen doldurmaya başlıyor.
-    label.style.position = 'absolute';
-    label.style.left = `${labelRect.left - listRect.left}px`;
-    label.style.top = `${labelRect.top - listRect.top}px`;
-    label.style.width = `${labelRect.width}px`;
-    label.style.margin = '0';
-    label.style.pointerEvents = 'none';
-
-    // Kalan satırları, silinen satırın yerini kapatacak şekilde eşzamanlı kaydır.
-    siblings.forEach((el, idx) => {
-      const lastRect = el.getBoundingClientRect();
-      flipElement(el, firstRects[idx].top - lastRect.top);
-    });
-
-    // Silinen satırın kendi soluma/kayma animasyonu, aynı anda başlıyor.
-    requestAnimationFrame(() => {
-      label.classList.add('task-leave');
-    });
-
-    label.addEventListener('transitionend', () => {
-      label.remove();
-      saveTasks();
-    }, { once: true });
-  };
-
-  const commitTaskInput = (input) => {
-    if (input.dataset.committed === 'true') return;
-    input.dataset.committed = 'true';
-
-    const label = input.closest('.brutal-radio-label');
-    const value = input.value.trim();
-
-    if (!value) {
-      // Boş bırakıldıysa satırı yumuşakça kaldır.
-      removeTask(label);
-      return;
-    }
-
-    // Yazı girildiyse, giriş alanını normal görev metnine dönüştür
-    // (böylece işaretlenince üstü çizilme animasyonu da çalışır).
-    const span = document.createElement('span');
-    span.className = 'brutal-radio-text';
-    span.textContent = value;
-    input.replaceWith(span);
-    saveTasks();
-  };
-
-  // Satırın sağındaki çarpı butonuna tıklanınca görevi siler.
-  // preventDefault/stopPropagation, tıklamanın <label> tarafından
-  // checkbox'ı işaretleme davranışına dönüşmesini engeller.
-  taskList.addEventListener('click', (e) => {
-    const deleteBtn = e.target.closest('.delete-btn');
-    if (!deleteBtn) return;
-    e.preventDefault();
-    e.stopPropagation();
-    removeTask(deleteBtn.closest('.brutal-radio-label'));
-  });
-
-  // Bir görev işaretlenip işareti kaldırıldığında da durumu kaydet.
-  taskList.addEventListener('change', (e) => {
-    if (e.target.classList.contains('brutal-radio')) {
-      saveTasks();
-    }
-  });
-
-  // Bir görev metnini (span) yerinde düzenlenebilir bir yazı alanına çevirir.
-  // Escape'e basılırsa orijinal metne geri döner (iptal); Enter veya alana
-  // tıklayıp çıkmak (blur) değişikliği kalıcı hale getirir. Boş bırakılırsa
-  // commitTaskInput satırı otomatik olarak siler (yeni görev eklerken de
-  // kullanılan aynı davranış).
-  const makeTaskTextEditable = (span) => {
-    if (!span || span.tagName === 'INPUT') return;
-    const original = span.textContent;
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'brutal-task-input brutal-radio-text';
-    input.value = original;
-    input.maxLength = 80;
-    span.replaceWith(input);
-
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        input.blur();
-      } else if (e.key === 'Escape') {
-        input.value = original;
-        input.blur();
-      }
-    });
-
-    input.addEventListener('blur', () => commitTaskInput(input));
-  };
-
-  // Düzenleme modu: "Düzenle" butonuna basılınca hem tüm görev metinleri
-  // yerinde düzenlenebilir hale gelir hem de normalde gizli olan silme
-  // butonları ortaya çıkar. Tekrar basılınca (ya da "+ Görev Ekle" ile
-  // yeni bir satır eklenip onaylanınca) açık kalan yazı alanları onaylanıp
-  // moddan çıkılır.
-  const editTaskBtn = document.getElementById('editTaskBtn');
-  let taskEditMode = false;
-
-  const setTaskEditMode = (on) => {
-    if (on === taskEditMode) return;
-    taskEditMode = on;
-    taskList.classList.toggle('is-edit-mode', on);
-    editTaskBtn.classList.toggle('is-active', on);
-    editTaskBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    editTaskBtn.setAttribute('aria-label', on ? 'Düzenlemeyi bitir' : 'Görevleri düzenle');
-
-    if (on) {
-      Array.from(taskList.querySelectorAll('.brutal-radio-text')).forEach(makeTaskTextEditable);
-    } else {
-      commitOpenInputs();
-    }
-  };
-
-  editTaskBtn.addEventListener('click', () => setTaskEditMode(!taskEditMode));
-
-  const addTask = () => {
-    commitOpenInputs();
-
-    const label = document.createElement('label');
-    label.className = 'brutal-radio-label task-enter';
-
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.className = 'brutal-radio';
-
-    const custom = document.createElement('span');
-    custom.className = 'brutal-radio-custom';
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'brutal-task-input brutal-radio-text';
-    input.placeholder = 'Görev yazın...';
-    input.maxLength = 80;
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.type = 'button';
-    deleteBtn.className = 'delete-btn';
-    deleteBtn.setAttribute('aria-label', 'Görevi sil');
-    deleteBtn.textContent = '×';
-
-    label.appendChild(checkbox);
-    label.appendChild(custom);
-    label.appendChild(input);
-    label.appendChild(deleteBtn);
-
-    withFlip(() => {
-      taskList.appendChild(label);
-    });
-
-    // Kaydırmalı alanın görünümünü değiştirmeden, yeni satırı doğrudan
-    // bir alt satıra ekleyip gerekiyorsa listeyi ona doğru kaydırıyoruz.
-    requestAnimationFrame(() => {
-      label.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    });
-
-    // Bir sonraki frame'de "task-enter" sınıfını kaldırarak
-    // CSS transition'ın (opacity + transform) yumuşakça oynamasını sağlıyoruz.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        label.classList.remove('task-enter');
-      });
-    });
-
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        input.blur();
-      } else if (e.key === 'Escape') {
-        input.value = '';
-        input.blur();
-      }
-    });
-
-    input.addEventListener('blur', () => commitTaskInput(input));
-
-    // Kullanıcı hemen yazabilsin diye anında odaklan.
-    input.focus();
-  };
-
-  addTaskBtn.addEventListener('click', addTask);
-
-  // Uygulama açılırken kaydedilmiş görevleri geri yükle; hiç kayıt yoksa
-  // (ilk çalıştırma) örnek görevler olduğu gibi kalır ve ileride kaydedilir.
-  restoreTasks();
-  if (!Array.isArray(APP_STATE.tasks)) saveTasks();
 </script>
 
 <script>
@@ -4878,7 +5801,7 @@
   const wheelHub = document.getElementById('wheelHub');
   const wheelHubMark = document.getElementById('wheelHubMark');
 
-  const WHEEL_PALETTE = ['#ff90e8', '#ffd23f', '#6ec6ff', '#ff5c5c', '#8fe3a0', '#c9a6ff', '#ffb46e', '#9fb8ff'];
+  const WHEEL_PALETTE = ['#ff90e8', '#ffd23f', '#6ec6ff', '#ff5c5c', '#8fe3a0', '#c9a6ff', '#ffb46e', '#9fb8ff', '#3f5aa8', '#7452a8'];
   const WHEEL_MAX_OPTIONS = 8;
   const WHEEL_MIN_OPTIONS = 2;
   const WHEEL_SPIN_MS = 3100;
@@ -5342,6 +6265,8 @@
   const lapsBackBtn = document.getElementById('lapsBackBtn');
   const lapsPageList = document.getElementById('lapsPageList');
   const lapsPageEmpty = document.getElementById('lapsPageEmpty');
+  const stopwatchHistoryBtn = document.getElementById('stopwatchHistoryBtn');
+  const page10BackBtn = document.getElementById('page10BackBtn');
 
   let swAccumulatedMs = 0; // Duraklatılana kadar biriken süre
   let swStartedAt = 0;     // Son "başlat"ın performance.now() zamanı
@@ -5349,6 +6274,55 @@
   let swRafId = null;
   let stopwatchLaps = [];                // Kaydedilen turlar: { totalMs, splitMs }
   let stopwatchControlsVisible = false;  // Tam ekranda boş alana dokununca Tur butonu görünür mü?
+
+  // ---- Sayfa 10: Günlük kronometre arşivi ----
+  // Kronometrenin o an biriktirdiği süre hangi takvim gününe aitse onun
+  // anahtarını (YYYY-MM-DD) tutar. Saat 00:00'ı geçtiğimiz her an tespit
+  // edildiğinde (tick sırasında, sayfa yeniden açıldığında veya arka plandan
+  // dönüldüğünde) o ana kadarki süre bu güne kaydedilip sayaç ertesi güne
+  // sıfırdan devam eder — kronometre kendisi durmaz, sadece günlük arşiv
+  // dilimlere ayrılır.
+  const page10DateKey = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
+  let swActiveDayKey = page10DateKey(new Date());
+
+  const loadStopwatchLogs = () => (
+    APP_STATE.stopwatchLogs && typeof APP_STATE.stopwatchLogs === 'object' ? APP_STATE.stopwatchLogs : {}
+  );
+
+  // Belirtilen güne verilen süreyi EKLER (üzerine yazmaz), çünkü aynı gün
+  // içinde kronometre birden çok kez durup başlatılabilir; her duraklatmada
+  // o ana kadarki dilim ayrı ayrı bu fonksiyonla toplanır.
+  const addStopwatchLogMs = (dateKey, ms) => {
+    if (ms <= 0) return;
+    const logs = loadStopwatchLogs();
+    logs[dateKey] = (logs[dateKey] || 0) + ms;
+    saveAppState({ stopwatchLogs: logs });
+  };
+
+  // Aktif gün ile bugünün gerçek tarihini karşılaştırır; aradan bir veya
+  // daha fazla gün geçmiş olsa bile (uygulama günlerce açılmamış olabilir)
+  // biriken süreyi doğru şekilde son aktif güne yazıp sayacı bugüne taşır.
+  const rolloverStopwatchDay = () => {
+    const todayKey = page10DateKey(new Date());
+    if (todayKey === swActiveDayKey) return false;
+    const total = swRunning ? currentElapsedMs() : swAccumulatedMs;
+    addStopwatchLogMs(swActiveDayKey, total);
+    swActiveDayKey = todayKey;
+    swAccumulatedMs = 0;
+    if (swRunning) {
+      swStartedAt = performance.now();
+    } else {
+      formatAndRenderTime(0);
+    }
+    if (typeof renderPage10 === 'function') renderPage10();
+    return true;
+  };
 
   // ---- Arka planda/uygulama kapansa bile çalışmaya devam eden kronometre ----
   // performance.now() yalnızca geçerli sayfa oturumu için anlamlıdır ve sayfa
@@ -5368,7 +6342,8 @@
         accumulatedMs: totalNow,
         running: swRunning,
         startEpoch: swRunning ? Date.now() : null,
-        laps: stopwatchLaps
+        laps: stopwatchLaps,
+        activeDayKey: swActiveDayKey
       }
     });
   };
@@ -5455,6 +6430,20 @@
     goToPage('page-5');
   };
 
+  // "Geçmiş" butonuna basınca Sayfa 10'u (Kronometre Geçmişi) açar; artık
+  // nav bar'da kendi sekmesi yok, buraya yalnızca Sayfa 5 üzerinden
+  // erişiliyor. Geri butonu Sayfa 5'e döner (Turlarım akışıyla birebir aynı).
+  const openPage10 = () => {
+    document.body.classList.add('is-page10-open'); // nav bar'ı gizler
+    goToPage('page-10');
+    if (typeof renderPage10 === 'function') renderPage10();
+  };
+
+  const closePage10 = () => {
+    document.body.classList.remove('is-page10-open');
+    goToPage('page-5');
+  };
+
   // Tur butonuna basınca o ana kadarki süreyi tur olarak kaydeder.
   const addLap = () => {
     if (!swRunning) return;
@@ -5469,6 +6458,12 @@
     swAccumulatedMs + (swRunning ? performance.now() - swStartedAt : 0);
 
   const stopwatchTick = () => {
+    // Kronometre çalışırken gece yarısını geçip geçmediğimizi her karede
+    // kontrol eder; geçtiyse önceki günün süresi arşive yazılıp sayaç
+    // 00:00 itibarıyla sıfırdan saymaya devam eder.
+    if (rolloverStopwatchDay()) {
+      saveStopwatchState();
+    }
     formatAndRenderTime(currentElapsedMs());
     if (swRunning) {
       swRafId = requestAnimationFrame(stopwatchTick);
@@ -5486,6 +6481,7 @@
 
   const startStopwatch = () => {
     if (swRunning) return;
+    rolloverStopwatchDay();
     swRunning = true;
     swStartedAt = performance.now();
     document.body.classList.add('is-stopwatch-running');
@@ -5506,6 +6502,7 @@
 
   const pauseStopwatch = () => {
     if (!swRunning) return;
+    rolloverStopwatchDay();
     swAccumulatedMs = currentElapsedMs();
     swRunning = false;
     if (swRafId) cancelAnimationFrame(swRafId);
@@ -5547,6 +6544,8 @@
   stopwatchResetBtn.addEventListener('click', resetStopwatch);
   stopwatchLapsBtn.addEventListener('click', openLapsPage);
   lapsBackBtn.addEventListener('click', closeLapsPage);
+  stopwatchHistoryBtn.addEventListener('click', openPage10);
+  page10BackBtn.addEventListener('click', closePage10);
 
   // Kart, sayaç çalışırken tek dokunmayla duraklatma alanı görevi görür
   // (butonlar gizli olduğu için bu, çalışırken erişilebilir tek kontroldür).
@@ -5632,13 +6631,18 @@
     }
 
     stopwatchLaps = Array.isArray(saved.laps) ? saved.laps : [];
+    swActiveDayKey = saved.activeDayKey || page10DateKey(new Date());
 
     if (saved.running && typeof saved.startEpoch === 'number') {
       // Kapalıyken/arka plandayken geçen gerçek süreyi duvar saatinden hesapla.
       swAccumulatedMs = Math.max(0, (saved.accumulatedMs || 0) + (Date.now() - saved.startEpoch));
+      swRunning = true; // rolloverStopwatchDay'in currentElapsedMs() ile doğru hesap yapması için
+      rolloverStopwatchDay(); // Uygulama kapalıyken gece yarısı geçmiş olabilir; varsa arşivle
+      swRunning = false;
       startStopwatch(); // swAccumulatedMs'i temel alarak saymaya kaldığı yerden devam eder
     } else {
       swAccumulatedMs = saved.accumulatedMs || 0;
+      rolloverStopwatchDay(); // Duraklatılmışken bile gece yarısı geçmiş olabilir
       formatAndRenderTime(swAccumulatedMs);
       stopwatchHint.textContent = swAccumulatedMs > 0 ? 'Devam etmek için dokun' : 'Başlatmak için dokun';
     }
@@ -5648,6 +6652,14 @@
   };
 
   restoreStopwatch();
+
+  // Sekme uzun süre arka planda kalıp (requestAnimationFrame duraklar)
+  // tekrar öne geldiğinde gece yarısını kaçırmamak için ek kontrol.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && rolloverStopwatchDay()) {
+      saveStopwatchState();
+    }
+  });
 
   // Güvenlik ağı: sekme/uygulama arka plana alınırken veya kapanırken
   // (visibilitychange/pagehide her zaman garanti olmasa da mümkün olduğunca)
@@ -5663,13 +6675,9 @@
 </script>
 
 <script>
-  // ---------- Sayfa 5: Büyük Takvim Arayüzü ----------
-  // "Takvim" butonuna basınca ekranı tam kaplayan bir üst katman açılır;
-  // ay içinde gezinme ve gün seçme burada gerçekleşir. Geri butonu (veya
-  // Esc) katmanı kapatıp Sayfa 5'e geri döner.
-  const calendarOpenBtn = document.getElementById('calendarOpenBtn');
-  const calendarPage = document.getElementById('page-6');
-  const calendarBackBtn = document.getElementById('calendarBackBtn');
+  // ---------- Sayfa 6: Büyük Takvim ----------
+  // Artık nav bar'daki kendi sekmesi üzerinden doğrudan erişiliyor; ay
+  // içinde gezinme ve gün seçme burada gerçekleşir.
   const calendarPrevBtn = document.getElementById('calendarPrevBtn');
   const calendarNextBtn = document.getElementById('calendarNextBtn');
   const calendarMonthLabel = document.getElementById('calendarMonthLabel');
@@ -5777,26 +6785,30 @@
       `${calendarSelectedDate.getDate()} ${CALENDAR_MONTHS[calendarSelectedDate.getMonth()]} ${calendarSelectedDate.getFullYear()}, ${dayName}`;
   };
 
-  // Sayfa 6 (Takvim), nav bar'daki 5 sekmenin dışında, yalnızca bu butonla
-  // açılan bağımsız bir sayfadır. Geçiş, diğer sekmelerle birebir aynı
-  // goToPage() akışını kullanır; tek fark nav bar üzerinden değil, doğrudan
-  // bu buton üzerinden tetiklenmesidir.
-  const openCalendarOverlay = () => {
-    calendarViewYear = calendarSelectedDate.getFullYear();
-    calendarViewMonth = calendarSelectedDate.getMonth();
+  // Alttaki tarih kutusuna tıklanınca takvim bugüne döner.
+  calendarSelectedInfo.style.cursor = 'pointer';
+  calendarSelectedInfo.addEventListener('click', () => {
+    calendarSelectedDate = new Date(calendarToday);
+    calendarViewYear = calendarToday.getFullYear();
+    calendarViewMonth = calendarToday.getMonth();
     renderCalendarGrid();
     updateCalendarSelectedInfo();
-    document.body.classList.add('is-calendar-open'); // nav bar'ı gizler
-    goToPage('page-6');
-  };
+  });
 
-  const closeCalendarOverlay = () => {
-    document.body.classList.remove('is-calendar-open');
-    goToPage('page-5');
-  };
-
-  calendarOpenBtn.addEventListener('click', openCalendarOverlay);
-  calendarBackBtn.addEventListener('click', closeCalendarOverlay);
+  // Nav bar'daki "Takvim" sekmesine her basıldığında, ay görünümü en son
+  // seçilen tarihin ayına döner (kullanıcı ok tuşlarıyla başka bir aya
+  // gezinip sekmeden ayrılmışsa bile, sekmeye her dönüşte seçili tarih
+  // yeniden odağa gelir).
+  const page6NavInput = document.querySelector('.nav-input[value="page-6"]');
+  if (page6NavInput) {
+    page6NavInput.addEventListener('change', () => {
+      if (!page6NavInput.checked) return;
+      calendarViewYear = calendarSelectedDate.getFullYear();
+      calendarViewMonth = calendarSelectedDate.getMonth();
+      renderCalendarGrid();
+      updateCalendarSelectedInfo();
+    });
+  }
 
   calendarPrevBtn.addEventListener('click', () => {
     calendarViewMonth -= 1;
@@ -5817,14 +6829,11 @@
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && calendarPage.classList.contains('is-active')) {
-      closeCalendarOverlay();
-    }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && document.getElementById('page-7').classList.contains('is-active')) {
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('page-7').classList.contains('is-active')) {
       closeLapsPage();
+    } else if (document.getElementById('page-10').classList.contains('is-active')) {
+      closePage10();
     }
   });
 
@@ -6211,7 +7220,7 @@
 </script>
 
 <script>
-  // ---------- Sayfa 8: Planlayıcı (Görevler / Rutinler) ----------
+  // ---------- Sayfa 8: Gündelik (Görevler / Rutinler) ----------
   // Kategorilere ayrılabilen bir yapılacaklar listesi ve her gün otomatik
   // sıfırlanan, gruplanabilir rutinler. Her iki grup türü de Sayfa 4'te
   // (Karar Çarkı) hazırlanan "Renk seç" pop-up'ını (openColorPicker,
@@ -6286,6 +7295,7 @@
     const box = document.createElement('span');
     box.className = 'page8-item-box';
     box.style.setProperty('--item-color', accentColor);
+    box.innerHTML = '<svg viewBox="0 0 24 24"><path d="M4 12.5l5 5.5 11-13"/></svg>';
 
     const text = document.createElement('span');
     text.className = 'page8-item-text';
@@ -6886,6 +7896,15 @@
   page9PrevDayBtn.addEventListener('click', () => shiftPage9Date(-1));
   page9NextDayBtn.addEventListener('click', () => shiftPage9Date(1));
 
+  // Tarih kutusuna tıklanınca bugüne dön.
+  page9DateLabel.style.cursor = 'pointer';
+  page9DateLabel.addEventListener('click', () => {
+    page9SelectedDate = page9StartOfDay(new Date());
+    page9RenderDateRow();
+    renderPage9SubjectList();
+    if (page9Range === 'day') renderPage9Summary();
+  });
+
   // ---- Özet: Gün/Hafta/Ay sekmesi ----
   const setPage9Range = (value) => {
     page9Range = value;
@@ -7036,6 +8055,848 @@
 </script>
 
 <script>
+  // ---------- Sayfa 10: Kronometre Geçmişi ----------
+  // Kronometrenin her gün 00:00'da otomatik arşivlediği günlük süreleri
+  // (APP_STATE.stopwatchLogs, anahtar: "YYYY-MM-DD" -> milisaniye) Gün/Hafta/Ay
+  // bazında özetler ve seçili aralığa düşen günleri tek tek listeler. Tarih
+  // gezinme ve Gün/Hafta/Ay segment mantığı Sayfa 9'daki Soru Takibi ile
+  // birebir aynı desendedir.
+  const page10PrevBtn = document.getElementById('page10PrevBtn');
+  const page10NextBtn = document.getElementById('page10NextBtn');
+  const page10DateLabel = document.getElementById('page10DateLabel');
+  const page10RangeSegmented = document.getElementById('page10RangeSegmented');
+  const page10RangeSlider = document.getElementById('page10RangeSlider');
+  const page10RangeLabel = document.getElementById('page10RangeLabel');
+  const page10SummaryTotal = document.getElementById('page10SummaryTotal');
+  const page10SummaryHint = document.getElementById('page10SummaryHint');
+  const page10LogList = document.getElementById('page10LogList');
+
+  const PAGE10_MONTHS_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  const PAGE10_WEEKDAYS_LONG = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+  const PAGE10_WEEKDAYS_SHORT = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+
+  let page10Range = 'day'; // 'day' | 'week' | 'month'
+  let page10SelectedDate = page10StartOfDay(new Date());
+
+  function page10StartOfDay(date) {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  // Sayfa 9'daki page9DateKey ile aynı format (YYYY-MM-DD), kronometrenin
+  // kendi arşiv anahtarlarıyla birebir eşleşmesi için.
+  const page10DateKeyOf = (date) => page10DateKey(date);
+
+  const page10FormatDurationMs = (ms) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  };
+
+  const page10FormatDateLabel = (date) => {
+    const today = page10StartOfDay(new Date());
+    const diffDays = Math.round((today - date) / 86400000);
+    if (diffDays === 0) return 'Bugün';
+    if (diffDays === 1) return 'Dün';
+    return `${date.getDate()} ${PAGE10_MONTHS_TR[date.getMonth()]} ${date.getFullYear()}`;
+  };
+
+  // Ayarlar'daki "Hafta başlangıcı" tercihini (Pazartesi/Pazar) kullanır,
+  // böylece haftalık özet takvim ve Soru Takibi ile tutarlı kalır.
+  const page10GetWeekStart = (date) => {
+    const startsSun = APP_STATE.weekStart === 'sun';
+    const day = date.getDay();
+    const diff = startsSun ? day : (day === 0 ? 6 : day - 1);
+    const start = page10StartOfDay(date);
+    start.setDate(start.getDate() - diff);
+    return start;
+  };
+
+  const page10GetRangeBounds = () => {
+    const d = page10SelectedDate;
+    if (page10Range === 'day') return { start: d, end: d };
+    if (page10Range === 'week') {
+      const start = page10GetWeekStart(d);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 6);
+      return { start, end };
+    }
+    const start = new Date(d.getFullYear(), d.getMonth(), 1);
+    const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    return { start, end };
+  };
+
+  const page10RangeLabelText = () => {
+    const { start, end } = page10GetRangeBounds();
+    if (page10Range === 'day') return page10FormatDateLabel(start);
+    if (page10Range === 'week') {
+      const sameMonth = start.getMonth() === end.getMonth();
+      const startStr = sameMonth ? `${start.getDate()}` : `${start.getDate()} ${PAGE10_MONTHS_TR[start.getMonth()]}`;
+      const endStr = `${end.getDate()} ${PAGE10_MONTHS_TR[end.getMonth()]}`;
+      return `${startStr} – ${endStr}`;
+    }
+    return `${PAGE10_MONTHS_TR[start.getMonth()]} ${start.getFullYear()}`;
+  };
+
+  // Gün seçiliyken üstteki tarih kutusunu gösterir; hafta/ay seçiliyken
+  // gezinme okları o aralığı bir birim ileri/geri kaydırır.
+  const page10RenderDateRow = () => {
+    page10DateLabel.textContent = page10RangeLabelText();
+    const today = page10StartOfDay(new Date());
+    page10NextBtn.disabled = page10Range === 'day' && page10SelectedDate.getTime() >= today.getTime();
+  };
+
+  const shiftPage10Date = (dir) => {
+    const next = new Date(page10SelectedDate);
+    if (page10Range === 'day') next.setDate(next.getDate() + dir);
+    else if (page10Range === 'week') next.setDate(next.getDate() + dir * 7);
+    else next.setMonth(next.getMonth() + dir);
+
+    const today = page10StartOfDay(new Date());
+    if (page10Range === 'day' && next.getTime() > today.getTime()) return;
+    page10SelectedDate = page10StartOfDay(next);
+    page10RenderDateRow();
+    renderPage10();
+  };
+  page10PrevBtn.addEventListener('click', () => shiftPage10Date(-1));
+  page10NextBtn.addEventListener('click', () => shiftPage10Date(1));
+
+  // Tarih kutusuna tıklanınca bugüne dön.
+  page10DateLabel.addEventListener('click', () => {
+    page10SelectedDate = page10StartOfDay(new Date());
+    page10RenderDateRow();
+    renderPage10();
+  });
+
+  // ---- Özet: Gün/Hafta/Ay sekmesi ----
+  const page10RangeOptions = Array.from(page10RangeSegmented.querySelectorAll('.settings-segmented-option'));
+  const setPage10Range = (value) => {
+    page10Range = value;
+    const idx = page10RangeOptions.findIndex((btn) => btn.dataset.value === value);
+    page10RangeSlider.style.transform = `translateX(${idx * 100}%)`;
+    page10RangeOptions.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.value === value));
+    page10RenderDateRow();
+    renderPage10();
+  };
+  page10RangeOptions.forEach((btn) => btn.addEventListener('click', () => setPage10Range(btn.dataset.value)));
+
+  // Bugüne ait, henüz gece yarısı arşivine düşmemiş "canlı" süreyi
+  // (kronometre şu an çalışıyor veya duraklatılmış halde bekliyor olabilir)
+  // arşivlenmiş kayıtların üzerine ekleyerek gösterir; böylece "Bugün"
+  // seçiliyken ekran her zaman güncel kalır.
+  const page10LiveTodayMs = () => {
+    const todayKey = page10DateKey(new Date());
+    if (typeof swActiveDayKey === 'undefined' || swActiveDayKey !== todayKey) return 0;
+    return typeof currentElapsedMs === 'function' ? currentElapsedMs() : 0;
+  };
+
+  // Seçili aralıktaki (gün/hafta/ay) tüm günleri toplayıp toplam süreyi ve
+  // gün gün dökümü hesaplar; en yeni tarih listenin en üstünde yer alır.
+  const renderPage10 = () => {
+    const { start, end } = page10GetRangeBounds();
+    const logs = (APP_STATE.stopwatchLogs && typeof APP_STATE.stopwatchLogs === 'object') ? APP_STATE.stopwatchLogs : {};
+    const todayKey = page10DateKey(new Date());
+
+    const days = [];
+    const cursor = new Date(start);
+    while (cursor.getTime() <= end.getTime()) {
+      const key = page10DateKeyOf(cursor);
+      let ms = logs[key] || 0;
+      if (key === todayKey) ms += page10LiveTodayMs();
+      days.push({ date: new Date(cursor), key, ms });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    days.reverse();
+
+    const total = days.reduce((sum, day) => sum + day.ms, 0);
+    page10SummaryTotal.textContent = page10FormatDurationMs(total);
+    page10RangeLabel.textContent = page10RangeLabelText();
+    page10SummaryHint.textContent = page10Range === 'day'
+      ? 'Seçili günün toplam kronometre süresi'
+      : `${days.length} günlük toplam kronometre süresi`;
+
+    page10LogList.innerHTML = '';
+    const daysWithTime = days.filter((day) => day.ms > 0);
+
+    if (!daysWithTime.length) {
+      const empty = document.createElement('div');
+      empty.className = 'page10-log-empty';
+      empty.textContent = 'Bu aralıkta henüz kayıt yok.';
+      page10LogList.appendChild(empty);
+      return;
+    }
+
+    daysWithTime.forEach((day) => {
+      const row = document.createElement('div');
+      row.className = 'page10-log-row' + (day.key === todayKey ? ' is-today' : '');
+
+      const dateWrap = document.createElement('div');
+      dateWrap.className = 'page10-log-date';
+
+      const dayEl = document.createElement('span');
+      dayEl.className = 'page10-log-day';
+      dayEl.textContent = day.key === todayKey
+        ? 'Bugün'
+        : `${day.date.getDate()} ${PAGE10_MONTHS_TR[day.date.getMonth()]} ${day.date.getFullYear()}`;
+
+      const weekdayEl = document.createElement('span');
+      weekdayEl.className = 'page10-log-weekday';
+      weekdayEl.textContent = PAGE10_WEEKDAYS_LONG[day.date.getDay()];
+
+      dateWrap.appendChild(dayEl);
+      dateWrap.appendChild(weekdayEl);
+
+      const durationEl = document.createElement('span');
+      durationEl.className = 'page10-log-duration';
+      durationEl.textContent = page10FormatDurationMs(day.ms);
+
+      row.appendChild(dateWrap);
+      row.appendChild(durationEl);
+      page10LogList.appendChild(row);
+    });
+  };
+
+  // Kronometre her saniye bir sonraki kareyi çizdiğinde Sayfa 10 açık
+  // değilse gereksiz yeniden render yapılmaz; sadece sayfa aktifken (veya
+  // rollover gerçekleştiğinde stopwatch script'i renderPage10'u doğrudan
+  // çağırdığında) güncellenir. Sayfa 10 aktifken canlı "Bugün" değerinin
+  // akıcı görünmesi için basit bir saniyelik zamanlayıcı yeterlidir.
+  setInterval(() => {
+    const page10El = document.getElementById('page-10');
+    if (page10El && page10El.classList.contains('is-active') && page10Range === 'day'
+      && page10SelectedDate.getTime() === page10StartOfDay(new Date()).getTime()) {
+      renderPage10();
+    }
+  }, 1000);
+
+  // ---- İlk render ----
+  page10RenderDateRow();
+  renderPage10();
+</script>
+
+<script>
+  // ---------- Sayfa 11: Denemelerim ----------
+  // Eklenen TYT/AYT denemelerini APP_STATE.page11 altında saklar. Her
+  // deneme, gerçek YKS müfredatındaki branş/soru sayısına göre bir
+  // "answers" haritası tutar (bkz. EXAM_SUBJECTS); her soru dört durum
+  // arasında döner: işaretsiz -> doğru -> yanlış -> boş -> işaretsiz.
+  // Bir deneme kartına dokununca Sayfa 6/7'nin tam ekran diliyle
+  // (.calendar-topbar) açılan #page-11-detail'de bu durumlar işaretlenir
+  // ve branş bazlı + toplam net en üstte gösterilir.
+
+  const page11GenId = () => 'exam-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  const EXAM_SUBJECTS = {
+    tyt: [
+      { key: 'turkce', name: 'Türkçe', count: 40, color: '#ff90e8' },
+      { key: 'tarih', name: 'Tarih', count: 5, color: '#ffd23f' },
+      { key: 'cografya', name: 'Coğrafya', count: 5, color: '#6ec6ff' },
+      { key: 'felsefe', name: 'Felsefe', count: 5, color: '#ff5c5c' },
+      { key: 'din', name: 'Din Kültürü ve Ahlak Bilgisi', count: 5, color: '#8fe3a0' },
+      { key: 'matematik', name: 'Matematik', count: 40, color: '#c9a6ff' },
+      { key: 'fizik', name: 'Fizik', count: 7, color: '#ffb46e' },
+      { key: 'kimya', name: 'Kimya', count: 7, color: '#9fb8ff' },
+      { key: 'biyoloji', name: 'Biyoloji', count: 6, color: '#ff90e8' }
+    ],
+    ayt: [
+      { key: 'matematik', name: 'Matematik', count: 40, color: '#c9a6ff' },
+      { key: 'fizik', name: 'Fizik', count: 14, color: '#ffb46e' },
+      { key: 'kimya', name: 'Kimya', count: 13, color: '#9fb8ff' },
+      { key: 'biyoloji', name: 'Biyoloji', count: 13, color: '#8fe3a0' }
+    ]
+  };
+
+  const PAGE11_TYPE_LABELS = { tyt: 'TYT', ayt: 'AYT' };
+  const PAGE11_BUBBLE_STATES = ['none', 'correct', 'wrong', 'blank'];
+
+  // Denemelerdeki branş renkleri artık Soru Takibi (Sayfa 9) çizelgesindeki
+  // renklerle birebir eşleşir: isim üzerinden o dersin güncel rengi
+  // aranır, kullanıcı orada rengi değiştirirse buraya da yansır. Sayfa 9'da
+  // eşleşen bir ders bulunamazsa (silinmiş/yeniden adlandırılmışsa)
+  // EXAM_SUBJECTS'teki sabit renge geri dönülür.
+  const page11SubjectColor = (type, subject) => {
+    const list = (page9State.subjects && page9State.subjects[type]) || [];
+    const match = list.find((s) => s.name === subject.name);
+    return (match && match.color) || subject.color;
+  };
+
+  const page11BuildAnswers = (type) => {
+    const answers = {};
+    EXAM_SUBJECTS[type].forEach((subj) => {
+      answers[subj.key] = new Array(subj.count).fill('none');
+    });
+    return answers;
+  };
+
+  // Deneme türü (TYT/AYT) renk şeridi: eskiden sabit (mavi/mor) ve
+  // değiştirilemezdi; artık daha olgun tonlarla başlıyor ve şeride
+  // dokununca açılan renk seçiciyle değiştirilebiliyor. Bir türün rengi
+  // değiştirildiğinde o türdeki TÜM denemeler aynı anda güncellensin
+  // diye tek bir yerde (page11State.colors) saklanır.
+  const PAGE11_DEFAULT_TYPE_COLORS = { tyt: '#3f5aa8', ayt: '#7452a8' };
+
+  const savedPage11 = APP_STATE.page11;
+  const page11State = (savedPage11 && Array.isArray(savedPage11.exams))
+    ? savedPage11
+    : { exams: [] };
+
+  if (!page11State.colors || typeof page11State.colors !== 'object') {
+    page11State.colors = { ...PAGE11_DEFAULT_TYPE_COLORS };
+  } else {
+    page11State.colors = { ...PAGE11_DEFAULT_TYPE_COLORS, ...page11State.colors };
+  }
+
+  const savePage11State = () => saveAppState({ page11: page11State });
+
+  // Bir denemenin branş bazlı ve toplam net hesabı (4 yanlış 1 doğruyu götürür).
+  const page11ComputeExam = (exam) => {
+    const subjects = EXAM_SUBJECTS[exam.type] || EXAM_SUBJECTS.tyt;
+    let totalCorrect = 0, totalWrong = 0, totalBlank = 0, totalNet = 0;
+    const bySubject = subjects.map((subj) => {
+      const answers = exam.answers[subj.key] || new Array(subj.count).fill('none');
+      let correct = 0, wrong = 0, blank = 0;
+      answers.forEach((state) => {
+        if (state === 'correct') correct += 1;
+        else if (state === 'wrong') wrong += 1;
+        else if (state === 'blank') blank += 1;
+      });
+      const net = correct - wrong / 4;
+      totalCorrect += correct;
+      totalWrong += wrong;
+      totalBlank += blank;
+      totalNet += net;
+      return { subject: subj, correct, wrong, blank, net };
+    });
+    return { bySubject, totalCorrect, totalWrong, totalBlank, totalNet };
+  };
+
+  const page11FormatNet = (n) => {
+    const rounded = Math.round(n * 100) / 100;
+    return (Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(2)).replace('.', ',');
+  };
+
+  // ---- Net/soru sayılarını "artıp azalarak" gösteren sayaç animasyonu ----
+  // Kartlar ve detay sayfası her render'da innerHTML ile yeniden
+  // oluşturulduğu için (eski DOM elemanı kaybolur), önceki değeri elemanın
+  // kendisinde değil, harici bir "hafıza" nesnesinde (anahtara göre)
+  // saklıyoruz. Böylece yeni oluşan eleman bile, ondan önceki değerden
+  // başlayıp yeni değere doğru sayarak animasyon yapabiliyor.
+  const page11ValueMemory = {};
+
+  const page11AnimateCounter = (el, memoryKey, toValue, options = {}) => {
+    const { decimals = false, suffix = '', spacer = false, duration = 550 } = options;
+
+    const renderFrame = (val) => {
+      const text = decimals ? page11FormatNet(val) : String(Math.round(val));
+      if (!suffix) {
+        el.textContent = text;
+      } else {
+        el.innerHTML = `${text}${spacer ? ' ' : ''}<span>${suffix}</span>`;
+      }
+    };
+
+    const hasPrev = Object.prototype.hasOwnProperty.call(page11ValueMemory, memoryKey);
+    const fromValue = hasPrev ? page11ValueMemory[memoryKey] : toValue;
+    page11ValueMemory[memoryKey] = toValue;
+
+    if (!hasPrev || fromValue === toValue) {
+      renderFrame(toValue);
+      return;
+    }
+
+    const startTime = performance.now();
+    const token = Symbol();
+    el._page11AnimToken = token;
+
+    const step = (now) => {
+      if (el._page11AnimToken !== token) return; // yeni bir animasyon başladıysa eskisini durdur
+      const t = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out
+      renderFrame(fromValue + (toValue - fromValue) * eased);
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
+        renderFrame(toValue);
+      }
+    };
+    requestAnimationFrame(step);
+  };
+
+  const page11FormatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-').map(Number);
+    const y = parts[0], m = parts[1], d = parts[2];
+    if (!y || !m || !d) return dateStr;
+    return `${d} ${MONTHS_TR[m - 1]} ${y}`;
+  };
+
+  // ---- Sayfa 11 ana liste ----
+  const page11ExamList = document.getElementById('page11ExamList');
+  const page11AddExamBtn = document.getElementById('page11AddExamBtn');
+  const page11EditBtn = document.getElementById('page11EditBtn');
+
+  // Düzenleme modu: kalem ikonuna basılınca kartlardaki silme butonları
+  // ortaya çıkar (Sayfa 2'deki görev listesiyle aynı mantık); tekrar
+  // basılınca gizlenir. Liste yeniden çizilse de (silme, ekleme vb.)
+  // .is-edit-mode class'ı kapsayıcı üzerinde kaldığı için mod korunur.
+  let page11EditMode = false;
+
+  const setPage11EditMode = (on) => {
+    if (on === page11EditMode) return;
+    page11EditMode = on;
+    page11ExamList.classList.toggle('is-edit-mode', on);
+    page11EditBtn.classList.toggle('is-active', on);
+    page11EditBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    page11EditBtn.setAttribute('aria-label', on ? 'Düzenlemeyi bitir' : 'Denemeleri düzenle');
+  };
+
+  page11EditBtn.addEventListener('click', () => setPage11EditMode(!page11EditMode));
+
+  const createPage11ExamCard = (exam) => {
+    const result = page11ComputeExam(exam);
+    const card = document.createElement('div');
+    card.className = 'page11-exam-card';
+
+    const accent = document.createElement('button');
+    accent.type = 'button';
+    accent.className = 'page11-exam-accent';
+    accent.style.background = page11State.colors[exam.type] || PAGE11_DEFAULT_TYPE_COLORS[exam.type];
+    accent.setAttribute('aria-label', `${PAGE11_TYPE_LABELS[exam.type] || 'TYT'} rengini değiştir`);
+    accent.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openColorPicker(`${PAGE11_TYPE_LABELS[exam.type] || 'TYT'} rengi`, page11State.colors[exam.type], (color) => {
+        page11State.colors[exam.type] = color;
+        savePage11State();
+        renderPage11List();
+      });
+    });
+
+    const main = document.createElement('div');
+    main.className = 'page11-exam-main';
+
+    const name = document.createElement('span');
+    name.className = 'page11-exam-name';
+    name.textContent = exam.name;
+
+    const meta = document.createElement('div');
+    meta.className = 'page11-exam-meta';
+
+    const date = document.createElement('span');
+    date.className = 'page11-exam-date';
+    date.textContent = page11FormatDate(exam.date);
+
+    const badge = document.createElement('span');
+    badge.className = 'page11-exam-type-badge';
+    badge.textContent = PAGE11_TYPE_LABELS[exam.type] || 'TYT';
+
+    meta.appendChild(date);
+    meta.appendChild(badge);
+    main.appendChild(name);
+    main.appendChild(meta);
+
+    const side = document.createElement('div');
+    side.className = 'page11-exam-side';
+
+    const net = document.createElement('div');
+    net.className = 'page11-exam-net';
+    page11AnimateCounter(net, `examCardNet:${exam.id}`, result.totalNet, { decimals: true, suffix: 'net' });
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'delete-btn page11-exam-delete';
+    delBtn.textContent = '×';
+    delBtn.setAttribute('aria-label', `"${exam.name}" denemesini sil`);
+    delBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openPage8Confirm(exam.name, () => {
+        page11State.exams = page11State.exams.filter((it) => it.id !== exam.id);
+        savePage11State();
+        renderPage11List();
+      });
+    });
+
+    side.appendChild(net);
+
+    card.appendChild(accent);
+    card.appendChild(main);
+    card.appendChild(side);
+    card.appendChild(delBtn);
+
+    card.addEventListener('click', () => openExamDetail(exam.id));
+
+    return card;
+  };
+
+  const renderPage11List = () => {
+    page11ExamList.innerHTML = '';
+    if (!page11State.exams.length) {
+      const empty = document.createElement('div');
+      empty.className = 'page11-empty';
+      empty.textContent = 'Henüz deneme eklenmedi.';
+      page11ExamList.appendChild(empty);
+      return;
+    }
+    // En yeni tarihli deneme en üstte; aynı tarihte eklenme sırası korunur.
+    const sorted = [...page11State.exams].sort((a, b) => (
+      (b.date || '').localeCompare(a.date || '') || (b.ts || 0) - (a.ts || 0)
+    ));
+    sorted.forEach((exam) => page11ExamList.appendChild(createPage11ExamCard(exam)));
+  };
+
+  // ---- Deneme ekleme pop-up'ı ----
+  const page11AddBackdrop = document.getElementById('page11AddBackdrop');
+  const page11ExamNameInput = document.getElementById('page11ExamNameInput');
+  const page11ExamDateBtn = document.getElementById('page11ExamDateBtn');
+  const page11ExamDateBtnText = document.getElementById('page11ExamDateBtnText');
+  const page11DatePickerBackdrop = document.getElementById('page11DatePickerBackdrop');
+  const page11DatePicker = document.getElementById('page11DatePicker');
+  const page11DatePrevBtn = document.getElementById('page11DatePrevBtn');
+  const page11DateNextBtn = document.getElementById('page11DateNextBtn');
+  const page11DatePickerMonthLabel = document.getElementById('page11DatePickerMonthLabel');
+  const page11DatePickerWeekdays = document.getElementById('page11DatePickerWeekdays');
+  const page11DatePickerGrid = document.getElementById('page11DatePickerGrid');
+  const page11DateTodayBtn = document.getElementById('page11DateTodayBtn');
+  const page11TypeSegmented = document.getElementById('page11TypeSegmented');
+  const page11TypeSlider = document.getElementById('page11TypeSlider');
+  const page11TypeOptions = Array.from(page11TypeSegmented.querySelectorAll('.settings-segmented-option'));
+  const page11AddCancelBtn = document.getElementById('page11AddCancelBtn');
+  const page11AddConfirmBtn = document.getElementById('page11AddConfirmBtn');
+
+  let page11PendingType = 'tyt';
+
+  const setPage11Type = (value) => {
+    page11PendingType = value;
+    page11TypeSlider.style.transform = value === 'ayt' ? 'translateX(100%)' : 'translateX(0)';
+    page11TypeOptions.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.value === value));
+  };
+  page11TypeOptions.forEach((btn) => btn.addEventListener('click', () => setPage11Type(btn.dataset.value)));
+
+  const page11Pad2 = (n) => String(n).padStart(2, '0');
+  const page11ToISODate = (d) => `${d.getFullYear()}-${page11Pad2(d.getMonth() + 1)}-${page11Pad2(d.getDate())}`;
+
+  // ---- Tarih alanı: native <input type="date"> yerine kendi tasarımımız
+  // olan, pop-up şeklinde açılan takvim. Sayfa 6'daki büyük takvimle aynı
+  // ay/gün hesaplama mantığını ve hafta başlangıcı ayarını (calendarWeekStart,
+  // calendarToday, isSameCalendarDate, CALENDAR_MONTHS/WEEKDAYS_*) paylaşır,
+  // kendi DOM'una ve sınıflarına çizer. ----
+  let page11SelectedDate = new Date(calendarToday);
+  let page11DateViewYear = page11SelectedDate.getFullYear();
+  let page11DateViewMonth = page11SelectedDate.getMonth();
+
+  const renderPage11DateWeekdaysHeader = () => {
+    page11DatePickerWeekdays.innerHTML = '';
+    for (let i = 0; i < 7; i++) {
+      const dow = (calendarWeekStart + i) % 7;
+      const el = document.createElement('span');
+      el.className = 'page11-datepicker-weekday';
+      if (dow === 0 || dow === 6) el.classList.add('is-weekend');
+      el.textContent = CALENDAR_WEEKDAYS_SHORT_DOW[dow];
+      page11DatePickerWeekdays.appendChild(el);
+    }
+  };
+  renderPage11DateWeekdaysHeader();
+
+  const renderPage11DateGrid = () => {
+    page11DatePickerGrid.innerHTML = '';
+    page11DatePickerMonthLabel.textContent = `${CALENDAR_MONTHS[page11DateViewMonth]} ${page11DateViewYear}`;
+
+    const firstOfMonth = new Date(page11DateViewYear, page11DateViewMonth, 1);
+    const jsWeekday = firstOfMonth.getDay();
+    const leadingBlank = (jsWeekday - calendarWeekStart + 7) % 7;
+
+    const daysInMonth = new Date(page11DateViewYear, page11DateViewMonth + 1, 0).getDate();
+    const daysInPrevMonth = new Date(page11DateViewYear, page11DateViewMonth, 0).getDate();
+
+    const TOTAL_CELLS = 42;
+    for (let i = 0; i < TOTAL_CELLS; i++) {
+      const dayNum = i - leadingBlank + 1;
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'page11-datepicker-day';
+
+      let cellDate;
+      if (dayNum < 1) {
+        cellDate = new Date(page11DateViewYear, page11DateViewMonth - 1, daysInPrevMonth + dayNum);
+        cell.classList.add('is-outside');
+        cell.disabled = true;
+      } else if (dayNum > daysInMonth) {
+        cellDate = new Date(page11DateViewYear, page11DateViewMonth + 1, dayNum - daysInMonth);
+        cell.classList.add('is-outside');
+        cell.disabled = true;
+      } else {
+        cellDate = new Date(page11DateViewYear, page11DateViewMonth, dayNum);
+      }
+
+      const columnIndex = i % 7;
+      const columnDow = (columnIndex + calendarWeekStart) % 7;
+      if (columnDow === 0 || columnDow === 6) cell.classList.add('is-weekend'); // Cumartesi & Pazar
+
+      cell.textContent = cellDate.getDate();
+      if (isSameCalendarDate(cellDate, calendarToday)) cell.classList.add('is-today');
+      if (isSameCalendarDate(cellDate, page11SelectedDate)) cell.classList.add('is-selected');
+
+      if (!cell.disabled) {
+        cell.addEventListener('click', () => {
+          page11SelectedDate = cellDate;
+          renderPage11DateGrid();
+          updatePage11DateBtnText();
+          closePage11DatePicker();
+        });
+      }
+
+      page11DatePickerGrid.appendChild(cell);
+    }
+  };
+
+  const updatePage11DateBtnText = () => {
+    const dayName = CALENDAR_WEEKDAYS_LONG[(page11SelectedDate.getDay() + 6) % 7];
+    page11ExamDateBtnText.textContent =
+      `${page11SelectedDate.getDate()} ${CALENDAR_MONTHS[page11SelectedDate.getMonth()]} ${page11SelectedDate.getFullYear()}, ${dayName}`;
+  };
+
+  const openPage11DatePicker = () => {
+    page11DateViewYear = page11SelectedDate.getFullYear();
+    page11DateViewMonth = page11SelectedDate.getMonth();
+    renderPage11DateGrid();
+    page11DatePickerBackdrop.classList.add('is-open');
+    page11ExamDateBtn.setAttribute('aria-expanded', 'true');
+  };
+
+  const closePage11DatePicker = () => {
+    page11DatePickerBackdrop.classList.remove('is-open');
+    page11ExamDateBtn.setAttribute('aria-expanded', 'false');
+  };
+
+  page11ExamDateBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (page11DatePickerBackdrop.classList.contains('is-open')) {
+      closePage11DatePicker();
+    } else {
+      openPage11DatePicker();
+    }
+  });
+
+  // Takvim kartının kendisine tıklamak dışarı tıklama sayılmasın diye;
+  // yalnızca dim arka plana (backdrop'un kendisine) tıklanınca kapanır.
+  page11DatePickerBackdrop.addEventListener('click', (e) => {
+    if (e.target === page11DatePickerBackdrop) closePage11DatePicker();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && page11DatePickerBackdrop.classList.contains('is-open')) closePage11DatePicker();
+  });
+
+  page11DatePrevBtn.addEventListener('click', () => {
+    page11DateViewMonth -= 1;
+    if (page11DateViewMonth < 0) { page11DateViewMonth = 11; page11DateViewYear -= 1; }
+    renderPage11DateGrid();
+  });
+
+  page11DateNextBtn.addEventListener('click', () => {
+    page11DateViewMonth += 1;
+    if (page11DateViewMonth > 11) { page11DateViewMonth = 0; page11DateViewYear += 1; }
+    renderPage11DateGrid();
+  });
+
+  page11DateTodayBtn.addEventListener('click', () => {
+    page11SelectedDate = new Date(calendarToday);
+    page11DateViewYear = page11SelectedDate.getFullYear();
+    page11DateViewMonth = page11SelectedDate.getMonth();
+    renderPage11DateGrid();
+    updatePage11DateBtnText();
+    closePage11DatePicker();
+  });
+
+  const openPage11AddModal = () => {
+    page11ExamNameInput.value = '';
+    page11SelectedDate = new Date(calendarToday);
+    page11DateViewYear = page11SelectedDate.getFullYear();
+    page11DateViewMonth = page11SelectedDate.getMonth();
+    updatePage11DateBtnText();
+    closePage11DatePicker();
+    setPage11Type('tyt');
+    page11AddBackdrop.classList.add('is-open');
+  };
+
+  const closePage11AddModal = () => {
+    page11AddBackdrop.classList.remove('is-open');
+    closePage11DatePicker();
+  };
+
+  page11AddExamBtn.addEventListener('click', openPage11AddModal);
+  page11AddCancelBtn.addEventListener('click', closePage11AddModal);
+  page11AddBackdrop.addEventListener('click', (e) => {
+    if (e.target === page11AddBackdrop) closePage11AddModal();
+  });
+
+  page11AddConfirmBtn.addEventListener('click', () => {
+    const name = page11ExamNameInput.value.trim();
+    const date = page11ToISODate(page11SelectedDate);
+    if (!name) { page11ExamNameInput.focus(); return; }
+
+    const exam = {
+      id: page11GenId(),
+      name,
+      date,
+      type: page11PendingType,
+      answers: page11BuildAnswers(page11PendingType),
+      ts: Date.now()
+    };
+    page11State.exams.push(exam);
+    savePage11State();
+    closePage11AddModal();
+    renderPage11List();
+  });
+
+  // ---- Deneme detay sayfası (tam ekran, branş bazlı netler) ----
+  const examDetailTitle = document.getElementById('examDetailTitle');
+  const examDetailTotalNet = document.getElementById('examDetailTotalNet');
+  const examDetailMeta = document.getElementById('examDetailMeta');
+  const examDetailCorrectCount = document.getElementById('examDetailCorrectCount');
+  const examDetailWrongCount = document.getElementById('examDetailWrongCount');
+  const examDetailBlankCount = document.getElementById('examDetailBlankCount');
+  const examDetailSubjectList = document.getElementById('examDetailSubjectList');
+  const examDetailBackBtn = document.getElementById('examDetailBackBtn');
+  const examDetailDeleteBtn = document.getElementById('examDetailDeleteBtn');
+  const examDetailMarkAllBtn = document.getElementById('examDetailMarkAllBtn');
+  const examDetailClearAllBtn = document.getElementById('examDetailClearAllBtn');
+
+  let page11ActiveExamId = null;
+
+  // Tek tıklama doğru, 2. tıklama yanlış, 3. tıklama boş, 4. tıklama
+  // (yani bir sonraki) işaretsiz eski haline döner.
+  const page11CycleBubble = (exam, subjectKey, index) => {
+    const current = exam.answers[subjectKey][index];
+    const nextIdx = (PAGE11_BUBBLE_STATES.indexOf(current) + 1) % PAGE11_BUBBLE_STATES.length;
+    exam.answers[subjectKey][index] = PAGE11_BUBBLE_STATES[nextIdx];
+    savePage11State();
+  };
+
+  const renderExamDetail = () => {
+    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
+    if (!exam) return;
+
+    examDetailTitle.textContent = exam.name;
+    examDetailMeta.textContent = `${page11FormatDate(exam.date)} · ${PAGE11_TYPE_LABELS[exam.type] || 'TYT'}`;
+
+    const result = page11ComputeExam(exam);
+    page11AnimateCounter(examDetailTotalNet, 'examDetailTotal', result.totalNet, { decimals: true, suffix: 'net' });
+    page11AnimateCounter(examDetailCorrectCount, 'examDetailCorrect', result.totalCorrect, { duration: 400 });
+    page11AnimateCounter(examDetailWrongCount, 'examDetailWrong', result.totalWrong, { duration: 400 });
+    page11AnimateCounter(examDetailBlankCount, 'examDetailBlank', result.totalBlank, { duration: 400 });
+
+    examDetailSubjectList.innerHTML = '';
+    result.bySubject.forEach(({ subject, net }) => {
+      const card = document.createElement('div');
+      card.className = 'exam-detail-subject-card';
+
+      const accent = document.createElement('div');
+      accent.className = 'exam-detail-subject-accent';
+      accent.style.background = page11SubjectColor(exam.type, subject);
+
+      const body = document.createElement('div');
+      body.className = 'exam-detail-subject-body';
+
+      const top = document.createElement('div');
+      top.className = 'exam-detail-subject-top';
+
+      const name = document.createElement('span');
+      name.className = 'exam-detail-subject-name';
+      name.textContent = subject.name;
+
+      const netEl = document.createElement('span');
+      netEl.className = 'exam-detail-subject-net';
+      page11AnimateCounter(netEl, `examDetailSubjectNet:${exam.id}:${subject.key}`, net, {
+        decimals: true,
+        suffix: 'net',
+        spacer: true
+      });
+
+      top.appendChild(name);
+      top.appendChild(netEl);
+
+      const grid = document.createElement('div');
+      grid.className = 'exam-detail-bubble-grid';
+
+      exam.answers[subject.key].forEach((state, idx) => {
+        const bubble = document.createElement('button');
+        bubble.type = 'button';
+        bubble.className = 'exam-detail-bubble';
+        if (state !== 'none') bubble.classList.add(`is-${state}`);
+        bubble.textContent = String(idx + 1);
+        bubble.setAttribute('aria-label', `${subject.name} soru ${idx + 1}`);
+        bubble.addEventListener('click', () => {
+          page11CycleBubble(exam, subject.key, idx);
+          renderExamDetail();
+        });
+        grid.appendChild(bubble);
+      });
+
+      body.appendChild(top);
+      body.appendChild(grid);
+      card.appendChild(accent);
+      card.appendChild(body);
+      examDetailSubjectList.appendChild(card);
+    });
+  };
+
+  // Bir denemenin tüm sorularını tek bir duruma (ör. hepsi doğru ya da
+  // hepsi işaretsiz) çeker; branş ayrımı gözetmeden tüm answers dizilerini
+  // gezer.
+  const page11SetAllBubbles = (exam, state) => {
+    Object.keys(exam.answers).forEach((subjectKey) => {
+      exam.answers[subjectKey] = exam.answers[subjectKey].map(() => state);
+    });
+    savePage11State();
+  };
+
+  const openExamDetail = (examId) => {
+    page11ActiveExamId = examId;
+    renderExamDetail();
+    document.body.classList.add('is-exam-detail-open'); // nav bar'ı gizler
+    goToPage('page-11-detail');
+  };
+
+  const closeExamDetail = () => {
+    document.body.classList.remove('is-exam-detail-open');
+    goToPage('page-11');
+    renderPage11List();
+  };
+  examDetailBackBtn.addEventListener('click', closeExamDetail);
+
+  examDetailMarkAllBtn.addEventListener('click', () => {
+    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
+    if (!exam) return;
+    page11SetAllBubbles(exam, 'correct');
+    renderExamDetail();
+  });
+
+  examDetailClearAllBtn.addEventListener('click', () => {
+    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
+    if (!exam) return;
+    page11SetAllBubbles(exam, 'none');
+    renderExamDetail();
+  });
+
+  examDetailDeleteBtn.addEventListener('click', () => {
+    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
+    if (!exam) return;
+    openPage8Confirm(exam.name, () => {
+      page11State.exams = page11State.exams.filter((it) => it.id !== exam.id);
+      savePage11State();
+      closeExamDetail();
+    });
+  });
+
+  // ---- İlk render ----
+  renderPage11List();
+</script>
+
+<script>
   // ---------- Yakınlaştırmayı Engelle ----------
   // Safari, viewport meta etiketini (user-scalable=no) yok sayıp iki
   // parmakla veya çift dokunarak yakınlaştırmaya izin verebiliyor;
@@ -7097,8 +8958,6 @@
     });
   }
 </script>
-
-<script src="snow.js" defer></script>
 
 </body>
 </html>
