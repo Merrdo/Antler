@@ -6368,6 +6368,17 @@
     line-height: 1.35;
   }
 
+  /* Son yedekleme tarihi/saati satırı: içi boşken (henüz hiç
+     eşitlenmemişse ya da giriş yapılmamışsa) tamamen kaybolur. */
+  .settings-last-backup {
+    font-weight: 600;
+    opacity: 0.75;
+  }
+
+  .settings-last-backup:empty {
+    display: none;
+  }
+
   /* Karanlık mod anahtarı: uygulamanın genel .brutal-toggle görünümünü
      (.track / .thumb sınıfları) kullanır, sadece hizalama için ufak bir
      ek sınıf. */
@@ -7139,8 +7150,17 @@
 <div class="pattern-layer" id="patternLayer"></div>
 
 <!-- Kayıt / Giriş ekranı: uygulamaya ilk giren biri için, verileri
-     Supabase üzerinden eşitleyebilmesi amacıyla önce bu ekran gösterilir. -->
-<div class="auth-gate is-hidden" id="authGate">
+     Supabase üzerinden eşitleyebilmesi amacıyla önce bu ekran gösterilir.
+     İçerik BİLEREK boş bırakıldı: <template> içindeki asıl form (parola
+     alanları dahil) yalnızca ekran gerçekten gösterilmesi gerektiğinde
+     JS ile buraya klonlanır. Aksi halde parola input'ları oturum açıkken
+     ya da "Şimdilik geç" denip ekran hiç görünmese bile en baştan DOM'da
+     hazır bulunuyordu; bu da cihazın/tarayıcının, kullanıcı hiç görmese
+     bile açılışta "parolayı doldur" bildirimi/önerisi göstermesine yol
+     açıyordu. -->
+<div class="auth-gate is-hidden" id="authGate"></div>
+
+<template id="authGateTemplate">
   <div class="auth-gate-card">
     <div class="auth-gate-header">
       <span class="auth-gate-icon" aria-hidden="true">
@@ -7186,7 +7206,8 @@
 
     <button type="button" class="auth-gate-skip" id="authGateSkipBtn">Şimdilik geç</button>
   </div>
-</div>
+</template>
+
 
 <div class="app">
 
@@ -7419,6 +7440,7 @@
             <div class="settings-row-text">
               <span class="settings-row-title" id="settingsAccountEmail">Giriş yapılmadı</span>
               <span class="settings-row-desc" id="settingsSyncStatusText">Verilerini eşitlemek için giriş yap</span>
+              <span class="settings-row-desc settings-last-backup" id="settingsLastBackupText"></span>
             </div>
             <span class="settings-sync-dot" id="settingsSyncDot" aria-hidden="true"></span>
           </div>
@@ -14393,8 +14415,39 @@
   // hızlıca dokunmak çift-dokunma DEĞİLDİR; bunu da engellersek her
   // butondan sonra ~300ms beklemeden bir sonrakine dokunulamaz hale gelir
   // (click olayı hiç tetiklenmez), ki asıl şikayet edilen sorun buydu.
+  //
+  // ÖNEMLİ 2: Parmak belirgin şekilde hareket ettiyse (yani kullanıcı
+  // aslında kaydırma/flick yapıyorsa) bu bir çift-dokunma-zoom jesti
+  // DEĞİLDİR. Böyle bir durumda touchend'de preventDefault çağırmak,
+  // iOS'ta kaydırmanın ataletle devam eden ("momentum") hareketini anında
+  // kesiyor ve kaydırma "takılıp" sonra tamamen tepkisiz kalıyormuş gibi
+  // hissettiriyordu — Ayarlar gibi uzun sayfalarda art arda hızlı
+  // kaydırınca (flick) fark ediliyordu. Bu yüzden hareketi takip edip
+  // gerçek bir sürükleme/kaydırma olduğunda hiç preventDefault UYGULAMIYORUZ.
   let lastTouchEndAt = 0;
   let lastTouchEndTarget = null;
+  let touchGestureStartX = 0;
+  let touchGestureStartY = 0;
+  let touchGestureMoved = false;
+
+  // passive:true — kaydırmayı senkron olarak bloke etmez, tarayıcı
+  // kaydırmayı hemen (JS'i beklemeden) başlatabilir.
+  document.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      touchGestureStartX = e.touches[0].clientX;
+      touchGestureStartY = e.touches[0].clientY;
+      touchGestureMoved = false;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    if (Math.abs(t.clientX - touchGestureStartX) > 10 || Math.abs(t.clientY - touchGestureStartY) > 10) {
+      touchGestureMoved = true;
+    }
+  }, { passive: true });
+
   document.addEventListener('touchend', (e) => {
     const now = Date.now();
     const target = e.target;
@@ -14407,19 +14460,28 @@
     const isInteractiveControl = target.closest(
       'button, input, a, label, select, textarea, [role="button"]'
     );
-    if (!isInteractiveControl && target === lastTouchEndTarget && now - lastTouchEndAt <= 300) {
+    if (
+      !touchGestureMoved &&
+      !isInteractiveControl &&
+      target === lastTouchEndTarget &&
+      now - lastTouchEndAt <= 300
+    ) {
       e.preventDefault();
     }
     lastTouchEndAt = now;
     lastTouchEndTarget = target;
   }, { passive: false });
 
-  // İki parmakla dokunmayı (pinch) daha da erken aşamada engelle.
-  document.addEventListener('touchmove', (e) => {
-    if (e.touches.length > 1) {
-      e.preventDefault();
-    }
-  }, { passive: false });
+  // Not: İki parmakla yakınlaştırma (pinch) zaten CSS `touch-action:
+  // pan-x pan-y` (html/body) ve yukarıdaki gesturestart/change/end
+  // engellemesiyle (Safari) durduruluyor. Önceden burada ayrıca
+  // `touchmove` üzerinde `e.touches.length > 1` kontrolüyle bir de JS
+  // engeli vardı; document üzerinde passive:false bir touchmove
+  // dinleyicisinin var olması TEK PARMAKLA yapılan normal kaydırmalarda
+  // bile tarayıcının her karede JS'in bitmesini beklemesine (senkron
+  // "scroll-blocking listener") neden oluyordu — Ayarlar sayfasında
+  // hissedilen "takılma" şikayetinin asıl kaynağı buydu. O dinleyici,
+  // pinch koruması zaten başka yollarla sağlandığı için kaldırıldı.
 
   // Ctrl/Cmd + tekerlek ile (trackpad pinch) tarayıcı yakınlaştırmasını engelle.
   document.addEventListener('wheel', (e) => {
@@ -14558,6 +14620,7 @@
   // ---- Ayarlar sayfasındaki eşitleme durumu arayüzü ----
   const settingsAccountEmail = document.getElementById('settingsAccountEmail');
   const settingsSyncStatusText = document.getElementById('settingsSyncStatusText');
+  const settingsLastBackupText = document.getElementById('settingsLastBackupText');
   const settingsSyncDot = document.getElementById('settingsSyncDot');
   const settingsSyncBtn = document.getElementById('settingsSyncBtn');
   const settingsAuthActionBtn = document.getElementById('settingsAuthActionBtn');
@@ -14575,12 +14638,34 @@
     return `${diffDay} gün önce eşitlendi`;
   };
 
+  // Son başarılı yedeklemenin tam tarih ve saatini ("8 Eyl 2026, 14:32"
+  // gibi) okunaklı biçimde döndürür; hiç yedekleme yoksa boş string
+  // döner ki .settings-last-backup:empty kuralı satırı tamamen gizlesin.
+  const formatAbsoluteSyncTime = (ts) => {
+    if (!ts) return '';
+    try {
+      const date = new Date(Number(ts));
+      if (Number.isNaN(date.getTime())) return '';
+      const formatted = new Intl.DateTimeFormat('tr-TR', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+      return `Son yedekleme: ${formatted}`;
+    } catch (err) {
+      return '';
+    }
+  };
+
   const updateSyncStatusUI = (mode) => {
     if (!settingsAccountEmail) return;
 
     if (!supabaseConfigured) {
       settingsAccountEmail.textContent = 'Bulut eşitleme yapılandırılmadı';
       settingsSyncStatusText.textContent = 'Bu özellik henüz etkin değil';
+      if (settingsLastBackupText) settingsLastBackupText.textContent = '';
       if (settingsSyncDot) settingsSyncDot.className = 'settings-sync-dot';
       if (settingsSyncBtn) settingsSyncBtn.disabled = true;
       if (settingsAuthActionBtn) settingsAuthActionBtn.style.display = 'none';
@@ -14590,6 +14675,7 @@
     if (!currentUser) {
       settingsAccountEmail.textContent = 'Giriş yapılmadı';
       settingsSyncStatusText.textContent = 'Verilerini eşitlemek için giriş yap';
+      if (settingsLastBackupText) settingsLastBackupText.textContent = '';
       if (settingsSyncDot) settingsSyncDot.className = 'settings-sync-dot';
       if (settingsSyncBtn) settingsSyncBtn.disabled = true;
       if (settingsAuthActionBtn) {
@@ -14608,6 +14694,13 @@
 
     const dotClass = { syncing: 'is-syncing', success: 'is-ok', error: 'is-error' }[mode] || '';
     if (settingsSyncDot) settingsSyncDot.className = `settings-sync-dot ${dotClass}`.trim();
+
+    // Son yedekleme tarihi/saati; şu anki durum (eşitleniyor/hata/boşta)
+    // ne olursa olsun her zaman ayrı bir satırda gösterilir.
+    if (settingsLastBackupText) {
+      const lastSync = localStorage.getItem(LAST_SYNC_KEY);
+      settingsLastBackupText.textContent = formatAbsoluteSyncTime(lastSync);
+    }
 
     if (mode === 'syncing') {
       settingsSyncStatusText.textContent = 'Eşitleniyor…';
@@ -14691,19 +14784,32 @@
   }
 
   // ================= Kayıt / Giriş ekranı (Auth Gate) =================
+  // Not: Parola alanlarının, ekran gerçekten gösterilmeden cihaz/tarayıcı
+  // tarafından "otomatik doldur" bildirimini tetiklememesi için asıl form
+  // <template id="authGateTemplate"> içinde tutulur ve #authGate boş
+  // kapsayıcısına yalnızca showAuthGate() ilk kez çağrıldığında (yani
+  // ekran fiilen gösterilecekse) klonlanır.
   const authGate = document.getElementById('authGate');
-  const authGateTabs = document.getElementById('authGateTabs');
-  const authLoginForm = document.getElementById('authLoginForm');
-  const authRegisterForm = document.getElementById('authRegisterForm');
-  const authGateSkipBtn = document.getElementById('authGateSkipBtn');
-  const authLoginError = document.getElementById('authLoginError');
-  const authRegisterError = document.getElementById('authRegisterError');
-  const authRegisterInfo = document.getElementById('authRegisterInfo');
-  const authLoginSubmit = document.getElementById('authLoginSubmit');
-  const authRegisterSubmit = document.getElementById('authRegisterSubmit');
+  const authGateTemplate = document.getElementById('authGateTemplate');
 
-  const showAuthGate = () => { if (authGate) authGate.classList.remove('is-hidden'); };
-  const hideAuthGate = () => { if (authGate) authGate.classList.add('is-hidden'); };
+  let authGateTabs = null;
+  let authLoginForm = null;
+  let authRegisterForm = null;
+  let authGateSkipBtn = null;
+  let authLoginError = null;
+  let authRegisterError = null;
+  let authRegisterInfo = null;
+  let authLoginSubmit = null;
+  let authRegisterSubmit = null;
+  let authGateReady = false;
+
+  const authErrorMessage = (err) => {
+    const msg = (err && err.message) || '';
+    if (/invalid login credentials/i.test(msg)) return 'E-posta veya şifre hatalı.';
+    if (/already registered/i.test(msg)) return 'Bu e-posta ile zaten bir hesap var.';
+    if (/password/i.test(msg) && /6/.test(msg)) return 'Şifre en az 6 karakter olmalı.';
+    return msg || 'Bir şeyler ters gitti, tekrar dene.';
+  };
 
   const setAuthPanel = (panel) => {
     if (!authGateTabs) return;
@@ -14741,103 +14847,120 @@
     if (authRegisterInfo) authRegisterInfo.classList.remove('is-visible');
   };
 
-  if (authGateTabs) {
-    authGateTabs.querySelectorAll('.auth-gate-tab').forEach((tab) => {
-      tab.addEventListener('click', () => setAuthPanel(tab.dataset.panel));
-    });
-  }
+  // Template içeriğini gerçek DOM'a klonlar ve olay dinleyicilerini bağlar.
+  // Yalnızca ekran fiilen gösterilmesi gerektiğinde bir kez çalışır.
+  const ensureAuthGateContent = () => {
+    if (authGateReady || !authGate || !authGateTemplate) return;
+    authGate.appendChild(authGateTemplate.content.cloneNode(true));
+    authGateReady = true;
 
-  if (authGateSkipBtn) {
-    authGateSkipBtn.addEventListener('click', () => {
-      try { localStorage.setItem(AUTH_SKIP_KEY, '1'); } catch (err) { /* yok say */ }
-      hideAuthGate();
-    });
-  }
+    authGateTabs = document.getElementById('authGateTabs');
+    authLoginForm = document.getElementById('authLoginForm');
+    authRegisterForm = document.getElementById('authRegisterForm');
+    authGateSkipBtn = document.getElementById('authGateSkipBtn');
+    authLoginError = document.getElementById('authLoginError');
+    authRegisterError = document.getElementById('authRegisterError');
+    authRegisterInfo = document.getElementById('authRegisterInfo');
+    authLoginSubmit = document.getElementById('authLoginSubmit');
+    authRegisterSubmit = document.getElementById('authRegisterSubmit');
 
-  const authErrorMessage = (err) => {
-    const msg = (err && err.message) || '';
-    if (/invalid login credentials/i.test(msg)) return 'E-posta veya şifre hatalı.';
-    if (/already registered/i.test(msg)) return 'Bu e-posta ile zaten bir hesap var.';
-    if (/password/i.test(msg) && /6/.test(msg)) return 'Şifre en az 6 karakter olmalı.';
-    return msg || 'Bir şeyler ters gitti, tekrar dene.';
-  };
+    if (authGateTabs) {
+      authGateTabs.querySelectorAll('.auth-gate-tab').forEach((tab) => {
+        tab.addEventListener('click', () => setAuthPanel(tab.dataset.panel));
+      });
+    }
 
-  if (authLoginForm) {
-    authLoginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!supabaseClient) return;
-      const email = document.getElementById('authLoginEmail').value.trim();
-      const password = document.getElementById('authLoginPassword').value;
-      if (authLoginError) authLoginError.classList.remove('is-visible');
-      authLoginSubmit.disabled = true;
-      authLoginSubmit.textContent = 'Giriş yapılıyor…';
-      try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        currentUser = data.user;
-        try { localStorage.removeItem(AUTH_SKIP_KEY); } catch (err) { /* yok say */ }
+    if (authGateSkipBtn) {
+      authGateSkipBtn.addEventListener('click', () => {
+        try { localStorage.setItem(AUTH_SKIP_KEY, '1'); } catch (err) { /* yok say */ }
         hideAuthGate();
-        updateSyncStatusUI();
-        await pullRemoteState({ reloadOnData: true });
-      } catch (err) {
-        if (authLoginError) {
-          authLoginError.textContent = authErrorMessage(err);
-          authLoginError.classList.add('is-visible');
-        }
-      } finally {
-        authLoginSubmit.disabled = false;
-        authLoginSubmit.textContent = 'Giriş Yap';
-      }
-    });
-  }
+      });
+    }
 
-  if (authRegisterForm) {
-    authRegisterForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!supabaseClient) return;
-      const email = document.getElementById('authRegisterEmail').value.trim();
-      const password = document.getElementById('authRegisterPassword').value;
-      const password2 = document.getElementById('authRegisterPassword2').value;
-      if (authRegisterError) authRegisterError.classList.remove('is-visible');
-      if (authRegisterInfo) authRegisterInfo.classList.remove('is-visible');
-
-      if (password !== password2) {
-        authRegisterError.textContent = 'Şifreler eşleşmiyor.';
-        authRegisterError.classList.add('is-visible');
-        return;
-      }
-      if (password.length < 6) {
-        authRegisterError.textContent = 'Şifre en az 6 karakter olmalı.';
-        authRegisterError.classList.add('is-visible');
-        return;
-      }
-
-      authRegisterSubmit.disabled = true;
-      authRegisterSubmit.textContent = 'Kayıt olunuyor…';
-      try {
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
-        if (error) throw error;
-        try { localStorage.removeItem(AUTH_SKIP_KEY); } catch (err) { /* yok say */ }
-        if (data.session) {
-          // E-posta doğrulaması kapalı bir projede oturum hemen açılır.
+    if (authLoginForm) {
+      authLoginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!supabaseClient) return;
+        const email = document.getElementById('authLoginEmail').value.trim();
+        const password = document.getElementById('authLoginPassword').value;
+        if (authLoginError) authLoginError.classList.remove('is-visible');
+        authLoginSubmit.disabled = true;
+        authLoginSubmit.textContent = 'Giriş yapılıyor…';
+        try {
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (error) throw error;
           currentUser = data.user;
+          try { localStorage.removeItem(AUTH_SKIP_KEY); } catch (err) { /* yok say */ }
           hideAuthGate();
           updateSyncStatusUI();
-          await pushLocalState();
-        } else {
-          authRegisterInfo.textContent = 'Kayıt başarılı! Devam etmek için e-postana gelen bağlantıyı onayla, ardından giriş yap.';
-          authRegisterInfo.classList.add('is-visible');
-          setAuthPanel('login');
+          await pullRemoteState({ reloadOnData: true });
+        } catch (err) {
+          if (authLoginError) {
+            authLoginError.textContent = authErrorMessage(err);
+            authLoginError.classList.add('is-visible');
+          }
+        } finally {
+          authLoginSubmit.disabled = false;
+          authLoginSubmit.textContent = 'Giriş Yap';
         }
-      } catch (err) {
-        authRegisterError.textContent = authErrorMessage(err);
-        authRegisterError.classList.add('is-visible');
-      } finally {
-        authRegisterSubmit.disabled = false;
-        authRegisterSubmit.textContent = 'Kayıt Ol';
-      }
-    });
-  }
+      });
+    }
+
+    if (authRegisterForm) {
+      authRegisterForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!supabaseClient) return;
+        const email = document.getElementById('authRegisterEmail').value.trim();
+        const password = document.getElementById('authRegisterPassword').value;
+        const password2 = document.getElementById('authRegisterPassword2').value;
+        if (authRegisterError) authRegisterError.classList.remove('is-visible');
+        if (authRegisterInfo) authRegisterInfo.classList.remove('is-visible');
+
+        if (password !== password2) {
+          authRegisterError.textContent = 'Şifreler eşleşmiyor.';
+          authRegisterError.classList.add('is-visible');
+          return;
+        }
+        if (password.length < 6) {
+          authRegisterError.textContent = 'Şifre en az 6 karakter olmalı.';
+          authRegisterError.classList.add('is-visible');
+          return;
+        }
+
+        authRegisterSubmit.disabled = true;
+        authRegisterSubmit.textContent = 'Kayıt olunuyor…';
+        try {
+          const { data, error } = await supabaseClient.auth.signUp({ email, password });
+          if (error) throw error;
+          try { localStorage.removeItem(AUTH_SKIP_KEY); } catch (err) { /* yok say */ }
+          if (data.session) {
+            // E-posta doğrulaması kapalı bir projede oturum hemen açılır.
+            currentUser = data.user;
+            hideAuthGate();
+            updateSyncStatusUI();
+            await pushLocalState();
+          } else {
+            authRegisterInfo.textContent = 'Kayıt başarılı! Devam etmek için e-postana gelen bağlantıyı onayla, ardından giriş yap.';
+            authRegisterInfo.classList.add('is-visible');
+            setAuthPanel('login');
+          }
+        } catch (err) {
+          authRegisterError.textContent = authErrorMessage(err);
+          authRegisterError.classList.add('is-visible');
+        } finally {
+          authRegisterSubmit.disabled = false;
+          authRegisterSubmit.textContent = 'Kayıt Ol';
+        }
+      });
+    }
+  };
+
+  const showAuthGate = () => {
+    if (!authGate) return;
+    ensureAuthGateContent();
+    authGate.classList.remove('is-hidden');
+  };
+  const hideAuthGate = () => { if (authGate) authGate.classList.add('is-hidden'); };
 
   if (settingsAuthActionBtn) {
     settingsAuthActionBtn.addEventListener('click', async () => {
@@ -14846,8 +14969,8 @@
         currentUser = null;
         updateSyncStatusUI();
       } else {
-        setAuthPanel('login');
         showAuthGate();
+        setAuthPanel('login');
       }
     });
   }
