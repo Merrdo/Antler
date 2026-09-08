@@ -14714,13 +14714,6 @@
   const IMAGE_BUCKET = 'question-images';
   const LAST_SYNC_KEY = 'takvimim_last_sync_v1';
   const AUTH_SKIP_KEY = 'takvimim_auth_skipped_v1';
-  // sessionStorage'a yazılır (localStorage değil): sekme/uygulama tamamen
-  // kapanıp yeniden açıldığında bu bayrak sıfırlanır, ama aynı açık kalan
-  // sekmede sayfa arka plana alınıp öne getirildiğinde SIFIRLANMAZ. Amaç:
-  // "uygulama her açıldığında buluttaki veriyi çekip yenile" isteğini bir
-  // sonsuz yenileme döngüsüne dönüştürmeden, her gerçek açılışta TAM OLARAK
-  // BİR KEZ zorunlu bir senkron+yenileme yapmak.
-  const STARTUP_SYNC_FLAG = 'takvimim_startup_synced_v1';
 
   const supabaseConfigured = !SUPABASE_URL.includes('YOUR-PROJECT-REF') && !SUPABASE_ANON_KEY.includes('YOUR-ANON-PUBLIC-KEY');
   const supabaseClient = (supabaseConfigured && window.supabase)
@@ -14730,38 +14723,6 @@
   let currentUser = null;
   let isSyncing = false;
   let autoSyncTimer = null;
-
-  // ---- Akışı bozmayan sessiz senkron-sonrası yenileme ----
-  // Buluttan yeni veri geldiğinde sayfayı tazelemeden önce tek bir şeye
-  // bakıyoruz: kullanıcı TAM O AN bir metin kutusuna yazı yazıyor mu?
-  // (Not: önceki sürümde "uygulama açıldığından beri herhangi bir yere
-  // dokunuldu mu" kontrolü vardı; bu çok gevşekti — kullanıcı sadece bir
-  // sayfaya göz atmak için dokunsa bile "meşgul" sayılıp yenileme sürekli
-  // erteleniyor, uygulama arka plana alınmadığı sürece de hiç
-  // gerçekleşmiyordu. Artık sadece gerçekten yarıda kalacak bir şey varsa
-  // (odaklı bir input/textarea) erteleniyor; basit gezinme yenilemeyi
-  // engellemiyor.)
-  const isUserTypingRightNow = () => {
-    const el = document.activeElement;
-    return !!(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable));
-  };
-
-  // true ise: buluttan yeni veri geldi ama o an bir alana yazı yazılıyordu,
-  // hemen yenilemedik; kullanıcı yazmayı bitirip alandan çıktığında veya
-  // uygulama bir sonraki kez öne geldiğinde (arka plandan/başka sekmeden
-  // dönüldüğünde) sessizce tazelenecek.
-  let appPendingReloadOnResume = false;
-  const tryFlushPendingReload = () => {
-    if (appPendingReloadOnResume && !isUserTypingRightNow()) {
-      appPendingReloadOnResume = false;
-      location.reload();
-    }
-  };
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') tryFlushPendingReload();
-  });
-  document.addEventListener('focusout', () => { setTimeout(tryFlushPendingReload, 0); }, true);
-
 
   // ---- VERİ KAYBINI ÖNLEYEN BİRLEŞTİRME (MERGE) ----
   // İki APP_STATE'i (yerel ve bulut) tek parça olarak KARŞILAŞTIRMAZ;
@@ -14776,83 +14737,6 @@
   //    olursa olsun diğerinin işi kaybolmaz. Yalnızca AYNI bölüm iki
   //    cihazda da değiştirilmişse en son damgalı olan kazanır (kaçınılmaz
   //    tek durum budur).
-  // ---- Derin (madde bazlı) birleştirme yardımcıları ----
-  // Eskiden bir üst-seviye bölüm (ör. questionPool, page9) çakıştığında
-  // taraflardan biri o bölümün TAMAMINI diğerinin üzerine yazıyordu. Bu,
-  // iki cihaz da senkron aralarında birbirinden habersiz farklı yeni
-  // kayıtlar eklediğinde (ör. telefonda yeni bir soru, bilgisayarda başka
-  // bir soru eklenmesi) taraflardan birinin eklediği verinin sessizce
-  // kaybolmasına yol açıyordu — "veri iniyor ama eksik" şikayetinin temel
-  // sebebi buydu. Aşağıdaki fonksiyonlar artık bölümün İÇİNE inip, id'si
-  // olan dizi elemanlarını (sorular, dersler, rutinler, denemeler vb.)
-  // birleştiriyor (union), sözlük şeklindeki objelerde (ör. dayLists,
-  // stopwatchLogs) ortak olmayan anahtarları koruyor; yalnızca gerçekten
-  // aynı id/alan üzerinde çakışma varsa hangi cihazın kazanacağına o
-  // bölümün __ts damgasına bakılarak karar veriliyor.
-  //
-  // Bilinen sınır: bu yaklaşımda "silme" işlemi ayrı bir iz (tombstone)
-  // tutulmadığı için, bir öğe tam senkron olmadan bir cihazda silinip
-  // diğer cihaz hâlâ eski hâliyle senkron olursa, silinen öğe bir sonraki
-  // birleştirmede geri gelebilir (kullanıcı tekrar silmesi gerekir). Bu,
-  // sessizce YENİ eklenen verinin kaybolmasından çok daha az kötü bir
-  // durum olduğu için bilinçli olarak bu şekilde tercih edildi.
-  const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
-
-  const mergeArraysByIdentity = (localArr, remoteArr, remoteWins) => {
-    const hasIdShape = (arr) => arr.some((it) => isPlainObject(it) && 'id' in it);
-    if (hasIdShape(localArr) || hasIdShape(remoteArr)) {
-      const byId = new Map();
-      const idless = [];
-      localArr.forEach((it) => {
-        if (isPlainObject(it) && 'id' in it) byId.set(it.id, it);
-        else idless.push(it);
-      });
-      remoteArr.forEach((it) => {
-        if (!isPlainObject(it) || !('id' in it)) { idless.push(it); return; }
-        const existing = byId.get(it.id);
-        if (!existing) { byId.set(it.id, it); return; }
-        if (JSON.stringify(existing) === JSON.stringify(it)) return;
-        // Aynı id iki tarafta da farklıysa: elemanın kendi zaman damgası
-        // (ts/updatedAt) varsa ona, yoksa üst bölümün __ts'ine göre karar ver.
-        const lt = Number(existing.ts || existing.updatedAt || 0);
-        const rt = Number(it.ts || it.updatedAt || 0);
-        if (rt !== lt) { if (rt > lt) byId.set(it.id, it); }
-        else byId.set(it.id, remoteWins ? it : existing);
-      });
-      return Array.from(byId.values()).concat(idless);
-    }
-    // İlkel değer dizisi (ör. bir günün ders id listesi): basit küme
-    // birleşimi — sırayı koru, tekrarları at.
-    const seen = new Set();
-    const merged = [];
-    localArr.concat(remoteArr).forEach((v) => {
-      const key = (typeof v === 'object' && v !== null) ? JSON.stringify(v) : v;
-      if (!seen.has(key)) { seen.add(key); merged.push(v); }
-    });
-    return merged;
-  };
-
-  const deepMergeValue = (localVal, remoteVal, remoteWins) => {
-    if (Array.isArray(localVal) && Array.isArray(remoteVal)) {
-      return mergeArraysByIdentity(localVal, remoteVal, remoteWins);
-    }
-    if (isPlainObject(localVal) && isPlainObject(remoteVal)) {
-      const keys = new Set([...Object.keys(localVal), ...Object.keys(remoteVal)]);
-      const out = {};
-      keys.forEach((k) => {
-        const lh = Object.prototype.hasOwnProperty.call(localVal, k);
-        const rh = Object.prototype.hasOwnProperty.call(remoteVal, k);
-        if (lh && rh) out[k] = deepMergeValue(localVal[k], remoteVal[k], remoteWins);
-        else if (rh) out[k] = remoteVal[k];
-        else out[k] = localVal[k];
-      });
-      return out;
-    }
-    if (localVal === undefined) return remoteVal;
-    if (remoteVal === undefined) return localVal;
-    return remoteWins ? remoteVal : localVal;
-  };
-
   const mergeAppStates = (localState, remoteState) => {
     const local = (localState && typeof localState === 'object') ? localState : {};
     const remote = (remoteState && typeof remoteState === 'object') ? remoteState : {};
@@ -14867,15 +14751,15 @@
       const rt = remoteTs[key] || 0;
       const localHas = Object.prototype.hasOwnProperty.call(local, key);
       const remoteHas = Object.prototype.hasOwnProperty.call(remote, key);
-      if (localHas && remoteHas) {
-        merged[key] = deepMergeValue(local[key], remote[key], rt > lt);
-        mergedTs[key] = Math.max(lt, rt);
-      } else if (remoteHas) {
+      if (remoteHas && (rt > lt || !localHas)) {
+        merged[key] = remote[key];
+        mergedTs[key] = rt || lt;
+      } else if (localHas) {
+        merged[key] = local[key];
+        mergedTs[key] = lt || rt;
+      } else {
         merged[key] = remote[key];
         mergedTs[key] = rt;
-      } else {
-        merged[key] = local[key];
-        mergedTs[key] = lt;
       }
     });
     merged.__ts = mergedTs;
@@ -15120,14 +15004,9 @@
       if (error) throw error;
 
       if (data && data.state && Object.keys(data.state).length) {
-        // Merge öncesi anlık görüntü: buluttan gerçekten YENİ bir şey gelip
-        // gelmediğini anlamak için (aşağıda reload kararı bu farka bakılarak
-        // veriliyor — reloadOnData=false olsa bile).
-        const beforeSnapshot = JSON.stringify(APP_STATE);
         const merged = mergeAppStates(APP_STATE, data.state);
         Object.keys(APP_STATE).forEach((k) => delete APP_STATE[k]);
         Object.assign(APP_STATE, merged);
-        const remoteBroughtNewData = JSON.stringify(APP_STATE) !== beforeSnapshot;
         localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
         localStorage.setItem(LAST_SYNC_KEY, String(Date.now()));
         try { localStorage.removeItem(PENDING_SYNC_KEY); } catch (err) { /* yok say */ }
@@ -15147,27 +15026,7 @@
         // animasyonunun tarayıcıda gerçekten tamamlanması için bir an
         // tanınıyor; aksi halde reload bu animasyonun ortasına denk gelip
         // klavye araç çubuğunun yeni sayfada asılı kalmasına yol açabiliyor.
-        //
-        // ÖNEMLİ: reloadOnData=false (yani açılışta zaten oturum açıkken
-        // sessizce yapılan pull) durumunda da buluttan GERÇEKTEN yeni bir
-        // şey geldiyse (remoteBroughtNewData) sayfa tazelenmezse, indirilen
-        // veri localStorage'da kalır ama ekrandaki (bellekteki) durum eski
-        // kalmaya devam eder — kullanıcı bir sonraki tam açılışa kadar
-        // "verimi yedekledim ama diğer cihazda göremiyorum" hissi yaşar.
-        // Bunu, kullanıcının o an aktif bir etkileşimini KESMEDEN çözüyoruz:
-        //  - Kullanıcı bu oturumda henüz bir şeye dokunmadıysa (uygulama
-        //    yeni açıldı), hemen tazelemek güvenlidir.
-        //  - Kullanıcı zaten bir şeyle meşgulse, akışını bölmüyoruz;
-        //    bunun yerine uygulamayı bir sonraki sefer öne getirdiğinde
-        //    (visibilitychange → 'visible') sessizce tazeliyoruz.
         if (reloadOnData) { setTimeout(() => location.reload(), 120); return { ok: true }; }
-        if (remoteBroughtNewData) {
-          if (!isUserTypingRightNow()) {
-            setTimeout(() => location.reload(), 120);
-          } else {
-            appPendingReloadOnResume = true;
-          }
-        }
       } else {
         // Bu hesap için buluta hiç veri yazılmamış: mevcut yerel veriyi
         // (varsa) olduğu gibi buluta gönder.
@@ -15189,35 +15048,6 @@
     clearTimeout(autoSyncTimer);
     autoSyncTimer = setTimeout(() => { pushLocalState({ silent: true }); }, 2500);
   };
-
-  // ---- Canlı senkron: uygulama açıkken buluttaki değişiklikleri de yakala ----
-  // Eskiden buluttaki veri yalnızca girişte ve sayfa yeniden yüklendiğinde
-  // okunuyordu; uygulama açık kaldığı sürece (siz bir şey değiştirmediğiniz
-  // sürece) başka bir cihazda yapılan değişiklik hiç fark edilmiyordu. Bu,
-  // "değişiklik başka cihazda görünmüyor" şikayetinin en büyük sebebiydi.
-  // Aşağıdaki periyodik kontrol, giriş yapılmışken belirli aralıklarla
-  // sessizce buluttan indirip (pullRemoteState zaten yazı yazarken sayfayı
-  // yenilemeyecek şekilde tasarlanmıştı) yeni bir şey varsa uygular.
-  const REMOTE_POLL_INTERVAL_MS = 25000;
-  let periodicSyncTimer = null;
-  const startPeriodicSync = () => {
-    if (periodicSyncTimer || !supabaseClient) return;
-    periodicSyncTimer = setInterval(() => {
-      if (currentUser && !isSyncing && document.visibilityState === 'visible') {
-        pullRemoteState({ reloadOnData: false });
-      }
-    }, REMOTE_POLL_INTERVAL_MS);
-  };
-  const stopPeriodicSync = () => {
-    if (periodicSyncTimer) { clearInterval(periodicSyncTimer); periodicSyncTimer = null; }
-  };
-  // Uygulama arka plandan öne geldiğinde (sekme/telefon değişikliği) hemen
-  // bir kez de anlık kontrol et; 25 saniyeyi beklemeden en güncel veriyi göster.
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && currentUser && !isSyncing) {
-      pullRemoteState({ reloadOnData: false });
-    }
-  });
 
   // Güvenlik ağı: kullanıcı bir ayarı değiştirip (ör. arka plan rengi)
   // 2.5 saniyelik gecikme dolmadan sekmeyi arka plana alır veya uygulamayı
@@ -15512,28 +15342,7 @@
         currentUser = session.user;
         hideAuthGate();
         updateSyncStatusUI();
-        startPeriodicSync();
-
-        // Bu SEKME/UYGULAMA açılışında buluttan henüz zorunlu bir senkron
-        // yapılmadıysa (STARTUP_SYNC_FLAG yoksa): buluttaki veriyi çek,
-        // birleştir ve — aradaki fark ne olursa olsun — sayfayı bulutla
-        // eşitlenmiş haliyle yenile. "Çekti mi çekmedi mi, uyguladı mı
-        // uygulamadı mı" belirsizliğini ortadan kaldırmak için kullanıcıya
-        // aynı giriş ekranındaki gibi bir yükleme göstergesi de gösterilir.
-        // Bayrak hemen (sonucu beklemeden) işaretlenir ki bu tek seferlik
-        // zorunlu yenileme kendi kendini tetikleyip sonsuz döngüye girmesin;
-        // sayfa yenilendiğinde sessionStorage bayrağı hâlâ ayakta olacağı
-        // için bir sonraki initAuthGate çalışması sessiz moda geçer.
-        let alreadyForcedThisLaunch = false;
-        try { alreadyForcedThisLaunch = sessionStorage.getItem(STARTUP_SYNC_FLAG) === '1'; } catch (err) { /* yok say */ }
-        if (!alreadyForcedThisLaunch) {
-          try { sessionStorage.setItem(STARTUP_SYNC_FLAG, '1'); } catch (err) { /* yok say */ }
-          showSyncOverlay();
-          await pullRemoteState({ reloadOnData: true });
-          hideSyncOverlay();
-        } else {
-          await pullRemoteState({ reloadOnData: false });
-        }
+        await pullRemoteState({ reloadOnData: false });
       } else {
         let skipped = false;
         try { skipped = localStorage.getItem(AUTH_SKIP_KEY) === '1'; } catch (err) { /* yok say */ }
@@ -15547,7 +15356,6 @@
 
     supabaseClient.auth.onAuthStateChange((_event, session) => {
       currentUser = session && session.user ? session.user : null;
-      if (currentUser) startPeriodicSync(); else stopPeriodicSync();
       updateSyncStatusUI();
     });
   };
