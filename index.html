@@ -14725,23 +14725,36 @@
   let autoSyncTimer = null;
 
   // ---- Akışı bozmayan sessiz senkron-sonrası yenileme ----
-  // Kullanıcı bu oturumda (sayfa bu şekilde açıldığından beri) sayfayla
-  // gerçekten etkileşime girdi mi? Girdiyse, buluttan sessizce yeni veri
-  // gelse bile arada location.reload() ile elindeki işi (yazdığı metin,
-  // izlediği kronometre, açık popup vb.) yarıda kesmiyoruz.
-  let appUserHasInteracted = false;
-  document.addEventListener('pointerdown', () => { appUserHasInteracted = true; }, { capture: true, once: true });
+  // Buluttan yeni veri geldiğinde sayfayı tazelemeden önce tek bir şeye
+  // bakıyoruz: kullanıcı TAM O AN bir metin kutusuna yazı yazıyor mu?
+  // (Not: önceki sürümde "uygulama açıldığından beri herhangi bir yere
+  // dokunuldu mu" kontrolü vardı; bu çok gevşekti — kullanıcı sadece bir
+  // sayfaya göz atmak için dokunsa bile "meşgul" sayılıp yenileme sürekli
+  // erteleniyor, uygulama arka plana alınmadığı sürece de hiç
+  // gerçekleşmiyordu. Artık sadece gerçekten yarıda kalacak bir şey varsa
+  // (odaklı bir input/textarea) erteleniyor; basit gezinme yenilemeyi
+  // engellemiyor.)
+  const isUserTypingRightNow = () => {
+    const el = document.activeElement;
+    return !!(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable));
+  };
 
-  // true ise: buluttan yeni veri geldi ama kullanıcı meşgul olduğu için
-  // hemen yenilemedik; uygulama bir sonraki kez öne geldiğinde (arka
-  // plandan/başka sekmeden dönüldüğünde) sessizce tazelenecek.
+  // true ise: buluttan yeni veri geldi ama o an bir alana yazı yazılıyordu,
+  // hemen yenilemedik; kullanıcı yazmayı bitirip alandan çıktığında veya
+  // uygulama bir sonraki kez öne geldiğinde (arka plandan/başka sekmeden
+  // dönüldüğünde) sessizce tazelenecek.
   let appPendingReloadOnResume = false;
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && appPendingReloadOnResume) {
+  const tryFlushPendingReload = () => {
+    if (appPendingReloadOnResume && !isUserTypingRightNow()) {
       appPendingReloadOnResume = false;
       location.reload();
     }
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') tryFlushPendingReload();
   });
+  document.addEventListener('focusout', () => { setTimeout(tryFlushPendingReload, 0); }, true);
+
 
   // ---- VERİ KAYBINI ÖNLEYEN BİRLEŞTİRME (MERGE) ----
   // İki APP_STATE'i (yerel ve bulut) tek parça olarak KARŞILAŞTIRMAZ;
@@ -15065,7 +15078,7 @@
         //    (visibilitychange → 'visible') sessizce tazeliyoruz.
         if (reloadOnData) { setTimeout(() => location.reload(), 120); return { ok: true }; }
         if (remoteBroughtNewData) {
-          if (!appUserHasInteracted) {
+          if (!isUserTypingRightNow()) {
             setTimeout(() => location.reload(), 120);
           } else {
             appPendingReloadOnResume = true;
