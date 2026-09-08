@@ -14714,6 +14714,13 @@
   const IMAGE_BUCKET = 'question-images';
   const LAST_SYNC_KEY = 'takvimim_last_sync_v1';
   const AUTH_SKIP_KEY = 'takvimim_auth_skipped_v1';
+  // sessionStorage'a yazılır (localStorage değil): sekme/uygulama tamamen
+  // kapanıp yeniden açıldığında bu bayrak sıfırlanır, ama aynı açık kalan
+  // sekmede sayfa arka plana alınıp öne getirildiğinde SIFIRLANMAZ. Amaç:
+  // "uygulama her açıldığında buluttaki veriyi çekip yenile" isteğini bir
+  // sonsuz yenileme döngüsüne dönüştürmeden, her gerçek açılışta TAM OLARAK
+  // BİR KEZ zorunlu bir senkron+yenileme yapmak.
+  const STARTUP_SYNC_FLAG = 'takvimim_startup_synced_v1';
 
   const supabaseConfigured = !SUPABASE_URL.includes('YOUR-PROJECT-REF') && !SUPABASE_ANON_KEY.includes('YOUR-ANON-PUBLIC-KEY');
   const supabaseClient = (supabaseConfigured && window.supabase)
@@ -15506,7 +15513,27 @@
         hideAuthGate();
         updateSyncStatusUI();
         startPeriodicSync();
-        await pullRemoteState({ reloadOnData: false });
+
+        // Bu SEKME/UYGULAMA açılışında buluttan henüz zorunlu bir senkron
+        // yapılmadıysa (STARTUP_SYNC_FLAG yoksa): buluttaki veriyi çek,
+        // birleştir ve — aradaki fark ne olursa olsun — sayfayı bulutla
+        // eşitlenmiş haliyle yenile. "Çekti mi çekmedi mi, uyguladı mı
+        // uygulamadı mı" belirsizliğini ortadan kaldırmak için kullanıcıya
+        // aynı giriş ekranındaki gibi bir yükleme göstergesi de gösterilir.
+        // Bayrak hemen (sonucu beklemeden) işaretlenir ki bu tek seferlik
+        // zorunlu yenileme kendi kendini tetikleyip sonsuz döngüye girmesin;
+        // sayfa yenilendiğinde sessionStorage bayrağı hâlâ ayakta olacağı
+        // için bir sonraki initAuthGate çalışması sessiz moda geçer.
+        let alreadyForcedThisLaunch = false;
+        try { alreadyForcedThisLaunch = sessionStorage.getItem(STARTUP_SYNC_FLAG) === '1'; } catch (err) { /* yok say */ }
+        if (!alreadyForcedThisLaunch) {
+          try { sessionStorage.setItem(STARTUP_SYNC_FLAG, '1'); } catch (err) { /* yok say */ }
+          showSyncOverlay();
+          await pullRemoteState({ reloadOnData: true });
+          hideSyncOverlay();
+        } else {
+          await pullRemoteState({ reloadOnData: false });
+        }
       } else {
         let skipped = false;
         try { skipped = localStorage.getItem(AUTH_SKIP_KEY) === '1'; } catch (err) { /* yok say */ }
