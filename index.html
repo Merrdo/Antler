@@ -14779,6 +14779,22 @@
     autoSyncTimer = setTimeout(() => { pushLocalState({ silent: true }); }, 2500);
   };
 
+  // Güvenlik ağı: kullanıcı bir ayarı değiştirip (ör. arka plan rengi)
+  // 2.5 saniyelik gecikme dolmadan sekmeyi arka plana alır veya uygulamayı
+  // kapatırsa, bekleyen bulut eşitlemesi hiç gönderilmeden kaybolabilir.
+  // Bu yüzden sayfa gizlenirken/kapanırken bekleyen zamanlayıcı varsa iptal
+  // edilip eşitleme hemen (beklemeden) tetiklenir.
+  const flushPendingAutoSync = () => {
+    if (!supabaseClient || !currentUser || !autoSyncTimer) return;
+    clearTimeout(autoSyncTimer);
+    autoSyncTimer = null;
+    pushLocalState({ silent: true });
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushPendingAutoSync();
+  });
+  window.addEventListener('pagehide', flushPendingAutoSync);
+
   if (settingsSyncBtn) {
     settingsSyncBtn.addEventListener('click', () => pushLocalState());
   }
