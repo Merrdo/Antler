@@ -2340,6 +2340,99 @@
     opacity: 0.4;
   }
 
+  /* Düzenleme modunda mevcut bir görev/rutin metnini yerinde düzenlemek
+     için açılan input; page8-item-text ile aynı tipografiyi kullanır ki
+     satırın boyu/hizası değişmesin. */
+  .page8-item-edit-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    border-bottom: 2px dashed rgba(18, 18, 18, 0.35);
+    outline: none;
+    padding: 0 0 1px;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #121212;
+  }
+
+  body.is-anthracite .page8-item-edit-input {
+    color: #f2f2f4;
+    border-bottom-color: rgba(242, 242, 244, 0.35);
+  }
+
+  /* ---- Basılı tutunca beliren eylem menüsü (Kopyala / Düzenle / Sil) ---- */
+  .page8-copy-bubble {
+    position: fixed;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 8.5rem;
+    background: #121212;
+    border: 2.5px solid #000;
+    border-radius: 0.6rem;
+    box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: translateY(4px) scale(0.92);
+    transition: opacity 0.15s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .page8-copy-bubble.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .page8-copy-bubble-item {
+    padding: 0.55rem 1rem;
+    background: transparent;
+    color: #fff;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    text-align: left;
+    border: none;
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .page8-copy-bubble-item:last-child {
+    border-bottom: none;
+  }
+
+  .page8-copy-bubble-item:active {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .page8-copy-bubble-item-danger {
+    color: #ff6b6b;
+  }
+
+  /* ---- Alt tarafta beliren "Kopyalandı" bildirimi ---- */
+  .page8-copy-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 1.6rem;
+    z-index: 600;
+    padding: 0.55rem 1.1rem;
+    background: #121212;
+    color: #fff;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 10px);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .page8-copy-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
   .page8-add-group-btn {
     width: 100%;
     text-align: center;
@@ -3151,6 +3244,18 @@
     color: #0d3d20;
   }
 
+  /* Fotoğraf lightbox'ının kartı ve içindeki resmin boşluk zemini
+     (görsel şeffaf/kenarları oransız olduğunda görünen dolgu) karanlık
+     modda hâlâ beyaz kalıyordu; diğer kartlarla aynı antresit tona
+     çekiyoruz ki koyu temada göz alıcı bir beyaz çerçeve oluşmasın. */
+  body.is-anthracite .qhavuz-lightbox-card {
+    background: #3b3e42;
+  }
+
+  body.is-anthracite .qhavuz-lightbox-card img {
+    background: #2a2c2f;
+  }
+
   /* Lightbox altında, kapat (×) butonuyla aynı yuvarlak brutalist
      tasarımı paylaşan doğru cevap şıkları. Sadece işaretlenen şık
      .is-correct alır ve yeşile döner; diğerleri nötr kalır. */
@@ -3374,6 +3479,16 @@
   body.is-anthracite .qhavuz-add-answer-btn.is-selected {
     background-color: #5cd68a;
     color: #0d3d20;
+  }
+
+  /* Karanlık modda genel ".add-task-btn" kuralı (body.is-anthracite
+     .add-task-btn) daha spesifik olduğu için ".qhavuz-test-start-btn"
+     rengini eziyordu; buton diğer gri butonlarla aynı renge dönüp
+     görünmez/ayırt edilemez hale geliyordu. Pembe vurgu rengini burada
+     tekrar zorluyoruz ki buton karanlık modda da öne çıksın. */
+  body.is-anthracite .qhavuz-test-start-btn {
+    background-color: #ff90e8;
+    color: #000;
   }
 
   /* ---------- Soru Havuzu: Test Modu (tam ekran) ----------
@@ -4423,6 +4538,64 @@
   .page11-modal-confirm:hover {
     transform: translate(-1px, -1px);
     box-shadow: 4px 4px 0px 0px #000;
+  }
+
+  /* ---------- Sayfa 8: yeni kategori/rutin grubu isim pop-up'ı
+     (page11-modal-card ile aynı dil, tek input alanlı sade hali) ---------- */
+  .page8-name-card {
+    width: 100%;
+    max-width: 320px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.1em;
+    box-shadow: 6px 6px 0px 0px #000;
+    padding: 1.3rem 1.2rem;
+    text-align: left;
+    transform: translateY(14px) scale(0.96);
+    opacity: 0;
+    transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.22s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .settings-confirm-backdrop.is-open .page8-name-card {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  .page8-name-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #121212;
+  }
+
+  .page8-name-field-input {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #121212;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.7rem;
+    padding: 0.55rem 0.7rem;
+  }
+
+  body.is-anthracite .page8-name-card {
+    background-color: #3b3e42;
+  }
+
+  body.is-anthracite .page8-name-title {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page8-name-field-input {
+    background-color: #2a2c2f;
+    color: #f2f2f4;
   }
 
   /* ---------- Sayfa 11: Tarih alanı için kendi tasarımımız olan,
@@ -6268,6 +6441,14 @@
     color: #f2f2f4;
   }
 
+  /* Hafta başlangıcı segmented control'ü (page8/9/10'daki gibi kendi
+     namespace'i olmadığından genel .settings-segmented-option kuralını
+     kullanıyor); aktif seçeneğin metni karanlık modda da net beyaz
+     kalsın diye burada da ayrıca tanımlıyoruz. */
+  body.is-anthracite .settings-segmented-option.is-active {
+    color: #fff;
+  }
+
   body.is-anthracite .settings-danger-btn {
     background-color: #3b3e42;
     border-color: #000;
@@ -6655,6 +6836,20 @@
       <div class="settings-confirm-actions">
         <button type="button" class="settings-confirm-cancel" id="page8ConfirmCancel">Vazgeç</button>
         <button type="button" class="settings-confirm-confirm" id="page8ConfirmConfirm">Evet, sil</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sayfa 8: yeni kategori/rutin grubu oluşturma pop-up'ı. "+ Kategori"
+       ya da "+ Rutin Grubu" tıklanınca listeye hemen eklemek yerine önce
+       burada isim sorulur; grup ancak isim onaylanınca oluşturulur. -->
+  <div class="settings-confirm-backdrop" id="page8NameBackdrop">
+    <div class="page8-name-card">
+      <span class="page8-name-title" id="page8NameTitle">Yeni Kategori</span>
+      <input type="text" class="page8-name-field-input" id="page8NameInput" maxlength="24" placeholder="İsim gir">
+      <div class="settings-confirm-actions">
+        <button type="button" class="settings-confirm-cancel" id="page8NameCancel">Vazgeç</button>
+        <button type="button" class="page11-modal-confirm" id="page8NameConfirm">Oluştur</button>
       </div>
     </div>
   </div>
@@ -9334,11 +9529,17 @@
   const page8NextColor = (count) => WHEEL_PALETTE[count % WHEEL_PALETTE.length];
 
   // Tek bir görev/rutin satırını (checkbox + metin + sil) oluşturur.
-  const createPage8ItemRow = (item, accentColor, onToggle, onDelete) => {
+  // `onEditText`, düzenleme modundayken metne tıklanınca metni yeniden
+  // yazılabilir hale getirmek için çağrılır (checkbox'ı tetiklemek yerine).
+  const createPage8ItemRow = (item, accentColor, onToggle, onDelete, onEditText) => {
     const row = document.createElement('div');
     row.className = 'page8-item-row' + (item.done ? ' is-done' : '');
 
-    const label = document.createElement('label');
+    // Native <label> yerine düz <div> kullanıyoruz: <label>, içindeki
+    // metne tıklandığında da otomatik olarak checkbox'ı tetikler ve bunu
+    // düzenleme modunda engellemek mümkün olmazdı. Tıklama davranışını
+    // artık tamamen kendimiz, aşağıdaki listener'larla yönetiyoruz.
+    const label = document.createElement('div');
     label.className = 'page8-item-check-label';
 
     const checkbox = document.createElement('input');
@@ -9346,6 +9547,7 @@
     checkbox.className = 'page8-item-check';
     checkbox.checked = !!item.done;
     checkbox.style.setProperty('--item-color', accentColor);
+    checkbox.tabIndex = -1;
 
     const box = document.createElement('span');
     box.className = 'page8-item-box';
@@ -9356,11 +9558,64 @@
     text.className = 'page8-item-text';
     text.textContent = item.text;
 
-    checkbox.addEventListener('change', () => {
-      item.done = checkbox.checked;
+    const toggleDone = () => {
+      item.done = !item.done;
+      checkbox.checked = item.done;
       row.classList.toggle('is-done', item.done);
       onToggle();
+    };
+
+    // Kutuya (görsel tik alanına) her zaman tıklanabilir: düzenleme
+    // modunda olsa da olmasa da işaretleme kutunun kendi görevi kalır.
+    box.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDone();
     });
+
+    // Metne tıklama: düzenleme modunda ise satır içi düzenleme başlatır,
+    // değilse (normal moddaki eski davranış gibi) işaretlemeyi değiştirir.
+    text.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (page8EditMode) {
+        if (typeof onEditText === 'function') onEditText();
+      } else {
+        toggleDone();
+      }
+    });
+
+    // ---- Basılı tutma: "Kopyala" balonu ----
+    // Metne basılı tutulunca (mouse veya dokunmatik) küçük bir "Kopyala"
+    // balonu belirir; tıklanınca metni panoya kopyalar ve ekranın alt
+    // tarafında kısa süreli "Kopyalandı" bildirimi gösterir.
+    let pressTimer = null;
+    let pressMoved = false;
+    const LONG_PRESS_MS = 450;
+
+    const clearPressTimer = () => {
+      if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    };
+
+    const startPress = () => {
+      pressMoved = false;
+      clearPressTimer();
+      pressTimer = setTimeout(() => {
+        if (!pressMoved) {
+          showPage8CopyBubble(text, item.text, {
+            onEdit: () => { if (typeof onEditText === 'function') onEditText(); },
+            onDelete
+          });
+        }
+      }, LONG_PRESS_MS);
+    };
+
+    text.addEventListener('pointerdown', startPress);
+    text.addEventListener('pointermove', () => { pressMoved = true; });
+    text.addEventListener('pointerup', clearPressTimer);
+    text.addEventListener('pointerleave', clearPressTimer);
+    text.addEventListener('pointercancel', clearPressTimer);
+    // Tarayıcının kendi bağlam menüsünün (sağ tık / uzun basma menüsü)
+    // araya girmesini engelle; kendi "Kopyala" balonumuzu gösteriyoruz.
+    text.addEventListener('contextmenu', (e) => e.preventDefault());
 
     label.appendChild(checkbox);
     label.appendChild(box);
@@ -9377,7 +9632,144 @@
     row.appendChild(del);
     row._page8Box = box;
     row._page8Checkbox = checkbox;
+    row._page8Text = text;
     return row;
+  };
+
+  // ---- Kopyala balonu ve "Kopyalandı" bildirimi (tüm Sayfa 8 için ortak) ----
+  let page8CopyBubbleEl = null;
+  let page8CopyBubbleCloseHandler = null;
+
+  const closePage8CopyBubble = () => {
+    if (page8CopyBubbleEl) {
+      page8CopyBubbleEl.remove();
+      page8CopyBubbleEl = null;
+    }
+    if (page8CopyBubbleCloseHandler) {
+      document.removeEventListener('pointerdown', page8CopyBubbleCloseHandler, true);
+      window.removeEventListener('scroll', page8CopyBubbleCloseHandler, true);
+      page8CopyBubbleCloseHandler = null;
+    }
+  };
+
+  let page8ToastEl = null;
+  let page8ToastTimer = null;
+
+  // Ekranın alt tarafında kısa süreliğine beliren "Kopyalandı" bildirimi.
+  const showPage8Toast = (message) => {
+    if (!page8ToastEl) {
+      page8ToastEl = document.createElement('div');
+      page8ToastEl.className = 'page8-copy-toast';
+      document.body.appendChild(page8ToastEl);
+    }
+    page8ToastEl.textContent = message;
+    // Yeniden tetiklenebilmesi için class'ı bir kare çıkarıp geri ekliyoruz.
+    page8ToastEl.classList.remove('is-visible');
+    void page8ToastEl.offsetWidth;
+    page8ToastEl.classList.add('is-visible');
+    if (page8ToastTimer) clearTimeout(page8ToastTimer);
+    page8ToastTimer = setTimeout(() => {
+      page8ToastEl.classList.remove('is-visible');
+    }, 1600);
+  };
+
+  const copyPage8Text = async (value) => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(value);
+        return true;
+      }
+    } catch (err) { /* aşağıdaki yedek yönteme düşülür */ }
+    try {
+      const helper = document.createElement('textarea');
+      helper.value = value;
+      helper.style.position = 'fixed';
+      helper.style.opacity = '0';
+      document.body.appendChild(helper);
+      helper.focus();
+      helper.select();
+      document.execCommand('copy');
+      helper.remove();
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  // `anchorEl`'in hemen üstünde/altında bir eylem menüsü açar: Kopyala,
+  // Düzenle, Sil. `actions.onEdit` verilmişse Düzenle satırı, `actions.onDelete`
+  // verilmişse Sil satırı da menüye eklenir; verilmemişse o satır hiç
+  // gösterilmez (ör. grup ismi için sadece Kopyala anlamlı olabilir).
+  const showPage8CopyBubble = (anchorEl, value, actions) => {
+    closePage8CopyBubble();
+    actions = actions || {};
+
+    const menu = document.createElement('div');
+    menu.className = 'page8-copy-bubble';
+
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'page8-copy-bubble-item';
+    copyBtn.textContent = 'Kopyala';
+    copyBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await copyPage8Text(value);
+      closePage8CopyBubble();
+      showPage8Toast('Kopyalandı');
+    });
+    menu.appendChild(copyBtn);
+
+    if (typeof actions.onEdit === 'function') {
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'page8-copy-bubble-item';
+      editBtn.textContent = 'Düzenle';
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closePage8CopyBubble();
+        actions.onEdit();
+      });
+      menu.appendChild(editBtn);
+    }
+
+    if (typeof actions.onDelete === 'function') {
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'page8-copy-bubble-item page8-copy-bubble-item-danger';
+      deleteBtn.textContent = 'Sil';
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closePage8CopyBubble();
+        actions.onDelete();
+      });
+      menu.appendChild(deleteBtn);
+    }
+
+    document.body.appendChild(menu);
+
+    const rect = anchorEl.getBoundingClientRect();
+    const bubbleRect = menu.getBoundingClientRect();
+    let left = rect.left + rect.width / 2 - bubbleRect.width / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - bubbleRect.width - 8));
+    let top = rect.top - bubbleRect.height - 10;
+    if (top < 8) top = rect.bottom + 10;
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+
+    requestAnimationFrame(() => menu.classList.add('is-visible'));
+
+    page8CopyBubbleEl = menu;
+    page8CopyBubbleCloseHandler = (e) => {
+      if (menu.contains(e.target)) return;
+      closePage8CopyBubble();
+    };
+    // Bir sonraki pointerdown'da değil, bundan sonraki etkileşimlerde kapansın
+    // diye kısa bir gecikmeyle dinleyiciyi ekliyoruz (aynı dokunuşla açılıp
+    // hemen kapanmasını önler).
+    setTimeout(() => {
+      document.addEventListener('pointerdown', page8CopyBubbleCloseHandler, true);
+      window.addEventListener('scroll', page8CopyBubbleCloseHandler, true);
+    }, 0);
   };
 
   // Bir kategori ya da rutin grubu kartını oluşturur. `itemsKey` grubun
@@ -9470,10 +9862,39 @@
     header.appendChild(addBtn);
     header.appendChild(delGroupBtn);
 
+    // Düzenleme modundayken görev/rutin metnine tıklanınca metni yerinde
+    // (input'a çevirerek) düzenlenebilir hale getirir.
+    const startItemTextEdit = (item, row) => {
+      const text = row._page8Text;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'page8-item-edit-input';
+      input.value = item.text;
+      input.maxLength = 60;
+      text.replaceWith(input);
+      input.focus();
+      input.select();
+
+      const commit = () => {
+        const value = input.value.trim();
+        if (value) item.text = value;
+        input.replaceWith(text);
+        text.textContent = item.text;
+        opts.onChange();
+      };
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+        else if (e.key === 'Escape') { input.value = item.text; input.blur(); }
+      });
+      input.addEventListener('blur', commit, { once: true });
+    };
+
     const renderItems = () => {
       itemList.innerHTML = '';
       group[itemsKey].forEach((item) => {
-        const row = createPage8ItemRow(
+        let row;
+        row = createPage8ItemRow(
           item,
           group.color,
           () => opts.onChange(),
@@ -9481,7 +9902,8 @@
             group[itemsKey] = group[itemsKey].filter((it) => it.id !== item.id);
             renderItems();
             opts.onChange();
-          }
+          },
+          () => startItemTextEdit(item, row)
         );
         itemList.appendChild(row);
       });
@@ -9629,32 +10051,80 @@
   renderPage8Categories();
   renderPage8RoutineGroups();
 
-  page8AddCategoryBtn.addEventListener('click', () => {
-    const cat = {
-      id: page8GenId(),
-      name: `Kategori ${page8State.categories.length + 1}`,
-      color: page8NextColor(page8State.categories.length),
-      tasks: []
-    };
-    page8State.categories.push(cat);
-    renderPage8Categories();
-    savePage8State();
-    const nameEl = page8CategoryList.lastElementChild.querySelector('.page8-group-name');
-    if (nameEl) nameEl.click();
-  });
+  // ---- Yeni kategori/rutin grubu isim pop-up'ı: "+ Kategori" ya da
+  //      "+ Rutin Grubu" tıklanınca grup hemen oluşturulmaz; önce burada
+  //      isim istenir, "Oluştur" ile onaylanınca ilgili listeye eklenir.
+  const page8NameBackdrop = document.getElementById('page8NameBackdrop');
+  const page8NameTitle = document.getElementById('page8NameTitle');
+  const page8NameInput = document.getElementById('page8NameInput');
+  const page8NameCancel = document.getElementById('page8NameCancel');
+  const page8NameConfirm = document.getElementById('page8NameConfirm');
+  let page8PendingNameKind = null; // 'category' | 'routine'
 
-  page8AddRoutineGroupBtn.addEventListener('click', () => {
-    const grp = {
-      id: page8GenId(),
-      name: `Rutin Grubu ${page8State.routineGroups.length + 1}`,
-      color: page8NextColor(page8State.routineGroups.length),
-      routines: []
-    };
-    page8State.routineGroups.push(grp);
-    renderPage8RoutineGroups();
-    savePage8State();
-    const nameEl = page8RoutineGroupList.lastElementChild.querySelector('.page8-group-name');
-    if (nameEl) nameEl.click();
+  const closePage8NamePopup = () => {
+    page8NameBackdrop.classList.remove('is-open');
+    page8PendingNameKind = null;
+  };
+
+  const openPage8NamePopup = (kind) => {
+    page8PendingNameKind = kind;
+    page8NameTitle.textContent = kind === 'category' ? 'Yeni Kategori' : 'Yeni Rutin Grubu';
+    page8NameInput.value = '';
+    page8NameInput.placeholder = kind === 'category'
+      ? `Kategori ${page8State.categories.length + 1}`
+      : `Rutin Grubu ${page8State.routineGroups.length + 1}`;
+    page8NameBackdrop.classList.add('is-open');
+    // Pop-up açılış animasyonu bitmeden odaklanırsa klavye bazı
+    // tarayıcılarda geç açılabiliyor; bir sonraki kareye erteliyoruz.
+    requestAnimationFrame(() => page8NameInput.focus());
+  };
+
+  const confirmPage8NamePopup = () => {
+    const kind = page8PendingNameKind;
+    if (!kind) return;
+    const typed = page8NameInput.value.trim();
+
+    if (kind === 'category') {
+      const cat = {
+        id: page8GenId(),
+        name: typed || `Kategori ${page8State.categories.length + 1}`,
+        color: page8NextColor(page8State.categories.length),
+        tasks: []
+      };
+      page8State.categories.push(cat);
+      renderPage8Categories();
+      savePage8State();
+    } else {
+      const grp = {
+        id: page8GenId(),
+        name: typed || `Rutin Grubu ${page8State.routineGroups.length + 1}`,
+        color: page8NextColor(page8State.routineGroups.length),
+        routines: []
+      };
+      page8State.routineGroups.push(grp);
+      renderPage8RoutineGroups();
+      savePage8State();
+    }
+
+    closePage8NamePopup();
+  };
+
+  page8AddCategoryBtn.addEventListener('click', () => openPage8NamePopup('category'));
+  page8AddRoutineGroupBtn.addEventListener('click', () => openPage8NamePopup('routine'));
+
+  page8NameCancel.addEventListener('click', closePage8NamePopup);
+  page8NameBackdrop.addEventListener('click', (e) => {
+    if (e.target === page8NameBackdrop) closePage8NamePopup();
+  });
+  page8NameConfirm.addEventListener('click', confirmPage8NamePopup);
+  page8NameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); confirmPage8NamePopup(); }
+    else if (e.key === 'Escape') { e.preventDefault(); closePage8NamePopup(); }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && page8NameBackdrop.classList.contains('is-open')) {
+      closePage8NamePopup();
+    }
   });
 
   // ---- Görevler / Rutinler sekme geçişi (Ayarlar'daki hafta başlangıcı
@@ -11764,6 +12234,43 @@
       img.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
     };
 
+    // object-fit: contain kullanıldığı için <img> kutusu ile üzerindeki
+    // gerçek fotoğraf içeriği farklı boyutta olabilir (en/boy oranı
+    // uyuşmazsa kutunun sağında/solunda veya üstünde/altında boşluk
+    // kalır). offsetWidth/offsetHeight kasıtlı olarak kullanılıyor:
+    // bunlar transform (scale/translate) uygulanmadan ÖNCEKİ, düzen
+    // (layout) boyutunu verir — getBoundingClientRect ise zaten
+    // uygulanmış olan zoom'u da işin içine katıp yanlış sonuç üretir.
+    const getContentBox = () => {
+      const boxW = img.offsetWidth, boxH = img.offsetHeight;
+      const natW = img.naturalWidth || boxW, natH = img.naturalHeight || boxH;
+      const boxRatio = boxW / boxH;
+      const natRatio = natW / natH;
+      let contentW, contentH;
+      if (natRatio > boxRatio) {
+        contentW = boxW;
+        contentH = boxW / natRatio;
+      } else {
+        contentH = boxH;
+        contentW = boxH * natRatio;
+      }
+      return { boxW, boxH, contentW, contentH };
+    };
+
+    // Galeri uygulamalarında olduğu gibi: fotoğrafın kenarı asla kutunun
+    // içine doğru, boş/beyaz alan görünecek şekilde sürüklenemesin diye
+    // pan değerlerini gerçek fotoğraf boyutuna göre sınırlıyoruz. Fotoğraf
+    // henüz kutuyu doldurmuyorsa (ör. mevcut zoom seviyesinde hâlâ
+    // boşluk varsa) o eksende hiç pan'e izin verilmez ve içerik ortalı
+    // kalır; sadece fotoğraf kutudan taştığı kadar kaydırılabilir.
+    const clampPan = (s) => {
+      const { boxW, boxH, contentW, contentH } = getContentBox();
+      const maxX = Math.max(0, (contentW * s - boxW) / 2);
+      const maxY = Math.max(0, (contentH * s - boxH) / 2);
+      panX = Math.min(Math.max(panX, -maxX), maxX);
+      panY = Math.min(Math.max(panY, -maxY), maxY);
+    };
+
     const reset = () => {
       scale = 1; panX = 0; panY = 0;
       img.style.transition = 'transform 0.2s ease';
@@ -11797,10 +12304,12 @@
         const m = mid(e.touches[0], e.touches[1]);
         panX = startPanX + (m.x - startMidX);
         panY = startPanY + (m.y - startMidY);
+        clampPan(scale);
         apply();
       } else if (e.touches.length === 1 && isPanning) {
         panX = e.touches[0].clientX - panStartX;
         panY = e.touches[0].clientY - panStartY;
+        clampPan(scale);
         apply();
       }
     }, { passive: true });
