@@ -8395,19 +8395,6 @@
   const goToPage = (id) => {
     const nextPage = document.getElementById(id);
     if (!nextPage || nextPage === activePage) return;
-
-    // iOS'ta bir metin/numara alanına yazıp klavyeyi kapatmadan alt
-    // menüden başka bir sayfaya geçilirse, odak (focus) o input'ta takılı
-    // kalabiliyor. Klavyenin kendisi ekrandan gitse bile üstündeki "◂ ▸ ...
-    // Bitti" araç çubuğu (accessory bar) ekranda asılı kalabiliyor ve
-    // hangi sayfaya gidilirse gidilsin görünmeye devam ediyor. Sayfa
-    // değişirken hâlâ odaklı bir input/textarea varsa onu bilinçli olarak
-    // "blur" ediyoruz ki klavye ve araç çubuğu düzgünce kapansın.
-    const active = document.activeElement;
-    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
-      active.blur();
-    }
-
     const prevPage = activePage;
     activePage = nextPage;
 
@@ -8542,26 +8529,6 @@
   // açılışta buluttaki (eski) veri yereldeki (yeni) veriyi asla ezmesin.
   const PENDING_SYNC_KEY = 'takvimim_pending_sync_v1';
 
-  // KRİTİK VERİ KAYBI DÜZELTMESİ: Sayfa her açıldığında (kullanıcı henüz
-  // hiçbir şey yapmadan, hatta giriş yapmadan bile ÖNCE) bazı sayfalar
-  // (ör. Rutinler/Takip sayfaları) kendi varsayılan/hesaplanan alanlarını
-  // (ör. "bugünün tarihi") doldurmak için saveAppState'i otomatik olarak
-  // bir kez çağırıyor. Bu, saveAppState'in PENDING_SYNC_KEY'i her sayfa
-  // açılışında '1' yapmasına sebep oluyordu — sanki kullanıcı az önce
-  // gerçek bir değişiklik yapmış gibi. Sonucunda girişte çalışan
-  // pullRemoteState, "yerelde gönderilmemiş değişiklik var" sanıp
-  // buluttan İNDİRMEK yerine yereldekini (silinip yeniden yüklenmişse
-  // boş/varsayılan durumu) buluta GÖNDERİP gerçek yedeği eziyordu.
-  //
-  // Çözüm: Sayfa ilk açılırken (kimlik doğrulama/indirme kararı verilene
-  // kadar) yapılan otomatik/varsayılan saveAppState çağrıları bu bayrağı
-  // KİRLETMESİN. Bayrak, initAuthGate() çağrılmadan hemen önce (yani tüm
-  // sayfaların kendi açılış-zamanı ilk kurulumları bitmiş olarak) true
-  // yapılır. Önceki bir oturumdan kalma GERÇEK bekleyen değişiklik varsa
-  // (PENDING_SYNC_KEY zaten localStorage'da '1' olarak duruyorsa) bu
-  // bayraktan etkilenmez ve korunmaya devam eder.
-  let appReadyForSync = false;
-
   const loadAppState = () => {
     try {
       const raw = localStorage.getItem(APP_STORAGE_KEY);
@@ -8583,17 +8550,13 @@
       // Bu değişiklik henüz buluta ulaşmadı; bir sonraki açılışta buluttan
       // gelecek (muhtemelen daha eski) veri bu değişikliği ezmesin diye
       // işaretleniyor. Gönderim başarılı olduğunda pushLocalState bu
-      // işareti temizler. NOT: appReadyForSync henüz false ise (yani hâlâ
-      // sayfanın açılış-zamanı ilk kurulumu sürüyorsa) bu, kullanıcının
-      // gerçek bir eylemi değildir; bayrağı kirletmemek için atlanır.
-      if (appReadyForSync) {
-        try { localStorage.setItem(PENDING_SYNC_KEY, '1'); } catch (err) { /* yok say */ }
-        // Giriş yapılmışsa, her değişiklikten sonra arka planda (gecikmeli)
-        // bulut eşitlemesi tetiklenir. scheduleAutoSync bu script'ten daha
-        // sonra tanımlansa da, gerçek çağrı her zaman sayfa tam yüklendikten
-        // ve kullanıcı bir şey değiştirdikten sonra olur; bu yüzden güvenlidir.
-        if (typeof scheduleAutoSync === 'function') scheduleAutoSync();
-      }
+      // işareti temizler.
+      try { localStorage.setItem(PENDING_SYNC_KEY, '1'); } catch (err) { /* yok say */ }
+      // Giriş yapılmışsa, her değişiklikten sonra arka planda (gecikmeli)
+      // bulut eşitlemesi tetiklenir. scheduleAutoSync bu script'ten daha
+      // sonra tanımlansa da, gerçek çağrı her zaman sayfa tam yüklendikten
+      // ve kullanıcı bir şey değiştirdikten sonra olur; bu yüzden güvenlidir.
+      if (typeof scheduleAutoSync === 'function') scheduleAutoSync();
     } catch (err) {
       console.warn('Uygulama verisi kaydedilemedi:', err);
     }
@@ -14812,18 +14775,7 @@
         .maybeSingle();
       if (error) throw error;
       isSyncing = false;
-      // EK GÜVENLİK AĞI: Buluttaki veri, yereldeki veriden "belirgin şekilde
-      // daha az" görünüyorsa (ör. çok daha küçük bir JSON boyutu), bunu
-      // sessizce yerelin üzerine yazmak riskli olur — bu genellikle
-      // buluta daha önce eksik/eski bir anlık görüntü yazıldığının
-      // işaretidir (ör. bir önceki oturumda gönderim tam tamamlanamamış
-      // olabilir). Böyle bir durumda buluttaki veriyle yereli asla ezme;
-      // bunun yerine yereldeki (daha zengin) veriyi koru ve buluta gönder.
-      const remoteSize = data && data.state ? JSON.stringify(data.state).length : 0;
-      const localSize = JSON.stringify(APP_STATE).length;
-      const remoteLooksSuspiciouslyEmptier = localSize > 200 && remoteSize < localSize * 0.5;
-
-      if (data && data.state && Object.keys(data.state).length && !remoteLooksSuspiciouslyEmptier) {
+      if (data && data.state && Object.keys(data.state).length) {
         Object.keys(APP_STATE).forEach((k) => delete APP_STATE[k]);
         Object.assign(APP_STATE, data.state);
         localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
@@ -14832,18 +14784,10 @@
         // Uygulamanın pek çok bölümü kendi durumunu APP_STATE'ten yalnızca
         // sayfa yüklenirken bir kez okuyor; indirilen veri her yerde anında
         // yansısın diye sayfa tazelenir.
-        // Yeniden yüklemeden hemen önce kısa bir gecikme: hideAuthGate()'te
-        // tetiklenen odak kaldırma (blur/body.focus) ve klavye kapanma
-        // animasyonunun tarayıcıda gerçekten tamamlanması için bir an
-        // tanınıyor; aksi halde reload bu animasyonun ortasına denk gelip
-        // klavye araç çubuğunun yeni sayfada asılı kalmasına yol açabiliyor.
-        if (reloadOnData) { setTimeout(() => location.reload(), 120); return { ok: true }; }
+        if (reloadOnData) { location.reload(); return { ok: true }; }
       } else {
-        // Bu hesap için buluta hiç veri yazılmamış OLABİLİR ya da buluttaki
-        // veri yereldekinden şüpheli derecede eksik görünüyor: her iki
-        // durumda da veri kaybını önlemek için mevcut (daha güvenilir)
-        // yerel veriyi buluta gönder.
-        updateSyncStatusUI('success');
+        // Bu hesap için buluta hiç veri yazılmamış: mevcut yerel veriyi ilk
+        // kayıt olarak yükle.
         await pushLocalState({ silent: true });
       }
       return { ok: true };
@@ -15058,67 +15002,13 @@
     ensureAuthGateContent();
     authGate.classList.remove('is-hidden');
   };
-  const hideAuthGate = () => {
-    if (!authGate) return;
-    // KRİTİK: Giriş/kayıt formundaki e-posta veya şifre alanı hâlâ odaklıyken
-    // (kullanıcı "Giriş Yap"a bastığında input'tan çıkmamış olabilir) kapıyı
-    // sadece CSS ile (opacity/visibility) gizlemek input'un odağını
-    // kaldırmıyor. Sonuç: input artık görünmez olsa da klavye ve üzerindeki
-    // "◂▾ ... Bitti" araç çubuğu ekranda asılı kalmaya devam ediyor ve
-    // kullanıcı asıl sayfaya dokunduğunda bile bir süre daha görünüyor.
-    // Bu durum girişten sonra sayfa yeniden yüklendiğinde (location.reload)
-    // daha da belirginleşiyor: iOS bazen odaklı input'u "hatırlayıp"
-    // yeniden yüklenen sayfada da klavyeyi/araç çubuğunu göstermeye devam
-    // ediyor. Sadece blur() her zaman yetmediği için, odağı bilinçli olarak
-    // nötr bir öğeye (document.body) taşıyoruz; bu klavyeyi daha kesin
-    // şekilde kapatır.
-    const active = document.activeElement;
-    if (active && authGate.contains(active) && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
-      active.blur();
-      const hadTabIndex = document.body.hasAttribute('tabindex');
-      if (!hadTabIndex) document.body.setAttribute('tabindex', '-1');
-      document.body.focus();
-      if (!hadTabIndex) document.body.removeAttribute('tabindex');
-    }
-    authGate.classList.add('is-hidden');
-  };
+  const hideAuthGate = () => { if (authGate) authGate.classList.add('is-hidden'); };
 
   if (settingsAuthActionBtn) {
     settingsAuthActionBtn.addEventListener('click', async () => {
       if (currentUser) {
-        // KRİTİK VERİ KAYBI DÜZELTMESİ: Çıkış yapmadan önce bekleyen (henüz
-        // buluta gönderilmemiş) değişiklikleri MUTLAKA gönder. Eskiden
-        // signOut() çağrılır çağrılmaz currentUser hemen null yapılıyordu;
-        // eğer son 2.5 saniye içinde bir değişiklik yapılmışsa autosync
-        // zamanlayıcısı hâlâ bekliyor olabiliyordu ve zamanlayıcı sonunda
-        // ateşlendiğinde pushLocalState, currentUser artık null olduğu
-        // için sessizce hiçbir şey yapmadan çıkıyordu. Sonuç: o son
-        // değişiklikler asla buluta ulaşmıyordu ve bir sonraki girişte
-        // (özellikle cihaz değiştiyse veya yerel veri temizlendiyse)
-        // kullanıcı buluttaki eski/eksik veriyle karşılaşıyordu.
-        clearTimeout(autoSyncTimer);
-        autoSyncTimer = null;
-
-        const originalLabel = settingsAuthActionBtn.textContent;
-        settingsAuthActionBtn.disabled = true;
-        settingsAuthActionBtn.textContent = 'Kaydediliyor…';
-
-        const result = await pushLocalState();
-
-        if (!result.ok) {
-          settingsAuthActionBtn.disabled = false;
-          settingsAuthActionBtn.textContent = originalLabel;
-          const proceedAnyway = window.confirm(
-            'Son değişikliklerin buluta gönderilemedi (bağlantı sorunu olabilir).\n\n' +
-            'Yine de çıkış yaparsan bu cihazdaki senkronize olmamış veriler kaybolabilir.\n\n' +
-            'Yine de çıkış yapmak istiyor musun?'
-          );
-          if (!proceedAnyway) return;
-        }
-
         try { await supabaseClient.auth.signOut(); } catch (err) { /* yok say */ }
         currentUser = null;
-        settingsAuthActionBtn.disabled = false;
         updateSyncStatusUI();
       } else {
         showAuthGate();
@@ -15157,14 +15047,6 @@
       updateSyncStatusUI();
     });
   };
-
-  // Bu noktaya kadar tüm sayfaların (Rutinler, Takip, vb.) açılış-zamanı
-  // ilk kurulum çağrıları (varsayılan/hesaplanan alanları dolduran
-  // saveAppState çağrıları dâhil) tamamlanmış olur. Artık bundan sonraki
-  // her saveAppState çağrısı gerçekten kullanıcının bir eylemidir; bu
-  // yüzden PENDING_SYNC_KEY bayrağı bundan sonra normal şekilde
-  // işaretlenebilir.
-  appReadyForSync = true;
 
   initAuthGate();
 </script>
