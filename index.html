@@ -14769,6 +14769,83 @@
   //    olursa olsun diğerinin işi kaybolmaz. Yalnızca AYNI bölüm iki
   //    cihazda da değiştirilmişse en son damgalı olan kazanır (kaçınılmaz
   //    tek durum budur).
+  // ---- Derin (madde bazlı) birleştirme yardımcıları ----
+  // Eskiden bir üst-seviye bölüm (ör. questionPool, page9) çakıştığında
+  // taraflardan biri o bölümün TAMAMINI diğerinin üzerine yazıyordu. Bu,
+  // iki cihaz da senkron aralarında birbirinden habersiz farklı yeni
+  // kayıtlar eklediğinde (ör. telefonda yeni bir soru, bilgisayarda başka
+  // bir soru eklenmesi) taraflardan birinin eklediği verinin sessizce
+  // kaybolmasına yol açıyordu — "veri iniyor ama eksik" şikayetinin temel
+  // sebebi buydu. Aşağıdaki fonksiyonlar artık bölümün İÇİNE inip, id'si
+  // olan dizi elemanlarını (sorular, dersler, rutinler, denemeler vb.)
+  // birleştiriyor (union), sözlük şeklindeki objelerde (ör. dayLists,
+  // stopwatchLogs) ortak olmayan anahtarları koruyor; yalnızca gerçekten
+  // aynı id/alan üzerinde çakışma varsa hangi cihazın kazanacağına o
+  // bölümün __ts damgasına bakılarak karar veriliyor.
+  //
+  // Bilinen sınır: bu yaklaşımda "silme" işlemi ayrı bir iz (tombstone)
+  // tutulmadığı için, bir öğe tam senkron olmadan bir cihazda silinip
+  // diğer cihaz hâlâ eski hâliyle senkron olursa, silinen öğe bir sonraki
+  // birleştirmede geri gelebilir (kullanıcı tekrar silmesi gerekir). Bu,
+  // sessizce YENİ eklenen verinin kaybolmasından çok daha az kötü bir
+  // durum olduğu için bilinçli olarak bu şekilde tercih edildi.
+  const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+
+  const mergeArraysByIdentity = (localArr, remoteArr, remoteWins) => {
+    const hasIdShape = (arr) => arr.some((it) => isPlainObject(it) && 'id' in it);
+    if (hasIdShape(localArr) || hasIdShape(remoteArr)) {
+      const byId = new Map();
+      const idless = [];
+      localArr.forEach((it) => {
+        if (isPlainObject(it) && 'id' in it) byId.set(it.id, it);
+        else idless.push(it);
+      });
+      remoteArr.forEach((it) => {
+        if (!isPlainObject(it) || !('id' in it)) { idless.push(it); return; }
+        const existing = byId.get(it.id);
+        if (!existing) { byId.set(it.id, it); return; }
+        if (JSON.stringify(existing) === JSON.stringify(it)) return;
+        // Aynı id iki tarafta da farklıysa: elemanın kendi zaman damgası
+        // (ts/updatedAt) varsa ona, yoksa üst bölümün __ts'ine göre karar ver.
+        const lt = Number(existing.ts || existing.updatedAt || 0);
+        const rt = Number(it.ts || it.updatedAt || 0);
+        if (rt !== lt) { if (rt > lt) byId.set(it.id, it); }
+        else byId.set(it.id, remoteWins ? it : existing);
+      });
+      return Array.from(byId.values()).concat(idless);
+    }
+    // İlkel değer dizisi (ör. bir günün ders id listesi): basit küme
+    // birleşimi — sırayı koru, tekrarları at.
+    const seen = new Set();
+    const merged = [];
+    localArr.concat(remoteArr).forEach((v) => {
+      const key = (typeof v === 'object' && v !== null) ? JSON.stringify(v) : v;
+      if (!seen.has(key)) { seen.add(key); merged.push(v); }
+    });
+    return merged;
+  };
+
+  const deepMergeValue = (localVal, remoteVal, remoteWins) => {
+    if (Array.isArray(localVal) && Array.isArray(remoteVal)) {
+      return mergeArraysByIdentity(localVal, remoteVal, remoteWins);
+    }
+    if (isPlainObject(localVal) && isPlainObject(remoteVal)) {
+      const keys = new Set([...Object.keys(localVal), ...Object.keys(remoteVal)]);
+      const out = {};
+      keys.forEach((k) => {
+        const lh = Object.prototype.hasOwnProperty.call(localVal, k);
+        const rh = Object.prototype.hasOwnProperty.call(remoteVal, k);
+        if (lh && rh) out[k] = deepMergeValue(localVal[k], remoteVal[k], remoteWins);
+        else if (rh) out[k] = remoteVal[k];
+        else out[k] = localVal[k];
+      });
+      return out;
+    }
+    if (localVal === undefined) return remoteVal;
+    if (remoteVal === undefined) return localVal;
+    return remoteWins ? remoteVal : localVal;
+  };
+
   const mergeAppStates = (localState, remoteState) => {
     const local = (localState && typeof localState === 'object') ? localState : {};
     const remote = (remoteState && typeof remoteState === 'object') ? remoteState : {};
@@ -14783,15 +14860,15 @@
       const rt = remoteTs[key] || 0;
       const localHas = Object.prototype.hasOwnProperty.call(local, key);
       const remoteHas = Object.prototype.hasOwnProperty.call(remote, key);
-      if (remoteHas && (rt > lt || !localHas)) {
-        merged[key] = remote[key];
-        mergedTs[key] = rt || lt;
-      } else if (localHas) {
-        merged[key] = local[key];
-        mergedTs[key] = lt || rt;
-      } else {
+      if (localHas && remoteHas) {
+        merged[key] = deepMergeValue(local[key], remote[key], rt > lt);
+        mergedTs[key] = Math.max(lt, rt);
+      } else if (remoteHas) {
         merged[key] = remote[key];
         mergedTs[key] = rt;
+      } else {
+        merged[key] = local[key];
+        mergedTs[key] = lt;
       }
     });
     merged.__ts = mergedTs;
@@ -15106,6 +15183,35 @@
     autoSyncTimer = setTimeout(() => { pushLocalState({ silent: true }); }, 2500);
   };
 
+  // ---- Canlı senkron: uygulama açıkken buluttaki değişiklikleri de yakala ----
+  // Eskiden buluttaki veri yalnızca girişte ve sayfa yeniden yüklendiğinde
+  // okunuyordu; uygulama açık kaldığı sürece (siz bir şey değiştirmediğiniz
+  // sürece) başka bir cihazda yapılan değişiklik hiç fark edilmiyordu. Bu,
+  // "değişiklik başka cihazda görünmüyor" şikayetinin en büyük sebebiydi.
+  // Aşağıdaki periyodik kontrol, giriş yapılmışken belirli aralıklarla
+  // sessizce buluttan indirip (pullRemoteState zaten yazı yazarken sayfayı
+  // yenilemeyecek şekilde tasarlanmıştı) yeni bir şey varsa uygular.
+  const REMOTE_POLL_INTERVAL_MS = 25000;
+  let periodicSyncTimer = null;
+  const startPeriodicSync = () => {
+    if (periodicSyncTimer || !supabaseClient) return;
+    periodicSyncTimer = setInterval(() => {
+      if (currentUser && !isSyncing && document.visibilityState === 'visible') {
+        pullRemoteState({ reloadOnData: false });
+      }
+    }, REMOTE_POLL_INTERVAL_MS);
+  };
+  const stopPeriodicSync = () => {
+    if (periodicSyncTimer) { clearInterval(periodicSyncTimer); periodicSyncTimer = null; }
+  };
+  // Uygulama arka plandan öne geldiğinde (sekme/telefon değişikliği) hemen
+  // bir kez de anlık kontrol et; 25 saniyeyi beklemeden en güncel veriyi göster.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && currentUser && !isSyncing) {
+      pullRemoteState({ reloadOnData: false });
+    }
+  });
+
   // Güvenlik ağı: kullanıcı bir ayarı değiştirip (ör. arka plan rengi)
   // 2.5 saniyelik gecikme dolmadan sekmeyi arka plana alır veya uygulamayı
   // kapatırsa, bekleyen bulut eşitlemesi hiç gönderilmeden kaybolabilir.
@@ -15399,6 +15505,7 @@
         currentUser = session.user;
         hideAuthGate();
         updateSyncStatusUI();
+        startPeriodicSync();
         await pullRemoteState({ reloadOnData: false });
       } else {
         let skipped = false;
@@ -15413,6 +15520,7 @@
 
     supabaseClient.auth.onAuthStateChange((_event, session) => {
       currentUser = session && session.user ? session.user : null;
+      if (currentUser) startPeriodicSync(); else stopPeriodicSync();
       updateSyncStatusUI();
     });
   };
