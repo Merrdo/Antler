@@ -8522,6 +8522,12 @@
   // kaybolmaz. Bu script, ona ihtiyaç duyan diğer script'lerden (tema,
   // anahtar vb.) önce çalışması için burada, dosyanın başında tanımlanır.
   const APP_STORAGE_KEY = 'takvimim_app_state_v1';
+  // Yerelde yapılıp henüz buluta başarıyla gönderilememiş bir değişiklik
+  // olup olmadığını işaretler. saveAppState her çağrıldığında '1' yapılır,
+  // pushLocalState başarıyla tamamlandığında silinir. Amaç: bir önceki
+  // oturumda gönderim tamamlanmadan uygulama kapatılmışsa, bir sonraki
+  // açılışta buluttaki (eski) veri yereldeki (yeni) veriyi asla ezmesin.
+  const PENDING_SYNC_KEY = 'takvimim_pending_sync_v1';
 
   const loadAppState = () => {
     try {
@@ -8541,6 +8547,11 @@
     try {
       Object.assign(APP_STATE, patch);
       localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
+      // Bu değişiklik henüz buluta ulaşmadı; bir sonraki açılışta buluttan
+      // gelecek (muhtemelen daha eski) veri bu değişikliği ezmesin diye
+      // işaretleniyor. Gönderim başarılı olduğunda pushLocalState bu
+      // işareti temizler.
+      try { localStorage.setItem(PENDING_SYNC_KEY, '1'); } catch (err) { /* yok say */ }
       // Giriş yapılmışsa, her değişiklikten sonra arka planda (gecikmeli)
       // bulut eşitlemesi tetiklenir. scheduleAutoSync bu script'ten daha
       // sonra tanımlansa da, gerçek çağrı her zaman sayfa tam yüklendikten
@@ -14725,6 +14736,7 @@
         .upsert({ user_id: currentUser.id, state: APP_STATE, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
       if (error) throw error;
       localStorage.setItem(LAST_SYNC_KEY, String(Date.now()));
+      try { localStorage.removeItem(PENDING_SYNC_KEY); } catch (err) { /* yok say */ }
       isSyncing = false;
       updateSyncStatusUI('success');
       return { ok: true };
@@ -14739,6 +14751,20 @@
   // ---- Eşitleme: buluttan yerele indir (girişte kullanılır) ----
   const pullRemoteState = async ({ reloadOnData } = {}) => {
     if (!supabaseClient || !currentUser || isSyncing) return { ok: false };
+
+    // KRİTİK: Yerelde daha önce buluta gönderilememiş bir değişiklik varsa
+    // (ör. önceki oturum, gönderim tamamlanmadan kapatıldıysa), buluttaki
+    // veri o değişiklikten daha eski olabilir. Böyle bir durumda buluttan
+    // gelen veriyle yereli asla ezme: önce yereldeki değişikliği göndermeyi
+    // dene. Gönderim başarılı olursa bulut zaten yerelle eşleşmiş olur ve
+    // ayrıca indirmeye gerek kalmaz. Gönderim başarısız olursa (ör. henüz
+    // ağ hazır değil) hiçbir şeye dokunmadan çık; veri kaybı yaşanmaz.
+    let hasPendingLocalChanges = false;
+    try { hasPendingLocalChanges = localStorage.getItem(PENDING_SYNC_KEY) === '1'; } catch (err) { /* yok say */ }
+    if (hasPendingLocalChanges) {
+      return await pushLocalState({ silent: true });
+    }
+
     isSyncing = true;
     updateSyncStatusUI('syncing');
     try {
@@ -14778,6 +14804,22 @@
     clearTimeout(autoSyncTimer);
     autoSyncTimer = setTimeout(() => { pushLocalState({ silent: true }); }, 2500);
   };
+
+  // Güvenlik ağı: kullanıcı bir ayarı değiştirip (ör. arka plan rengi)
+  // 2.5 saniyelik gecikme dolmadan sekmeyi arka plana alır veya uygulamayı
+  // kapatırsa, bekleyen bulut eşitlemesi hiç gönderilmeden kaybolabilir.
+  // Bu yüzden sayfa gizlenirken/kapanırken bekleyen zamanlayıcı varsa iptal
+  // edilip eşitleme hemen (beklemeden) tetiklenir.
+  const flushPendingAutoSync = () => {
+    if (!supabaseClient || !currentUser || !autoSyncTimer) return;
+    clearTimeout(autoSyncTimer);
+    autoSyncTimer = null;
+    pushLocalState({ silent: true });
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushPendingAutoSync();
+  });
+  window.addEventListener('pagehide', flushPendingAutoSync);
 
   if (settingsSyncBtn) {
     settingsSyncBtn.addEventListener('click', () => pushLocalState());
