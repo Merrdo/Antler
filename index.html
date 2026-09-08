@@ -173,20 +173,20 @@
     --bg-color: #fff;
     --main-color: #121212;
     position: relative;
-    width: 340px;
-    height: 50px;
+    width: 310px;
+    height: 60px;
     background-color: var(--bg-color);
     border: 2px solid var(--main-color);
-    border-radius: 20px;
+    border-radius: 24px;
     display: flex;
     flex-direction: row;
     /* En uçtaki (ilk/son) sekmenin seçili gösterge karesi köşelere flush
-       olunca, pilin 20px'lik köşe kavisi 13px'lik göstergeden daha keskin
+       olunca, pilin 24px'lik köşe kavisi 16px'lik göstergeden daha keskin
        kıvrıldığı için gösterge köşesi pilin dışına taşıyordu. Soldan ve
        sağdan küçük bir iç boşluk bırakarak (nav-slider'daki karşılık gelen
        inset ile birlikte) göstergeyi kavisin içinde tutuyoruz. */
-    padding: 0 3px;
-    box-shadow: 4px 4px var(--main-color);
+    padding: 0 4px;
+    box-shadow: 5px 5px var(--main-color);
     pointer-events: auto;
   }
 
@@ -194,22 +194,22 @@
      değil, köşeleri yumuşatılmış kare (squircle) bir kart. */
   .nav-slider {
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: calc((100% - 6px) / 8);
-    height: 40px;
+    top: 4px;
+    left: 4px;
+    width: calc((100% - 8px) / 7);
+    height: 48px;
     background-color: var(--main-color);
-    border-radius: 13px;
+    border-radius: 16px;
     transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
     will-change: transform;
     z-index: 0;
   }
 
   .option {
-    width: calc(100% / 8);
-    height: 40px;
+    width: calc(100% / 7);
+    height: 48px;
     position: relative;
-    top: 3px;
+    top: 4px;
     left: 0;
     z-index: 1;
   }
@@ -245,8 +245,8 @@
 
   /* İkonlar: ince çizgi (outline) stil, seçili sekmede beyaza döner. */
   .nav-icon {
-    width: 21px;
-    height: 21px;
+    width: 25px;
+    height: 25px;
     stroke: var(--font-color-dark);
     fill: none;
     stroke-width: 1.8;
@@ -320,8 +320,8 @@
   }
 
   .nav-input[value="page-1"]:checked + .nav-btn .nav-icon-home path {
-    stroke-dasharray: 40;
-    stroke-dashoffset: 40;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
     animation: navHomeDraw 0.45s ease-out both;
   }
 
@@ -333,32 +333,42 @@
     animation-delay: 0.22s;
   }
 
-  /* Kronometre sekmesi seçildiğinde ikon, saniye kolu tık-tık sallanıyormuş
-     gibi kısa bir sağa-sola salınım yapar; Ana Sayfa'nın dikey zıplamasından
-     farklı olarak burada dönüş (rotate) hareketi öne çıkar. */
-  @keyframes navStopwatchTick {
+  /* Kronometre sekmesi seçildiğinde ikonun kendisi hareket etmez;
+     yalnızca içindeki ibre (çubuk) tam bir tur (360°) dönerek eski
+     konumuna geri gelir. İbre eski konumuna ulaştığında, üstteki
+     yatay çubuğa sanki parmakla basılmış gibi kısa bir "bas-bırak"
+     animasyonu uygulanır. */
+  @keyframes navStopwatchHandSpin {
     0% {
-      transform: scale(0.6) rotate(0deg);
-    }
-    35% {
-      transform: scale(1.15) rotate(14deg);
-    }
-    55% {
-      transform: scale(1.05) rotate(-10deg);
-    }
-    72% {
-      transform: scale(1.02) rotate(6deg);
-    }
-    86% {
-      transform: scale(1) rotate(-3deg);
+      transform: rotate(0deg);
     }
     100% {
-      transform: scale(1) rotate(0deg);
+      transform: rotate(360deg);
     }
   }
 
-  .nav-input[value="page-5"]:checked + .nav-btn .nav-icon-stopwatch {
-    animation: navStopwatchTick 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  .nav-input[value="page-5"]:checked + .nav-btn .nav-icon-stopwatch .nav-stopwatch-hand {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: navStopwatchHandSpin 0.5s ease-in-out both;
+  }
+
+  @keyframes navStopwatchBtnPress {
+    0% {
+      transform: translateY(0) scaleY(1);
+    }
+    40% {
+      transform: translateY(0.8px) scaleY(0.35);
+    }
+    100% {
+      transform: translateY(0) scaleY(1);
+    }
+  }
+
+  .nav-input[value="page-5"]:checked + .nav-btn .nav-icon-stopwatch .nav-stopwatch-btn {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: navStopwatchBtnPress 0.28s ease-in-out 0.5s both;
   }
 
   /* Takvim ikonundaki gün numarası: rakam olduğu için stroke değil dolgu
@@ -368,7 +378,7 @@
   .nav-calendar-daynum {
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
-    font-size: 9.6px;
+    font-size: 11.5px;
     fill: var(--font-color-dark);
     stroke: none;
     transition: fill 0.25s ease;
@@ -444,33 +454,15 @@
     animation-delay: 0s;
   }
 
-  /* Soru Takibi sekmesi artık büyüteç yerine panolu bir kontrol
-     listesi (checklist) ikonuyla temsil edilir: üstteki klips
-     hafifçe zıplayarak belirir, ardından içindeki tik işareti
-     sanki elle çiziliyormuş gibi "çizilerek" tamamlanır. */
-  @keyframes navChecklistClipPop {
-    0% {
-      opacity: 0;
-      transform: scale(0.5);
-    }
-    60% {
-      opacity: 1;
-      transform: scale(1.15);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  .nav-input[value="page-9"]:checked + .nav-btn .nav-icon-checklist .nav-checklist-clip {
-    animation: navChecklistClipPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  }
+  /* Soru Takibi sekmesi panolu bir kontrol listesi (checklist)
+     ikonuyla temsil edilir. Pano ve klips sabit durur; yalnızca
+     içindeki tik işareti sanki elle çiziliyormuş gibi "çizilerek"
+     belirir. */
 
   @keyframes navChecklistCheckDraw {
     0% {
       opacity: 0;
-      stroke-dashoffset: 11;
+      stroke-dashoffset: 12;
     }
     30% {
       opacity: 1;
@@ -482,49 +474,166 @@
   }
 
   .nav-input[value="page-9"]:checked + .nav-btn .nav-icon-checklist .nav-checklist-check {
-    stroke-dasharray: 11;
-    stroke-dashoffset: 11;
-    animation: navChecklistCheckDraw 0.3s ease-out 0.18s both;
+    stroke-dasharray: 12;
+    stroke-dashoffset: 12;
+    animation: navChecklistCheckDraw 0.3s ease-out 0.16s both;
   }
 
-  /* Denemelerim sekmesi seçildiğinde kağıt ikonu, bir sınav kağıdı
-     çekmeceden çıkarılıp masaya bırakılıyormuş gibi yukarıdan hafif
-     dönerek kayar. */
-  @keyframes navExamSlide {
+  /* Denemelerim sekmesi seçildiğinde kağıt artık zıplayıp kaymıyor;
+     bunun yerine içindeki satırlar sanki elle sırayla yazılıyormuş
+     gibi, yavaşça ve birbiri ardınca "çizilerek" belirir. */
+  @keyframes navExamPaperIn {
     0% {
-      transform: translateY(7px) scale(0.7) rotate(-8deg);
-    }
-    50% {
-      transform: translateY(-3px) scale(1.16) rotate(5deg);
-    }
-    75% {
-      transform: translateY(1px) scale(0.94) rotate(-2deg);
+      opacity: 0;
+      transform: scale(0.85);
     }
     100% {
-      transform: translateY(0) scale(1) rotate(0deg);
+      opacity: 1;
+      transform: scale(1);
     }
   }
 
-  .nav-input[value="page-11"]:checked + .nav-btn .nav-icon-exam {
-    animation: navExamSlide 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  .nav-input[value="page-11"]:checked + .nav-btn .nav-icon-exam rect {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: navExamPaperIn 0.2s ease-out both;
   }
+
+  @keyframes navExamLineWrite {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .nav-input[value="page-11"]:checked + .nav-btn .nav-icon-exam line {
+    stroke-dasharray: 8;
+    stroke-dashoffset: 8;
+    animation: navExamLineWrite 0.32s ease-in-out both;
+  }
+
+  .nav-input[value="page-11"]:checked + .nav-btn .nav-icon-exam line:nth-of-type(1) {
+    animation-delay: 0.12s;
+  }
+
+  .nav-input[value="page-11"]:checked + .nav-btn .nav-icon-exam line:nth-of-type(2) {
+    animation-delay: 0.38s;
+  }
+
+  .nav-input[value="page-11"]:checked + .nav-btn .nav-icon-exam line:nth-of-type(3) {
+    stroke-dasharray: 5;
+    stroke-dashoffset: 5;
+    animation-delay: 0.64s;
+  }
+
+  /* Kamera sekmesi: nav bar'ın tam ortasında yer alır. Objektifin
+     üzerinde, varsayılan olarak görünmez duran bir flaş katmanı bulunur:
+     yumuşak/bulanık bir parlama (glow), onun içinde parlak bir çekirdek
+     ve etrafa saçılan ışık huzmeleri (rays). Sekme seçildiğinde bu üçü
+     birlikte hızla büyüyüp parlayarak, gerçek bir fotoğraf flaşı gibi
+     daha büyük ve daha göz alıcı bir patlama efekti oluşturur. */
+  .nav-camera-flash-glow {
+    fill: var(--font-color-light);
+    stroke: none;
+    opacity: 0;
+    filter: blur(1.3px);
+  }
+
+  .nav-camera-flash {
+    fill: var(--font-color-light);
+    stroke: none;
+    opacity: 0;
+  }
+
+  .nav-camera-flash-rays {
+    opacity: 0;
+  }
+
+  .nav-camera-flash-rays line {
+    stroke: var(--font-color-light);
+    stroke-width: 1.2;
+    stroke-linecap: round;
+  }
+
+  @keyframes navCameraFlashGlow {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    22% {
+      opacity: 0.85;
+      transform: scale(2.1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(3.4);
+    }
+  }
+
+  @keyframes navCameraFlashCore {
+    0% {
+      opacity: 0;
+      transform: scale(0.2);
+    }
+    18% {
+      opacity: 1;
+      transform: scale(2.3);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(2.9);
+    }
+  }
+
+  @keyframes navCameraFlashRays {
+    0% {
+      opacity: 0;
+      transform: scale(0.2);
+    }
+    28% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.6);
+    }
+  }
+
+  .nav-input[value="page-camera"]:checked + .nav-btn .nav-icon-camera .nav-camera-flash-glow {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: navCameraFlashGlow 0.65s ease-out both;
+  }
+
+  .nav-input[value="page-camera"]:checked + .nav-btn .nav-icon-camera .nav-camera-flash {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: navCameraFlashCore 0.55s ease-out both;
+  }
+
+  .nav-input[value="page-camera"]:checked + .nav-btn .nav-icon-camera .nav-camera-flash-rays {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: navCameraFlashRays 0.5s ease-out both;
+  }
+
 
   /* Sayfa adını kısaca gösteren baloncuk: butonun hemen üstünde belirir.
      Hem fareyle üzerine gelince (önizleme) hem de dokunulduğunda (kısa
      süreli, JS ile) görünür olur. */
   .nav-tooltip {
     position: absolute;
-    bottom: calc(100% + 10px);
+    bottom: calc(100% + 12px);
     left: 50%;
     transform: translateX(-50%) translateY(4px);
     background-color: var(--main-color);
     color: var(--font-color-light);
     font-family: "Space Grotesk", sans-serif;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 14px;
     white-space: nowrap;
-    padding: 5px 10px;
-    border-radius: 9px;
+    padding: 6px 12px;
+    border-radius: 11px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.18s ease, transform 0.18s ease;
@@ -537,7 +646,7 @@
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    border: 5px solid transparent;
+    border: 6px solid transparent;
     border-top-color: var(--main-color);
   }
 
@@ -750,6 +859,22 @@
     background-color: #3b3e42;
   }
 
+  /* Ana sayfa widget kartları da anahtar aktifken diğer beyaz yüzeylerle
+     aynı antresit tona geçer; metin/ikon çizgileri okunaklı kalsın diye
+     açık renge döner. */
+  body.is-anthracite .home-widget {
+    background-color: #3b3e42;
+  }
+
+  body.is-anthracite .home-widget-label,
+  body.is-anthracite .home-widget-sub {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .home-widget-arrow path {
+    stroke: #f2f2f4;
+  }
+
   /* Segmented control (Görevler/Rutinler) Ayarlar sayfasındaki gibi
      yarı saydam değil, her zaman opak bir yüzey: normalde beyaz/açık
      gri, anahtar aktifken antresit koyu gri. Böylece altındaki tema
@@ -825,8 +950,8 @@
     background-color: #3b3e42;
   }
 
-  body.is-anthracite .page9-subject-card {
-    background-color: #3b3e42;
+  body.is-anthracite .page9-subject-row + .page9-subject-row {
+    border-top-color: rgba(255, 255, 255, 0.14);
   }
 
   body.is-anthracite .page9-subject-name,
@@ -834,18 +959,12 @@
     color: #f2f2f4;
   }
 
-  body.is-anthracite .page9-subject-badge {
+  body.is-anthracite .page9-stepper {
     background-color: #3b3e42;
-    color: #f2f2f4;
   }
 
+  body.is-anthracite .page9-stepper-btn,
   body.is-anthracite .page9-count-input {
-    background-color: #3b3e42;
-    color: #f2f2f4;
-  }
-
-  body.is-anthracite .page9-stepper-btn {
-    background-color: #3b3e42;
     color: #f2f2f4;
   }
 
@@ -866,6 +985,43 @@
   body.is-anthracite .page9-add-subject-btn.add-task-btn {
     background-color: #3b3e42;
     border-color: #000;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page9-add-card {
+    background: #3b3e42;
+  }
+
+  body.is-anthracite .page9-add-title,
+  body.is-anthracite .page9-add-subtitle {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page9-add-selectall {
+    background-color: #2a2c2f;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page9-add-chip {
+    background-color: #2a2c2f;
+  }
+
+  body.is-anthracite .page9-add-chip-name,
+  body.is-anthracite .page9-add-chip-note {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page9-add-chip-box {
+    background-color: #3b3e42;
+  }
+
+  body.is-anthracite .page9-add-custom-input {
+    background-color: #2a2c2f;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page9-add-custom-btn {
+    background-color: #3b3e42;
     color: #f2f2f4;
   }
 
@@ -982,12 +1138,150 @@
     background-color: #ff90e8;
   }
 
-  /* Sayfa 1'deki tema değiştirme butonunu dikeyde ortalar */
+  /* Sayfa 1: karşılama sayfası (selamlama + tarih başlığı, tema düğmesi,
+     kısayol widget'ları). Diğer sayfalarla aynı 340-360px genişlik
+     mantığını takip eder. */
   .home-content {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: 360px;
+    gap: 1.6rem;
+  }
+
+  .home-hero {
+    display: flex;
     align-items: center;
-    gap: 24px;
+    justify-content: space-between;
+    gap: 0.8rem;
+  }
+
+  .home-hero-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .home-hero-eyebrow {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--theme-text, #f2f2f7);
+    opacity: 0.6;
+    transition: color 0.5s ease;
+  }
+
+  .home-hero-title {
+    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1.9rem;
+    line-height: 1.1;
+    color: var(--theme-text, #f2f2f7);
+    transition: color 0.5s ease;
+  }
+
+  .home-hero-date {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--theme-text, #f2f2f7);
+    opacity: 0.75;
+    transition: color 0.5s ease;
+  }
+
+  /* Tema düğmesi: Uiverse "button_top" 3D basma efektini korur, sadece
+     yuvarlak ve ikon boyutuna küçültülmüş bir varyantı. */
+  .home-theme-btn {
+    --button_radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    flex-shrink: 0;
+  }
+
+  .home-theme-btn-top {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .home-widgets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+  }
+
+  .home-widget {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1.1rem 1rem;
+    background-color: #fff;
+    border: 4px solid #000;
+    border-radius: 1.2em;
+    box-shadow: 6px 6px 0px 0px #000;
+    cursor: pointer;
+    text-align: left;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  .home-widget:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0px 0px #000;
+  }
+
+  .home-widget:active {
+    transform: translate(3px, 3px);
+    box-shadow: 3px 3px 0px 0px #000;
+    background-color: #ff90e8;
+  }
+
+  .home-widget-arrow {
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
+    width: 15px;
+    height: 15px;
+    opacity: 0.35;
+  }
+
+  .home-widget-icon-chip {
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 50%;
+    border: 3px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .home-widget-icon-chip-blue {
+    background-color: #a8d8ff;
+  }
+
+  .home-widget-icon-chip-pink {
+    background-color: #ff90e8;
+  }
+
+  .home-widget-label {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #000;
+  }
+
+  .home-widget-sub {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: #000;
+    opacity: 0.55;
+    margin-top: -0.35rem;
   }
 
   /* ---------- Görev silme butonu (satırın sağında, brutalist stile uyumlu) ---------- */
@@ -1221,6 +1515,7 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding-top: calc(40px + env(safe-area-inset-top));
+    padding-bottom: calc(22px + env(safe-area-inset-bottom));
   }
 
   .wheel-page {
@@ -1737,6 +2032,14 @@
     width: 100%;
   }
 
+  .page8-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
   .page8-subtitle {
     font-family: "Space Grotesk", sans-serif;
     font-weight: 600;
@@ -1862,6 +2165,19 @@
     font-size: 0.85rem;
     border-width: 2.5px;
     box-shadow: 2px 2px 0px 0px #000;
+    opacity: 0;
+    transform: scale(0.6);
+    pointer-events: none;
+    margin-left: -2.05rem;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease,
+      margin 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  .page8-group-list.is-edit-mode .page8-group-delete {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    margin-left: 0;
   }
 
   .page8-item-list {
@@ -1985,6 +2301,19 @@
     font-size: 0.85rem;
     border-width: 2.5px;
     box-shadow: 2px 2px 0px 0px #000;
+    opacity: 0;
+    transform: scale(0.6);
+    pointer-events: none;
+    margin-left: -2.1rem;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease,
+      margin 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  .page8-group-list.is-edit-mode .page8-item-delete {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    margin-left: 0;
   }
 
   .page8-add-item-row {
@@ -2034,6 +2363,14 @@
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+    width: 100%;
+  }
+
+  .page9-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
     width: 100%;
   }
 
@@ -2091,35 +2428,69 @@
   .page9-subject-list {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    position: relative;
   }
 
-  .page9-subject-card {
+  /* Düzenleme modunda satırlar hafifçe titreyerek sürüklenebilir
+     olduklarını gösterir (iOS'taki uygulama simgesi titremesiyle aynı
+     mantık); her satırın rastgele bir animasyon gecikmesi olduğu için
+     hepsi aynı anda değil, doğal/dağınık biçimde titrer. */
+  @keyframes page9Jiggle {
+    0% { transform: rotate(-1deg); }
+    50% { transform: rotate(1deg); }
+    100% { transform: rotate(-1deg); }
+  }
+
+  .page9-subject-list.is-edit-mode .page9-subject-row {
+    animation: page9Jiggle 0.22s ease-in-out infinite;
+    touch-action: none;
+  }
+
+  /* Basılı tutup sürüklenen satır: titremesi durur, listeden çıkıp
+     parmağı/imleci takip eder ve altında kalan boşluğu bir yer tutucu
+     korur. */
+  .page9-subject-row.is-dragging {
+    animation: none !important;
+    background-color: #fff;
+    border-radius: 0.7em;
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.28);
+    z-index: 5;
+  }
+
+  body.is-anthracite .page9-subject-row.is-dragging {
+    background-color: #3b3e42;
+  }
+
+  .page9-subject-row-placeholder {
+    box-sizing: border-box;
+    border-radius: 0.6em;
+    border: 2px dashed rgba(0, 0, 0, 0.2);
+  }
+
+  body.is-anthracite .page9-subject-row-placeholder {
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  /* Her ders artık kendi çerçeveli kutusu olmadan, tek bir dış kart
+     (.page9-card) içinde ince bir üst çizgiyle ayrılan tek satır olarak
+     gösteriliyor; böylece kart-içinde-kart yığılması ve çift gölge
+     kalabalığı ortadan kalkıyor. */
+  .page9-subject-row {
     width: 100%;
     box-sizing: border-box;
-    background: #fff;
-    border: 3px solid #000;
-    border-radius: 0.9em;
-    box-shadow: 4px 4px 0px 0px #000;
-    overflow: hidden;
-  }
-
-  .page9-subject-accent {
-    height: 7px;
-    border-bottom: 2.5px solid #000;
-    transition: background-color 0.2s ease;
-  }
-
-  .page9-subject-top {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.55rem 0.65rem 0.4rem;
+    gap: 0.55rem;
+    padding: 0.65rem 0.1rem;
+  }
+
+  .page9-subject-row + .page9-subject-row {
+    border-top: 2px solid rgba(0, 0, 0, 0.09);
   }
 
   .page9-subject-dot {
-    width: 1.1rem;
-    height: 1.1rem;
+    width: 1.15rem;
+    height: 1.15rem;
     border-radius: 50%;
     border: 2.5px solid #000;
     flex-shrink: 0;
@@ -2141,12 +2512,11 @@
     display: block;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 800;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     color: #121212;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    cursor: text;
   }
 
   .page9-subject-name-input {
@@ -2157,61 +2527,1171 @@
     padding: 0;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 800;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     color: #121212;
-  }
-
-  .page9-subject-badge {
-    flex-shrink: 0;
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 700;
-    font-size: 0.72rem;
-    color: #fff;
-    background: #121212;
-    border-radius: 1rem;
-    padding: 0.2rem 0.5rem;
-    white-space: nowrap;
-    transition: background-color 0.2s ease;
   }
 
   .page9-subject-delete {
     flex-shrink: 0;
-    width: 1.4rem;
-    height: 1.4rem;
-    font-size: 0.8rem;
+    width: 1.3rem;
+    height: 1.3rem;
+    font-size: 0.75rem;
+    border-width: 2.5px;
+    box-shadow: 2px 2px 0px 0px #000;
+    opacity: 0;
+    transform: scale(0.6);
+    pointer-events: none;
+    margin-right: -1.65rem;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease,
+      margin 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  .page9-subject-list.is-edit-mode .page9-subject-delete {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    margin-right: 0;
+  }
+
+  /* Sabitleme (pin) butonu: silme butonuyla aynı boyut/görünürlük mantığı
+     — sadece düzenleme modunda belirir. Sabitliyken (is-active) vurgu
+     rengiyle (pembe) dolarak "artık her gün otomatik çıkacak" mesajını verir. */
+  .page9-subject-pin {
+    flex-shrink: 0;
+    width: 1.3rem;
+    height: 1.3rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    background-color: #fff;
+    border: 2.5px solid #000;
+    border-radius: 50%;
+    box-shadow: 2px 2px 0px 0px #000;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.6);
+    pointer-events: none;
+    margin-right: -1.65rem;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease,
+      margin 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  .page9-subject-list.is-edit-mode .page9-subject-pin {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    margin-right: 0;
+  }
+
+  .page9-subject-pin.is-active {
+    background-color: #ff90e8;
+  }
+
+  body.is-anthracite .page9-subject-pin {
+    background-color: #3b3e42;
+    border-color: #000;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .page9-subject-pin.is-active {
+    background-color: #ff90e8;
+    color: #121212;
+  }
+
+  /* ---------- Sayfa 9: "Ders Ekle" pop-up'ı ----------
+     "+ Ders Ekle" butonuna basınca açılır; hazır TYT/AYT branşlarını
+     topluca ya da tek tek seçmeyi, ayrıca kendi ders adını yazıp
+     eklemeyi sağlayan geniş bir pop-up. wheel-color-backdrop ile aynı
+     dili (brutalist kart, üstte kapatma çarpısı) kullanır. */
+  .page9-add-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(18, 18, 28, 0.55);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+  }
+
+  .page9-add-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .page9-add-card {
+    width: 100%;
+    max-width: 420px;
+    max-height: 82vh;
+    overflow-y: auto;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.1em;
+    box-shadow: 6px 6px 0px 0px #000;
+    padding: 1.1rem 1.1rem 1.3rem;
+    transform: translateY(14px) scale(0.96);
+    opacity: 0;
+    transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.22s ease;
+  }
+
+  .page9-add-backdrop.is-open .page9-add-card {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  .page9-add-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .page9-add-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .page9-add-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #121212;
+  }
+
+  .page9-add-subtitle {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: #121212;
+    opacity: 0.55;
+  }
+
+  .page9-add-close {
+    flex-shrink: 0;
+  }
+
+  .page9-add-selectall {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem 0.8rem;
+    margin-bottom: 0.8rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.78rem;
+    color: #121212;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.6rem;
+    box-shadow: 2px 2px 0px 0px #000;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+  }
+
+  .page9-add-selectall:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
+  }
+
+  .page9-add-selectall.is-active {
+    background-color: #ff90e8;
+  }
+
+  .page9-add-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .page9-add-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.6rem 0.7rem;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.7rem;
+    cursor: pointer;
+    transition: background-color 0.18s ease, transform 0.15s ease;
+  }
+
+  .page9-add-chip:active {
+    transform: translate(1px, 1px);
+  }
+
+  .page9-add-chip-box {
+    flex-shrink: 0;
+    width: 1.1rem;
+    height: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2.5px solid #000;
+    border-radius: 0.35rem;
+    background-color: #fff;
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: transparent;
+  }
+
+  .page9-add-chip.is-selected .page9-add-chip-box {
+    background-color: #ff90e8;
+    color: #000;
+  }
+
+  .page9-add-chip-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: #121212;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .page9-add-chip-note {
+    flex-shrink: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    color: #121212;
+    opacity: 0.5;
+  }
+
+  .page9-add-chip.is-disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+
+  .page9-add-chip-delete {
+    flex-shrink: 0;
+    width: 1.3rem;
+    height: 1.3rem;
+    font-size: 0.75rem;
     border-width: 2.5px;
     box-shadow: 2px 2px 0px 0px #000;
   }
 
-  .page9-subject-controls {
+  .page9-add-custom-row {
     display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0 0.65rem 0.65rem;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
   }
 
-  .page9-stepper-btn {
+  .page9-add-custom-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0.55rem 0.7rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: #121212;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.65rem;
+    outline: none;
+  }
+
+  .page9-add-custom-btn {
     flex-shrink: 0;
+    width: 2.3rem;
+    height: 2.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #000;
+    background-color: #fff;
+    border: 2.5px solid #000;
+    border-radius: 0.65rem;
+    box-shadow: 2px 2px 0px 0px #000;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .page9-add-custom-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
+  }
+
+  .page9-add-confirm {
+    display: block;
+    width: 100%;
+    margin-top: 1.1rem;
+    text-align: center;
+  }
+
+  .page9-add-confirm:disabled {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* ---------- Soru Havuzu (eski "Kamera" sekmesi) ----------
+     Sayfa 11 ile aynı üstte hizalı, kaydırmalı düzen. Yüklenen her
+     görsel; branş ve doğru cevap şıkkıyla birlikte 2 sütunlu bir kart
+     ızgarasında birikir. */
+  #page-camera {
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: calc(48px + env(safe-area-inset-top));
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  #page-camera::-webkit-scrollbar {
+    display: none;
+  }
+
+  .qhavuz-wrap {
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .qhavuz-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 100%;
+  }
+
+  .qhavuz-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .qhavuz-subtitle {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--theme-text, #fff);
+    opacity: 0.75;
+    transition: color 0.5s ease;
+  }
+
+  .qhavuz-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .qhavuz-actions {
+    display: flex;
+    gap: 0.6rem;
+    width: 100%;
+  }
+
+  .qhavuz-actions .add-task-btn {
+    flex: 1 1 0;
+    text-align: center;
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+  }
+
+  .qhavuz-test-start-btn {
+    background-color: #ff90e8;
+  }
+
+  .qhavuz-file-input {
+    display: none;
+  }
+
+  .qhavuz-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+  }
+
+  .qhavuz-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--theme-text, #fff);
+    opacity: 0.6;
+    padding: 1.4rem 0;
+    transition: color 0.5s ease;
+  }
+
+  .qhavuz-card {
+    position: relative;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.1em;
+    box-shadow: 6px 6px 0px 0px #000;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .qhavuz-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0px 0px #000;
+  }
+
+  .qhavuz-thumb {
+    width: 100%;
+    aspect-ratio: 1;
+    background: #f2f2f2;
+    border-bottom: 4px solid #000;
+    overflow: hidden;
+  }
+
+  .qhavuz-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .qhavuz-card-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    padding: 0.55rem 0.6rem;
+  }
+
+  .qhavuz-card-subject {
+    min-width: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.68rem;
+    color: #121212;
+    padding: 0.2rem 0.5rem;
+    border-radius: 1rem;
+    border: 2px solid #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .qhavuz-card-answer {
+    flex-shrink: 0;
+    width: 1.6rem;
+    height: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    color: #fff;
+    background: #121212;
+    border-radius: 50%;
+  }
+
+  .qhavuz-card-book {
+    display: block;
+    padding: 0 0.6rem 0.6rem;
+    margin-top: -0.3rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.68rem;
+    color: #121212;
+    opacity: 0.55;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .qhavuz-card-delete {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
     width: 1.7rem;
     height: 1.7rem;
+    font-size: 0.85rem;
+    border-width: 2.5px;
+    box-shadow: 2px 2px 0px 0px #000;
+    z-index: 2;
+    /* Sadece düzenleme modunda belirir; normalde karta dokununca soru
+       görseli büyük açılsın diye görünmez ve tıklamayı engellemez. */
+    opacity: 0;
+    transform: scale(0.6);
+    pointer-events: none;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease,
+      box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  .qhavuz-grid.is-edit-mode .qhavuz-card-delete {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+
+  /* Test modunda doğru yapılan sorunun kartına, havuza dönünce eklenen
+     yeşil tik rozeti. */
+  .qhavuz-card-check {
+    position: absolute;
+    top: 0.4rem;
+    left: 0.4rem;
+    width: 1.7rem;
+    height: 1.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #3ddc84;
+    border: 2.5px solid #000;
+    border-radius: 50%;
+    box-shadow: 2px 2px 0px 0px #000;
+    z-index: 2;
+  }
+
+  /* ---- Soru Havuzu: soru görselini büyük gösteren lightbox ---- */
+  .qhavuz-lightbox-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.4rem;
+    background: rgba(12, 12, 16, 0.88);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .qhavuz-lightbox-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .qhavuz-lightbox-card {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.1em;
+    box-shadow: 8px 8px 0px 0px #000;
+    overflow: hidden;
+    transform: scale(0.92);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .qhavuz-lightbox-backdrop.is-open .qhavuz-lightbox-card {
+    transform: scale(1);
+  }
+
+  .qhavuz-lightbox-card img {
+    display: block;
+    width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    background: #f2f2f2;
+    touch-action: none;
+  }
+
+  .qhavuz-lightbox-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2;
+  }
+
+  /* Kapat butonuyla aynı yuvarlak tasarımı paylaşan, onun hemen
+     solunda duran manuel "çözüldü" işaretleme butonu. İşaretliyken
+     kart listesindeki yeşil tik rozetiyle (.qhavuz-card-check) aynı
+     yeşile döner. */
+  .qhavuz-lightbox-solve {
+    position: absolute;
+    top: 0.5rem;
+    right: 2.9rem;
+    z-index: 2;
+    color: transparent;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .qhavuz-lightbox-solve svg {
+    display: block;
+  }
+
+  .qhavuz-lightbox-solve.is-checked {
+    background-color: #3ddc84;
+    color: #0d3d20;
+  }
+
+  .qhavuz-lightbox-solve:hover,
+  .qhavuz-lightbox-solve:active {
+    background-color: #f2f2f2;
+  }
+
+  .qhavuz-lightbox-solve.is-checked:hover,
+  .qhavuz-lightbox-solve.is-checked:active {
+    background-color: #3ddc84;
+  }
+
+  body.is-anthracite .qhavuz-lightbox-solve.is-checked {
+    background-color: #3ddc84;
+    color: #0d3d20;
+  }
+
+  /* Lightbox altında, kapat (×) butonuyla aynı yuvarlak brutalist
+     tasarımı paylaşan doğru cevap şıkları. Sadece işaretlenen şık
+     .is-correct alır ve yeşile döner; diğerleri nötr kalır. */
+  .qhavuz-lightbox-answer-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.9rem 1rem 1.1rem;
+    background: #fff;
+  }
+
+  .qhavuz-lightbox-answer-btn {
+    flex-shrink: 0;
+    width: 2.1rem;
+    height: 2.1rem;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     font-family: "Space Grotesk", sans-serif;
     font-size: 1rem;
-    font-weight: 800;
     line-height: 1;
+    font-weight: 800;
+    color: #000;
+    background-color: #fff;
+    border: 3px solid #000;
+    border-radius: 50%;
+    box-shadow: 3px 3px 0px 0px #000;
+    cursor: default;
+    opacity: 1;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.18s ease, color 0.18s ease;
+  }
+
+  /* Düzenleme modu açıkken lightbox'taki şıklar tıklanabilir hale
+     gelir; doğru cevabı buradan değiştirebilmek için page9-add
+     dilindeki basma geri bildirimini paylaşır. */
+  .qhavuz-lightbox-answer-btn.is-editable {
+    cursor: pointer;
+  }
+
+  .qhavuz-lightbox-answer-btn.is-editable:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
+  }
+
+  .qhavuz-lightbox-answer-btn.is-correct {
+    background-color: #5cd68a;
+    color: #0d3d20;
+  }
+
+  body.is-anthracite .qhavuz-lightbox-answer-row {
+    background: #3b3e42;
+  }
+
+  body.is-anthracite .qhavuz-lightbox-answer-btn {
+    background-color: #2a2c2f;
+    color: #f2f2f4;
+    border-color: #000;
+  }
+
+  body.is-anthracite .qhavuz-lightbox-answer-btn.is-correct {
+    background-color: #5cd68a;
+    color: #0d3d20;
+  }
+
+  /* ---- Soru Havuzu: görsel ekleme pop-up'ı (page9-add-card ile aynı
+       zemini paylaşır; burada sadece kendine özgü alanlar tanımlanır) ---- */
+  .qhavuz-add-card {
+    max-width: 380px;
+  }
+
+  .qhavuz-add-preview {
+    width: 100%;
+    max-height: 55vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 2.5px solid #000;
+    border-radius: 0.8rem;
+    margin-bottom: 0.9rem;
+    background: #f2f2f2;
+  }
+
+  .qhavuz-add-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .qhavuz-add-label {
+    display: block;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.78rem;
+    color: #121212;
+    opacity: 0.6;
+    margin: 0.7rem 0 0.4rem;
+  }
+
+  .qhavuz-add-label-optional {
+    font-weight: 600;
+    opacity: 0.7;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .qhavuz-add-book-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .qhavuz-add-book-input {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .qhavuz-add-page-input {
+    flex: 0 0 5rem;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .qhavuz-add-subject-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .qhavuz-add-subject-chip {
+    --qhavuz-chip-color: #ff90e8;
+    padding: 0.5rem 0.6rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: #121212;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.65rem;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.18s ease, transform 0.15s ease;
+  }
+
+  .qhavuz-add-subject-chip:active {
+    transform: translate(1px, 1px);
+  }
+
+  .qhavuz-add-subject-chip.is-selected {
+    background-color: var(--qhavuz-chip-color);
+  }
+
+  .qhavuz-add-answer-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+  }
+
+  .qhavuz-add-answer-btn {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
     color: #121212;
     background-color: #f2f2f2;
     border: 2.5px solid #000;
     border-radius: 0.6rem;
     cursor: pointer;
-    transition: transform 0.15s ease, background-color 0.15s ease;
+    box-shadow: 2px 2px 0px 0px #000;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.18s ease, color 0.18s ease;
+  }
+
+  .qhavuz-add-answer-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
+  }
+
+  .qhavuz-add-answer-btn.is-selected {
+    background-color: #5cd68a;
+    color: #0d3d20;
+  }
+
+  /* ---------- Soru Havuzu: anahtar aktifken (antresit/koyu mod) ---------- */
+  body.is-anthracite .qhavuz-card {
+    background: #3b3e42;
+  }
+
+  body.is-anthracite .qhavuz-card-book {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .qhavuz-thumb {
+    background: #2a2c2f;
+  }
+
+  body.is-anthracite .qhavuz-add-preview {
+    background: #2a2c2f;
+  }
+
+  body.is-anthracite .qhavuz-add-label {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .qhavuz-add-subject-chip {
+    background-color: #2a2c2f;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .qhavuz-add-subject-chip.is-selected {
+    background-color: var(--qhavuz-chip-color);
+    color: #121212;
+  }
+
+  body.is-anthracite .qhavuz-add-answer-btn {
+    background-color: #2a2c2f;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .qhavuz-add-answer-btn.is-selected {
+    background-color: #5cd68a;
+    color: #0d3d20;
+  }
+
+  /* ---------- Soru Havuzu: Test Modu (tam ekran) ----------
+     Sayfa 11 detayıyla (#page-11-detail) aynı üstte hizalı, kaydırmalı
+     tam ekran düzeni. Soru görseli büyük gösterilir, doğru cevap
+     işaretlenene kadar hiçbir şık renklenmez; işaretlenince seçilen
+     şık (yanlışsa kırmızı, doğru şık her zaman yeşil) sert bir
+     "zıplama" animasyonuyla boyanır ve altında "Sonraki Soru" butonu
+     belirir. */
+  #page-camera-test {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  #page-camera-test::-webkit-scrollbar {
+    display: none;
+  }
+
+  .qhavuz-test-wrap {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .qhavuz-test-progress {
+    flex-shrink: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--theme-text, #f2f2f7);
+    opacity: 0.75;
+    transition: color 0.5s ease;
+    min-width: 2.6rem;
+    text-align: right;
+  }
+
+  .qhavuz-test-question {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+    width: 100%;
+  }
+
+  .qhavuz-test-question.is-hidden {
+    display: none;
+  }
+
+  .qhavuz-test-subject-badge {
+    align-self: center;
+  }
+
+  .qhavuz-test-image {
+    width: 100%;
+    max-height: 48vh;
+    overflow: hidden;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.1em;
+    box-shadow: 6px 6px 0px 0px #000;
+    touch-action: none;
+  }
+
+  .qhavuz-test-image img {
+    width: 100%;
+    height: auto;
+    max-height: 48vh;
+    object-fit: contain;
+    display: block;
+    touch-action: none;
+  }
+
+  .qhavuz-test-answer-grid {
+    width: 100%;
+  }
+
+  .qhavuz-test-answer-grid .qhavuz-add-answer-btn {
+    font-size: 1.05rem;
+  }
+
+  /* Doğru işaretlenen şık (kendi seçimi doğruysa VEYA yanlış
+     yaptığında asıl doğru şıkkı göstermek için) her zaman yeşile
+     "zıplar"; yanlış seçilen şık kırmızıya boyanır. Aynı zıplama
+     eğrisi .wheel-color-swatch ve .exam-detail-bubble'daki geçişle
+     birebir aynı. */
+  .qhavuz-add-answer-btn.is-correct,
+  .qhavuz-add-answer-btn.is-wrong {
+    transform: scale(1.08);
+  }
+
+  .qhavuz-add-answer-btn.is-correct {
+    background-color: #5cd68a;
+    color: #0d3d20;
+    box-shadow: 3px 3px 0px 0px #000;
+  }
+
+  .qhavuz-add-answer-btn.is-wrong {
+    background-color: #ff5c5c;
+    color: #5c0011;
+    box-shadow: 3px 3px 0px 0px #000;
+  }
+
+  .qhavuz-add-answer-btn:disabled {
+    cursor: default;
+  }
+
+  /* Sayfa 11: yanlış/boş soruya eklenen görseli değiştirme/kaldırma
+     düğmeleri (Soru Havuzu'ndaki "Soru Ekle" pop-up'ıyla aynı kartın
+     içinde, .qhavuz-add-card altında kullanılır). */
+  .page11-question-change-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.5rem 0.8rem;
+    margin-top: 0.6rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.78rem;
+    color: #121212;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.6rem;
+    box-shadow: 2px 2px 0px 0px #000;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .page11-question-change-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
+  }
+
+  .page11-question-remove-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 0.5rem;
+    padding: 0.3rem;
+    background: none;
+    border: none;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.74rem;
+    color: #ff5c5c;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .page11-question-remove-btn.is-hidden {
+    display: none;
+  }
+
+  body.is-anthracite .page11-question-change-btn {
+    background-color: #2a2c2f;
+    color: #f2f2f4;
+  }
+
+  .qhavuz-test-feedback {
+    min-height: 1.5rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    text-align: center;
+    color: var(--theme-text, #f2f2f7);
+    opacity: 0;
+    transform: scale(0.7) translateY(4px);
+    transition: opacity 0.22s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.5s ease;
+  }
+
+  .qhavuz-test-feedback.is-visible {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  .qhavuz-test-feedback.is-correct {
+    color: #5cd68a;
+  }
+
+  .qhavuz-test-feedback.is-wrong {
+    color: #ff5c5c;
+  }
+
+  .qhavuz-test-next-btn {
+    width: 100%;
+    text-align: center;
+    background-color: #ff90e8;
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .qhavuz-test-next-btn.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .qhavuz-test-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+    padding: 2.4rem 1.4rem;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.2em;
+    box-shadow: 6px 6px 0px 0px #000;
+  }
+
+  .qhavuz-test-result.is-hidden {
+    display: none;
+  }
+
+  .qhavuz-test-result-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #121212;
+  }
+
+  .qhavuz-test-result-score {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 2.6rem;
+    color: #121212;
+    line-height: 1.1;
+  }
+
+  .qhavuz-test-result-sub {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #121212;
+    opacity: 0.55;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.6rem;
+  }
+
+  .qhavuz-test-close-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  body.is-anthracite .qhavuz-test-result {
+    background: #3b3e42;
+  }
+
+  body.is-anthracite .qhavuz-test-result-title,
+  body.is-anthracite .qhavuz-test-result-score,
+  body.is-anthracite .qhavuz-test-result-sub {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .qhavuz-test-image {
+    background: #2a2c2f;
+  }
+
+
+  /* Düzenleme modu kapalıyken isim tıklamayla değiştirilemez: metin imleci
+     yerine normal işaretçi gösterip "text" cursor'ını kaldırıyoruz. */
+  .page9-subject-name {
+    cursor: default;
+  }
+
+  .page9-subject-list.is-edit-mode .page9-subject-name {
+    cursor: text;
+  }
+
+  .page9-subject-controls {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* Eksi/sayı/artı artık üç ayrı kutu yerine tek bir çerçeveli "pill"
+     içinde, ince iç çizgilerle bölünmüş tek bir bütün olarak duruyor. */
+  .page9-stepper {
+    display: flex;
+    align-items: stretch;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.65rem;
+    box-shadow: 2px 2px 0px 0px #000;
+    overflow: hidden;
+  }
+
+  .page9-stepper-btn {
+    flex-shrink: 0;
+    width: 1.6rem;
+    height: 1.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #121212;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
   }
 
   .page9-stepper-btn:active {
-    transform: scale(0.92);
     background-color: #ff90e8;
   }
 
@@ -2223,18 +3703,19 @@
   }
 
   .page9-count-input {
-    flex: 1 1 auto;
-    min-width: 0;
-    width: 3.2rem;
+    flex-shrink: 0;
+    width: 2.05rem;
+    height: 1.85rem;
     text-align: center;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     color: #121212;
-    background-color: #f2f2f2;
-    border: 2.5px solid #000;
-    border-radius: 0.6rem;
-    padding: 0.3rem 0.2rem;
+    background-color: transparent;
+    border: none;
+    border-left: 2px solid #000;
+    border-right: 2px solid #000;
+    padding: 0;
     -moz-appearance: textfield;
   }
 
@@ -2242,24 +3723,6 @@
   .page9-count-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
-  }
-
-  .page9-add-count-btn {
-    flex: 1 1 auto;
-    padding: 0.4rem 0.5rem;
-    font-size: 0.85rem;
-    border-width: 2.5px;
-    box-shadow: 2.5px 2.5px 0px 0px #000;
-    text-align: center;
-  }
-
-  .page9-add-count-btn:hover {
-    box-shadow: 4px 4px 0px 0px #000;
-  }
-
-  .page9-add-count-btn:active,
-  .page9-add-count-btn.is-pressed {
-    box-shadow: 1px 1px 0px 0px #000;
   }
 
   .page9-add-subject-btn {
@@ -3427,6 +4890,7 @@
      zemin, kalın siyah çerçeve, kaydırılmış sert gölge; işaretlenince
      gradyan değil DÜZ bir durum rengiyle dolduruluyor. */
   .exam-detail-bubble {
+    position: relative;
     aspect-ratio: 1;
     display: flex;
     align-items: center;
@@ -3443,6 +4907,43 @@
     box-shadow: 2px 2px 0px 0px #000;
     transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease,
       background-color 0.15s ease, color 0.15s ease;
+  }
+
+  /* Yanlış/boş bırakılan bir soru baloncuğunun köşesinde beliren, soru
+     görseli eklemek/görüntülemek için dokunulan küçük rozet. Görsel
+     eklenmemişse kamera ikonu, eklenmişse yeşil dolgulu (has-photo)
+     halde gösterilir. stopPropagation ile ana baloncuğun durum
+     döngüsünü (doğru/yanlış/boş) tetiklemeden çalışır. */
+  .exam-detail-bubble-photo-btn {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    color: #121212;
+    border: 1.6px solid #000;
+    border-radius: 50%;
+    box-shadow: 1px 1px 0px 0px #000;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+  }
+
+  .exam-detail-bubble-photo-btn svg {
+    width: 8px;
+    height: 8px;
+  }
+
+  .exam-detail-bubble-photo-btn:active {
+    transform: scale(0.88);
+  }
+
+  .exam-detail-bubble-photo-btn.has-photo {
+    background: #5cd68a;
+    color: #0d3d20;
   }
 
   .exam-detail-bubble:active {
@@ -3560,6 +5061,16 @@
   body.is-anthracite .exam-detail-bubble.is-blank {
     background-color: #3b3e42;
     color: #f2f2f4;
+  }
+
+  body.is-anthracite .exam-detail-bubble-photo-btn {
+    background-color: #3b3e42;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .exam-detail-bubble-photo-btn.has-photo {
+    background: #5cd68a;
+    color: #0d3d20;
   }
 
   /* Karanlık temada Doğru/Yanlış rozetleri de aynı düz renkte sabit
@@ -3690,10 +5201,36 @@
 
   .stopwatch-controls {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 100%;
-    gap: 1rem;
+    /* Sabit bir "gap" kullanmıyoruz: Turlarım/Sıfırla satırı görünür
+       olmadığında bu boşluğun da kaybolması gerekiyor ki Geçmiş butonu
+       yukarıda dursun; boşluk artık .stopwatch-controls-top'un kendi
+       max-height/margin geçişiyle kontrol ediliyor (aşağıya bakınız). */
+  }
+
+  /* Turlarım ve Sıfırla butonlarını eskisi gibi birbirine yakın ve
+     hizalı tutan üst satır. Süre sıfırken (Turlarım/Sıfırla gizliyken)
+     bu satırın kapladığı yükseklik ve altındaki boşluk da sıfırlanır,
+     böylece Geçmiş butonu yukarıda durur; süre birikip butonlar
+     belirdiğinde satır yumuşakça açılır ve Geçmiş aşağı kayar. */
+  .stopwatch-controls-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 0.5rem;
+    overflow: hidden;
+    max-height: 4rem;
+    margin-bottom: 0.9rem;
+    transition: max-height 0.3s ease, margin-bottom 0.3s ease;
+  }
+
+  .stopwatch-controls-top:has(.stopwatch-laps-btn.is-hidden) {
+    max-height: 0;
+    margin-bottom: 0;
   }
 
   .stopwatch-reset-btn {
@@ -3900,6 +5437,9 @@
   body.is-laps-open .navbar,
   body.is-patterns-open .navbar,
   body.is-exam-detail-open .navbar,
+  body.is-wheel-open .navbar,
+  body.is-calendar-open .navbar,
+  body.is-qhavuz-test-open .navbar,
   body.is-page10-open .navbar {
     opacity: 0;
     transform: translateY(28px);
@@ -3909,6 +5449,9 @@
   body.is-laps-open .navbar .wrapper,
   body.is-patterns-open .navbar .wrapper,
   body.is-exam-detail-open .navbar .wrapper,
+  body.is-wheel-open .navbar .wrapper,
+  body.is-calendar-open .navbar .wrapper,
+  body.is-qhavuz-test-open .navbar .wrapper,
   body.is-page10-open .navbar .wrapper {
     pointer-events: none;
   }
@@ -3926,7 +5469,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(96px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
   }
 
@@ -3981,6 +5524,11 @@
     flex-shrink: 0;
     width: 2.6rem;
     height: 2.6rem;
+  }
+
+  .calendar-back-btn.is-hidden {
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .calendar-card {
@@ -4754,11 +6302,59 @@
 <div class="app">
 
   <section class="page is-active" id="page-1">
-    <div class="home-content">
-      <!-- From Uiverse.io by Voxybuns -->
-      <button>
-        <span class="button_top"> Button </span>
-      </button>
+    <div class="home-content" id="homeContent">
+      <div class="home-hero">
+        <div class="home-hero-text">
+          <span class="home-hero-eyebrow" id="homeGreeting">Merhaba</span>
+          <h1 class="home-hero-title">Takvimim</h1>
+          <span class="home-hero-date" id="homeDate">—</span>
+        </div>
+
+        <!-- From Uiverse.io by Voxybuns (tema geçiş düğmesi olarak yeniden kullanıldı) -->
+        <button type="button" class="home-theme-btn" id="homeThemeBtn" aria-label="Temayı değiştir">
+          <span class="button_top home-theme-btn-top">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path d="M12 2a10 10 0 1 0 0 20c1.4 0 2-.9 2-2 0-.55-.2-1-.5-1.4-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8H16.6c1.9 0 3.4-1.55 3.4-3.5C20 6.5 16.4 2 12 2Z" fill="none" stroke="#000" stroke-width="1.7" stroke-linejoin="round"/>
+              <circle cx="7.6" cy="10.6" r="1.15" fill="#000"/>
+              <circle cx="9.7" cy="6.9" r="1.15" fill="#000"/>
+              <circle cx="14.6" cy="6.9" r="1.15" fill="#000"/>
+              <circle cx="16.6" cy="11" r="1.15" fill="#000"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+
+      <div class="home-widgets">
+        <button type="button" class="home-widget" id="homeWidgetCalendar">
+          <svg class="home-widget-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="#000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="home-widget-icon-chip home-widget-icon-chip-blue">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <path d="M8 2v4" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+              <path d="M16 2v4" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+              <rect x="3" y="4" width="18" height="18" rx="3" fill="none" stroke="#000" stroke-width="2"/>
+              <path d="M3 10h18" stroke="#000" stroke-width="2"/>
+            </svg>
+          </span>
+          <span class="home-widget-label">Takvim</span>
+          <span class="home-widget-sub">Bugüne git</span>
+        </button>
+
+        <button type="button" class="home-widget" id="homeWidgetWheel">
+          <svg class="home-widget-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="#000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="home-widget-icon-chip home-widget-icon-chip-pink">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <rect x="4" y="4" width="16" height="16" rx="4.5" fill="none" stroke="#000" stroke-width="2"/>
+              <circle cx="8.3" cy="8.3" r="1.3" fill="#000"/>
+              <circle cx="15.7" cy="8.3" r="1.3" fill="#000"/>
+              <circle cx="12" cy="12" r="1.3" fill="#000"/>
+              <circle cx="8.3" cy="15.7" r="1.3" fill="#000"/>
+              <circle cx="15.7" cy="15.7" r="1.3" fill="#000"/>
+            </svg>
+          </span>
+          <span class="home-widget-label">Mini Oyunlar</span>
+          <span class="home-widget-sub">Şimdi ne yapsam?</span>
+        </button>
+      </div>
     </div>
   </section>
 
@@ -4766,6 +6362,16 @@
     <!-- "Şimdi Ne Yapsam?" karar çarkı: kullanıcı kendi seçeneklerini
          ekleyip silebiliyor, çevirince rastgele biri seçiliyor. -->
     <div class="wheel-page">
+      <div class="calendar-topbar">
+        <button type="button" class="calendar-back-btn" id="wheelBackBtn" aria-label="Geri dön">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <span class="calendar-topbar-title">Mini Oyunlar</span>
+        <div class="calendar-topbar-spacer"></div>
+      </div>
+
       <div class="wheel-stage">
         <div class="wheel-pointer">
           <div class="wheel-pointer-inner" id="wheelPointerInner">
@@ -4819,9 +6425,11 @@
       </div>
 
       <div class="stopwatch-controls" id="stopwatchControls">
-        <button type="button" class="add-task-btn stopwatch-laps-btn is-hidden" id="stopwatchLapsBtn">Turlarım</button>
+        <div class="stopwatch-controls-top">
+          <button type="button" class="add-task-btn stopwatch-laps-btn is-hidden" id="stopwatchLapsBtn">Turlarım</button>
+          <button type="button" class="add-task-btn stopwatch-reset-btn is-hidden" id="stopwatchResetBtn">Sıfırla</button>
+        </div>
         <button type="button" class="add-task-btn stopwatch-history-btn" id="stopwatchHistoryBtn">Geçmiş</button>
-        <button type="button" class="add-task-btn stopwatch-reset-btn is-hidden" id="stopwatchResetBtn">Sıfırla</button>
       </div>
     </div>
 
@@ -4847,7 +6455,15 @@
        şeffaf durur (kendine ait koyu/opak bir zemini yok). Artık nav
        bar'da kendi sekmesi üzerinden doğrudan erişiliyor. -->
   <section class="page" id="page-6">
-    <h1>Takvim</h1>
+    <div class="calendar-topbar">
+      <button type="button" class="calendar-back-btn" id="calendarBackBtn" aria-label="Geri dön">
+        <svg viewBox="0 0 24 24" width="18" height="18">
+          <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="calendar-topbar-title">Takvim</span>
+      <div class="calendar-topbar-spacer"></div>
+    </div>
 
     <div class="calendar-card">
       <div class="calendar-nav">
@@ -4882,7 +6498,11 @@
         </svg>
       </button>
       <span class="calendar-topbar-title">Turlarım</span>
-      <span class="calendar-topbar-spacer" aria-hidden="true"></span>
+      <button type="button" class="calendar-back-btn is-danger" id="lapsClearBtn" aria-label="Turları sil">
+        <svg viewBox="0 0 24 24" width="18" height="18">
+          <path d="M4 7h16M9.5 7V4.8a1.3 1.3 0 0 1 1.3-1.3h2.4a1.3 1.3 0 0 1 1.3 1.3V7M6.5 7l.9 12.4A2 2 0 0 0 9.4 21h5.2a2 2 0 0 0 2-1.6L17.5 7M10.2 11v6M13.8 11v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
     </div>
 
     <div class="laps-page-card">
@@ -5006,6 +6626,28 @@
 
   <!-- Sayfa 8: grup/kategori silme onay pop-up'ı (Ayarlar'daki sıfırlama
        onayıyla aynı brutalist stil, farklı id'lerle genel amaçlı) -->
+  <div class="settings-confirm-backdrop" id="stopwatchResetConfirmBackdrop">
+    <div class="settings-confirm-card">
+      <span class="settings-confirm-title">Emin misin?</span>
+      <span class="settings-confirm-desc">Kronometre sıfırlanacak ve turlar silinecek.</span>
+      <div class="settings-confirm-actions">
+        <button type="button" class="settings-confirm-cancel" id="stopwatchResetConfirmCancel">Vazgeç</button>
+        <button type="button" class="settings-confirm-confirm" id="stopwatchResetConfirmConfirm">Evet, sıfırla</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-confirm-backdrop" id="lapsClearConfirmBackdrop">
+    <div class="settings-confirm-card">
+      <span class="settings-confirm-title">Emin misin?</span>
+      <span class="settings-confirm-desc">Kaydedilen tüm turlar kalıcı olarak silinecek.</span>
+      <div class="settings-confirm-actions">
+        <button type="button" class="settings-confirm-cancel" id="lapsClearConfirmCancel">Vazgeç</button>
+        <button type="button" class="settings-confirm-confirm" id="lapsClearConfirmConfirm">Evet, sil</button>
+      </div>
+    </div>
+  </div>
+
   <div class="settings-confirm-backdrop" id="page8ConfirmBackdrop">
     <div class="settings-confirm-card">
       <span class="settings-confirm-title" id="page8ConfirmTitle">Emin misin?</span>
@@ -5020,7 +6662,15 @@
   <section class="page" id="page-8">
     <div class="page8-wrap">
       <div class="page8-header">
-        <h1>Gündelik</h1>
+        <div class="page8-header-top">
+          <h1>Gündelik</h1>
+          <button type="button" class="add-task-btn edit-task-btn" id="page8EditBtn" aria-label="Düzenle" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path d="M4 20l4.5-1 10.2-10.2-3.5-3.5L5 15.5 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13.3 6.8l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
         <span class="page8-subtitle">Kategorilere ve rutinlere ayır, renklendir</span>
         <div class="settings-segmented page8-segmented" id="page8Segmented">
           <div class="settings-segmented-slider" id="page8SegmentedSlider"></div>
@@ -5047,7 +6697,15 @@
   <section class="page" id="page-9">
     <div class="page9-wrap">
       <div class="page9-header">
-        <h1>Soru Takibi</h1>
+        <div class="page9-header-top">
+          <h1>Soru Takibi</h1>
+          <button type="button" class="add-task-btn edit-task-btn" id="page9EditBtn" aria-label="Branşları düzenle" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path d="M4 20l4.5-1 10.2-10.2-3.5-3.5L5 15.5 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13.3 6.8l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
         <span class="page9-subtitle">Çözdüğün soruları branşına göre kaydet</span>
       </div>
 
@@ -5229,6 +6887,46 @@
     </div>
   </section>
 
+  <!-- Soru Havuzu: Test Modu (tam ekran). Sayfa 11 detayıyla aynı üst
+       çubuk dilini (.calendar-topbar) kullanır; nav bar'da sekmesi yok,
+       yalnızca "Test Modu" > branş seçimiyle açılır. Doğru cevap soru
+       çözülene kadar gösterilmez; işaretlenince şık animasyonla
+       doğru/yanlış olarak boyanır ve "Sonraki Soru" butonu belirir. -->
+  <section class="page" id="page-camera-test">
+    <div class="qhavuz-test-wrap">
+      <div class="calendar-topbar">
+        <button type="button" class="calendar-back-btn" id="qhavuzTestBackBtn" aria-label="Testten çık">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <span class="calendar-topbar-title" id="qhavuzTestTitle">Test</span>
+        <span class="qhavuz-test-progress" id="qhavuzTestProgress">1/1</span>
+      </div>
+
+      <div class="qhavuz-test-question" id="qhavuzTestQuestionView">
+        <span class="qhavuz-card-subject qhavuz-test-subject-badge" id="qhavuzTestSubjectBadge"></span>
+
+        <div class="qhavuz-test-image">
+          <img id="qhavuzTestImg" alt="Test sorusu">
+        </div>
+
+        <div class="qhavuz-add-answer-grid qhavuz-test-answer-grid" id="qhavuzTestAnswerGrid"></div>
+
+        <div class="qhavuz-test-feedback" id="qhavuzTestFeedback"></div>
+
+        <button type="button" class="add-task-btn qhavuz-test-next-btn" id="qhavuzTestNextBtn">Sonraki Soru</button>
+      </div>
+
+      <div class="qhavuz-test-result is-hidden" id="qhavuzTestResultView">
+        <span class="qhavuz-test-result-title">Test Tamamlandı!</span>
+        <div class="qhavuz-test-result-score" id="qhavuzTestResultScore">0/0</div>
+        <span class="qhavuz-test-result-sub">doğru</span>
+        <button type="button" class="add-task-btn qhavuz-test-close-btn" id="qhavuzTestCloseBtn">Kapat</button>
+      </div>
+    </div>
+  </section>
+
   <!-- Sayfa 11: Deneme ekleme pop-up'ı (settings-confirm-backdrop ile aynı dil). -->
   <div class="settings-confirm-backdrop" id="page11AddBackdrop">
     <div class="page11-modal-card">
@@ -5328,6 +7026,34 @@
     </div>
   </section>
 
+  <!-- Sayfa: Soru Havuzu. Nav bar'ın ortasındaki sekme; çözülemeyen
+       soruların görseli yüklenir, açılan pop-up'ta branş ve doğru cevap
+       şıkkı işaretlenir, kart olarak listede birikir. -->
+  <section class="page" id="page-camera">
+    <div class="qhavuz-wrap">
+      <div class="qhavuz-header">
+        <div class="qhavuz-header-top">
+          <h1>Soru Havuzu</h1>
+          <button type="button" class="add-task-btn edit-task-btn" id="qhavuzEditBtn" aria-label="Soruları düzenle" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path d="M4 20l4.5-1 10.2-10.2-3.5-3.5L5 15.5 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13.3 6.8l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <span class="qhavuz-subtitle">Çözemediğin soruların görselini yükle, branşını ve doğru cevabını işaretle</span>
+      </div>
+
+      <div class="qhavuz-actions">
+        <button type="button" class="add-task-btn qhavuz-add-btn" id="qhavuzAddBtn">+ Görsel Yükle</button>
+        <button type="button" class="add-task-btn qhavuz-test-start-btn" id="qhavuzTestBtn">Test Modu</button>
+      </div>
+      <input type="file" accept="image/*" id="qhavuzFileInput" class="qhavuz-file-input">
+
+      <div class="qhavuz-grid" id="qhavuzGrid"></div>
+    </div>
+  </section>
+
 </div>
 
 <!-- Sayfa 4: seçenek rengini değiştirmek için açılan pop-up. -->
@@ -5344,6 +7070,128 @@
   </div>
 </div>
 
+<!-- Sayfa 9: "+ Ders Ekle" ile açılan geniş pop-up. Hazır TYT/AYT
+     branşlarını topluca/tek tek seçmeyi, ayrıca kendi ders adını yazıp
+     eklemeyi sağlar. -->
+<div class="page9-add-backdrop" id="page9AddBackdrop">
+  <div class="page9-add-card">
+    <div class="page9-add-header">
+      <div class="page9-add-heading">
+        <span class="page9-add-title">Ders Ekle</span>
+        <span class="page9-add-subtitle" id="page9AddSubtitle"></span>
+      </div>
+      <button type="button" class="delete-btn page9-add-close" id="page9AddClose" aria-label="Kapat">×</button>
+    </div>
+
+    <button type="button" class="page9-add-selectall" id="page9AddSelectAll">Tümünü Seç</button>
+
+    <div class="page9-add-grid" id="page9AddGrid"></div>
+
+    <div class="page9-add-custom-row">
+      <input type="text" class="page9-add-custom-input" id="page9AddCustomInput" placeholder="Kendi dersini yaz…" maxlength="28">
+      <button type="button" class="page9-add-custom-btn" id="page9AddCustomBtn" aria-label="Ders ekle">+</button>
+    </div>
+
+    <button type="button" class="add-task-btn page9-add-confirm" id="page9AddConfirm">Seçilenleri Ekle</button>
+  </div>
+</div>
+
+<!-- Soru Havuzu: bir görsel seçilince açılan pop-up. Branş ve doğru
+     cevap şıkkı seçilmeden "Kaydet" butonu pasif kalır. wheel-color /
+     page9-add pop-up'larıyla aynı brutalist dili paylaşır. -->
+<div class="page9-add-backdrop" id="qhavuzAddBackdrop">
+  <div class="page9-add-card qhavuz-add-card">
+    <div class="page9-add-header">
+      <div class="page9-add-heading">
+        <span class="page9-add-title">Soru Ekle</span>
+        <span class="page9-add-subtitle">Branş ve doğru cevabı işaretle</span>
+      </div>
+      <button type="button" class="delete-btn page9-add-close" id="qhavuzAddClose" aria-label="Kapat">×</button>
+    </div>
+
+    <div class="qhavuz-add-preview">
+      <img id="qhavuzAddPreviewImg" alt="Soru görseli">
+    </div>
+
+    <span class="qhavuz-add-label">Branş</span>
+    <div class="qhavuz-add-subject-grid" id="qhavuzAddSubjectGrid"></div>
+
+    <span class="qhavuz-add-label">Doğru Cevap</span>
+    <div class="qhavuz-add-answer-grid" id="qhavuzAddAnswerGrid"></div>
+
+    <span class="qhavuz-add-label">Kitap Bilgisi <span class="qhavuz-add-label-optional">(opsiyonel)</span></span>
+    <div class="qhavuz-add-book-row">
+      <input type="text" class="page9-add-custom-input qhavuz-add-book-input" id="qhavuzAddBookInput" placeholder="Kitap adı" maxlength="60">
+      <input type="text" inputmode="numeric" class="page9-add-custom-input qhavuz-add-page-input" id="qhavuzAddPageInput" placeholder="Sayfa" maxlength="6">
+    </div>
+
+    <button type="button" class="add-task-btn page9-add-confirm" id="qhavuzAddConfirm" disabled>Kaydet</button>
+  </div>
+</div>
+
+<!-- Soru Havuzu: Test Modu kurulum pop-up'ı. Hangi branştan test
+     oluşturulacağını seçtirir; page9-add-chip ile aynı listeleme dilini
+     kullanır, sadece burada tek seçim (radio gibi) yapılır ve her
+     satırda o branştaki soru sayısı gösterilir. -->
+<div class="page9-add-backdrop" id="qhavuzTestSetupBackdrop">
+  <div class="page9-add-card qhavuz-add-card">
+    <div class="page9-add-header">
+      <div class="page9-add-heading">
+        <span class="page9-add-title">Test Oluştur</span>
+        <span class="page9-add-subtitle">Hangi branştan test istersin?</span>
+      </div>
+      <button type="button" class="delete-btn page9-add-close" id="qhavuzTestSetupClose" aria-label="Kapat">×</button>
+    </div>
+
+    <div class="page9-add-grid" id="qhavuzTestSetupGrid"></div>
+
+    <button type="button" class="add-task-btn page9-add-confirm" id="qhavuzTestSetupConfirm" disabled>Testi Başlat</button>
+  </div>
+</div>
+
+<!-- Soru Havuzu: bir soru kartına dokununca görseli tam ekrana yakın,
+     büyük boyutta gösteren basit bir lightbox. -->
+<div class="qhavuz-lightbox-backdrop" id="qhavuzLightboxBackdrop">
+  <div class="qhavuz-lightbox-card">
+    <button type="button" class="delete-btn qhavuz-lightbox-solve" id="qhavuzLightboxSolveBtn" aria-label="Manuel çözüldü olarak işaretle" aria-pressed="false">
+      <svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button type="button" class="delete-btn qhavuz-lightbox-close" id="qhavuzLightboxClose" aria-label="Kapat">×</button>
+    <img id="qhavuzLightboxImg" alt="Soru görseli">
+    <div class="qhavuz-lightbox-answer-row" id="qhavuzLightboxAnswerRow"></div>
+  </div>
+</div>
+
+<!-- Sayfa 11: bir denemede yanlış/boş bırakılan soruya görsel eklemek
+     (veya eklenmiş görseli düzenlemek) için açılan pop-up. Soru
+     Havuzu'ndaki "Soru Ekle" pop-up'ıyla aynı brutalist dili paylaşır;
+     branş burada zaten deneme üzerinden belli olduğu için yalnızca
+     görsel önizleme ve doğru cevap şıkkı gösterilir. -->
+<div class="page9-add-backdrop" id="page11QuestionBackdrop">
+  <div class="page9-add-card qhavuz-add-card">
+    <div class="page9-add-header">
+      <div class="page9-add-heading">
+        <span class="page9-add-title">Soru Görseli</span>
+        <span class="page9-add-subtitle">Doğru cevabı işaretle</span>
+      </div>
+      <button type="button" class="delete-btn page9-add-close" id="page11QuestionClose" aria-label="Kapat">×</button>
+    </div>
+
+    <div class="qhavuz-add-preview">
+      <img id="page11QuestionPreviewImg" alt="Soru görseli">
+    </div>
+
+    <button type="button" class="page11-question-change-btn" id="page11QuestionChangeBtn">Fotoğrafı Değiştir</button>
+
+    <span class="qhavuz-add-label">Doğru Cevap</span>
+    <div class="qhavuz-add-answer-grid" id="page11QuestionAnswerGrid"></div>
+
+    <button type="button" class="add-task-btn page9-add-confirm" id="page11QuestionConfirm" disabled>Kaydet</button>
+    <button type="button" class="page11-question-remove-btn is-hidden" id="page11QuestionRemoveBtn">Görseli Kaldır</button>
+  </div>
+</div>
+<input type="file" accept="image/*" id="page11QuestionFileInput" class="qhavuz-file-input">
+
 <!-- From Uiverse.io by andrew-demchenk0 (uyarlandı) -->
 <nav class="navbar">
   <div class="wrapper">
@@ -5359,41 +7207,14 @@
       </div>
     </div>
     <div class="option">
-      <input class="nav-input" type="radio" name="nav" value="page-4">
-      <div class="nav-btn">
-        <span class="nav-tooltip">Mini Oyunlar</span>
-        <svg class="nav-icon nav-icon-dice" viewBox="0 0 24 24">
-          <rect x="4" y="4" width="16" height="16" rx="4.5"/>
-          <circle class="dice-dot" cx="8.3" cy="8.3" r="1.15" stroke="none"/>
-          <circle class="dice-dot" cx="15.7" cy="8.3" r="1.15" stroke="none"/>
-          <circle class="dice-dot" cx="12" cy="12" r="1.15" stroke="none"/>
-          <circle class="dice-dot" cx="8.3" cy="15.7" r="1.15" stroke="none"/>
-          <circle class="dice-dot" cx="15.7" cy="15.7" r="1.15" stroke="none"/>
-        </svg>
-      </div>
-    </div>
-    <div class="option">
       <input class="nav-input" type="radio" name="nav" value="page-5">
       <div class="nav-btn">
         <span class="nav-tooltip">Kronometre</span>
         <svg class="nav-icon nav-icon-stopwatch" viewBox="0 0 24 24">
           <circle cx="12" cy="13" r="8"/>
-          <line x1="12" y1="9" x2="12" y2="13"/>
-          <line x1="9" y1="3" x2="15" y2="3"/>
+          <line class="nav-stopwatch-hand" x1="12" y1="9" x2="12" y2="13"/>
+          <line class="nav-stopwatch-btn" x1="9" y1="3" x2="15" y2="3"/>
           <line x1="12" y1="3" x2="12" y2="5"/>
-        </svg>
-      </div>
-    </div>
-    <div class="option">
-      <input class="nav-input" type="radio" name="nav" value="page-6">
-      <div class="nav-btn">
-        <span class="nav-tooltip">Takvim</span>
-        <svg class="nav-icon nav-icon-calendar" viewBox="0 0 24 24">
-          <path d="M8 2v4"/>
-          <path d="M16 2v4"/>
-          <rect x="3" y="4" width="18" height="18" rx="2"/>
-          <path d="M3 10h18"/>
-          <text class="nav-calendar-daynum" x="12" y="16.3" text-anchor="middle" dominant-baseline="central">1</text>
         </svg>
       </div>
     </div>
@@ -5410,13 +7231,35 @@
       </div>
     </div>
     <div class="option">
+      <input class="nav-input" type="radio" name="nav" value="page-camera">
+      <div class="nav-btn">
+        <span class="nav-tooltip">Soru Havuzu</span>
+        <svg class="nav-icon nav-icon-camera" viewBox="0 0 24 24">
+          <path d="M3 8.5a1.5 1.5 0 0 1 1.5-1.5h2.4l1.3-1.8a1.5 1.5 0 0 1 1.2-.6h5.2a1.5 1.5 0 0 1 1.2.6l1.3 1.8h2.4A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/>
+          <circle cx="12" cy="13" r="3.4"/>
+          <circle class="nav-camera-flash-glow" cx="12" cy="13" r="3"/>
+          <circle class="nav-camera-flash" cx="12" cy="13" r="1.3"/>
+          <g class="nav-camera-flash-rays">
+            <line x1="12" y1="13" x2="12" y2="6.5"/>
+            <line x1="12" y1="13" x2="12" y2="19.5"/>
+            <line x1="12" y1="13" x2="5.5" y2="13"/>
+            <line x1="12" y1="13" x2="18.5" y2="13"/>
+            <line x1="12" y1="13" x2="7.4" y2="8.4"/>
+            <line x1="12" y1="13" x2="16.6" y2="17.6"/>
+            <line x1="12" y1="13" x2="7.4" y2="17.6"/>
+            <line x1="12" y1="13" x2="16.6" y2="8.4"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="option">
       <input class="nav-input" type="radio" name="nav" value="page-9">
       <div class="nav-btn">
         <span class="nav-tooltip">Soru Takibi</span>
         <svg class="nav-icon nav-icon-checklist" viewBox="0 0 24 24">
-          <rect x="5" y="4" width="14" height="17" rx="2"/>
-          <rect class="nav-checklist-clip" x="9" y="2" width="6" height="3" rx="1"/>
-          <polyline class="nav-checklist-check" points="8.5 12.5 11 15 16 9.5"/>
+          <rect x="5" y="5.5" width="14" height="15" rx="2.4"/>
+          <rect class="nav-checklist-clip" x="9" y="3" width="6" height="2.5" rx="1"/>
+          <polyline class="nav-checklist-check" points="8.3 13 10.8 15.5 15.7 9.5"/>
         </svg>
       </div>
     </div>
@@ -5555,7 +7398,51 @@
 </script>
 
 <script>
-  // ---------- Yerel Depolama (localStorage) ----------
+  // ---------- Sayfa 1: Karşılama metni ----------
+  // Saate göre değişen selamlama ("Günaydın"/"İyi günler"/...) ve bugünün
+  // tarihi; dakikada bir tazelenir ki gece yarısını/saat dilimini geçen
+  // uzun oturumlarda da güncel kalsın.
+  const homeGreetingEl = document.getElementById('homeGreeting');
+  const homeDateEl = document.getElementById('homeDate');
+  const HOME_MONTHS_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  const HOME_WEEKDAYS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+
+  const updateHomeGreeting = () => {
+    const now = new Date();
+    const hour = now.getHours();
+    let greeting = 'İyi geceler';
+    if (hour >= 5 && hour < 12) greeting = 'Günaydın';
+    else if (hour >= 12 && hour < 18) greeting = 'İyi günler';
+    else if (hour >= 18 && hour < 22) greeting = 'İyi akşamlar';
+
+    if (homeGreetingEl) homeGreetingEl.textContent = greeting;
+    if (homeDateEl) {
+      homeDateEl.textContent = `${now.getDate()} ${HOME_MONTHS_TR[now.getMonth()]} · ${HOME_WEEKDAYS_TR[now.getDay()]}`;
+    }
+  };
+  updateHomeGreeting();
+  setInterval(updateHomeGreeting, 60000);
+
+  // ---------- Sayfa 1: Kısayol widget'ları ----------
+  // Takvim ve Mini Oyunlar artık nav bar'da kendi sekmeleri olmadığından,
+  // widget'lar doğrudan o sayfaların kendi aç fonksiyonlarını çağırır
+  // (Turlarım/Kronometre Geçmişi'nin Sayfa 5'ten açılmasıyla aynı desen).
+  const homeWidgetCalendar = document.getElementById('homeWidgetCalendar');
+  const homeWidgetWheel = document.getElementById('homeWidgetWheel');
+
+  if (homeWidgetCalendar) {
+    homeWidgetCalendar.addEventListener('click', () => {
+      if (typeof openCalendarPage === 'function') openCalendarPage();
+    });
+  }
+  if (homeWidgetWheel) {
+    homeWidgetWheel.addEventListener('click', () => {
+      if (typeof openWheelPage === 'function') openWheelPage();
+    });
+  }
+</script>
+
+<script>
   // Uygulamanın tüm verileri (görevler, tema, çark seçenekleri, kronometre,
   // koyu mod anahtarı) burada tanımlanan tek bir anahtar altında
   // localStorage'a yazılır. Böylece sayfa yenilense, sekme kapansa veya
@@ -5675,7 +7562,7 @@
 </script>
 
 <script>
-  const btn = document.querySelector('button');
+  const btn = document.getElementById('homeThemeBtn');
 
   // Animasyonun her zaman en az bu kadar görünür kalmasını garanti ediyoruz.
   // Kalem (pen) dokunuşları parmağa göre çok daha kısa sürdüğü için
@@ -5881,6 +7768,22 @@
   const wheelAddBtn = document.getElementById('wheelAddBtn');
   const wheelHub = document.getElementById('wheelHub');
   const wheelHubMark = document.getElementById('wheelHubMark');
+
+  // "Mini Oyunlar" artık nav bar'da kendi sekmesi olmadığından, Ana
+  // Sayfa'daki widget üzerinden açılıp geri butonuyla Ana Sayfa'ya dönen
+  // bağımsız bir sayfa (Takvim/Turlarım ile aynı açma/kapama deseni).
+  const openWheelPage = () => {
+    document.body.classList.add('is-wheel-open'); // nav bar'ı gizler
+    goToPage('page-4');
+  };
+
+  const closeWheelPage = () => {
+    document.body.classList.remove('is-wheel-open');
+    goToPage('page-1');
+  };
+
+  const wheelBackBtn = document.getElementById('wheelBackBtn');
+  if (wheelBackBtn) wheelBackBtn.addEventListener('click', closeWheelPage);
 
   const WHEEL_PALETTE = ['#ff90e8', '#ffd23f', '#6ec6ff', '#ff5c5c', '#8fe3a0', '#c9a6ff', '#ffb46e', '#9fb8ff', '#3f5aa8', '#7452a8'];
   const WHEEL_MAX_OPTIONS = 8;
@@ -6346,6 +8249,10 @@
   const lapsBackBtn = document.getElementById('lapsBackBtn');
   const lapsPageList = document.getElementById('lapsPageList');
   const lapsPageEmpty = document.getElementById('lapsPageEmpty');
+  const lapsClearBtn = document.getElementById('lapsClearBtn');
+  const lapsClearConfirmBackdrop = document.getElementById('lapsClearConfirmBackdrop');
+  const lapsClearConfirmCancel = document.getElementById('lapsClearConfirmCancel');
+  const lapsClearConfirmConfirm = document.getElementById('lapsClearConfirmConfirm');
   const stopwatchHistoryBtn = document.getElementById('stopwatchHistoryBtn');
   const page10BackBtn = document.getElementById('page10BackBtn');
 
@@ -6477,6 +8384,7 @@
     lapsPageList.innerHTML = html.replace(/stopwatch-lap-row/g, 'laps-page-row')
       .replace(/stopwatch-lap-index/g, 'laps-page-index');
     lapsPageEmpty.style.display = stopwatchLaps.length > 0 ? 'none' : '';
+    if (lapsClearBtn) lapsClearBtn.classList.toggle('is-hidden', stopwatchLaps.length === 0);
   };
 
   // Tam ekranda boş alana dokununca Tur butonunu (ve varsa tur listesini) göster/gizle;
@@ -6622,7 +8530,67 @@
     saveStopwatchState();
   };
 
-  stopwatchResetBtn.addEventListener('click', resetStopwatch);
+  const stopwatchResetConfirmBackdrop = document.getElementById('stopwatchResetConfirmBackdrop');
+  const stopwatchResetConfirmCancel = document.getElementById('stopwatchResetConfirmCancel');
+  const stopwatchResetConfirmConfirm = document.getElementById('stopwatchResetConfirmConfirm');
+
+  const openStopwatchResetConfirm = () => stopwatchResetConfirmBackdrop.classList.add('is-open');
+  const closeStopwatchResetConfirm = () => stopwatchResetConfirmBackdrop.classList.remove('is-open');
+
+  if (stopwatchResetConfirmCancel) stopwatchResetConfirmCancel.addEventListener('click', closeStopwatchResetConfirm);
+  if (stopwatchResetConfirmBackdrop) {
+    stopwatchResetConfirmBackdrop.addEventListener('click', (e) => {
+      if (e.target === stopwatchResetConfirmBackdrop) closeStopwatchResetConfirm();
+    });
+  }
+  if (stopwatchResetConfirmConfirm) {
+    stopwatchResetConfirmConfirm.addEventListener('click', () => {
+      closeStopwatchResetConfirm();
+      resetStopwatch();
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && stopwatchResetConfirmBackdrop && stopwatchResetConfirmBackdrop.classList.contains('is-open')) {
+      closeStopwatchResetConfirm();
+    }
+  });
+
+  stopwatchResetBtn.addEventListener('click', openStopwatchResetConfirm);
+
+  // ---- Turlarım sayfası: sadece turları sil (kronometreyi durdurmaz/sıfırlamaz) ----
+  const clearLaps = () => {
+    stopwatchLaps = [];
+    stopwatchControlsVisible = false;
+    stopwatchLapBtn.classList.remove('is-visible');
+    clearTimeout(lapControlsTimer);
+    renderLaps();
+    saveStopwatchState();
+  };
+
+  const openLapsClearConfirm = () => {
+    if (!stopwatchLaps.length) return;
+    lapsClearConfirmBackdrop.classList.add('is-open');
+  };
+  const closeLapsClearConfirm = () => lapsClearConfirmBackdrop.classList.remove('is-open');
+
+  if (lapsClearBtn) lapsClearBtn.addEventListener('click', openLapsClearConfirm);
+  if (lapsClearConfirmCancel) lapsClearConfirmCancel.addEventListener('click', closeLapsClearConfirm);
+  if (lapsClearConfirmBackdrop) {
+    lapsClearConfirmBackdrop.addEventListener('click', (e) => {
+      if (e.target === lapsClearConfirmBackdrop) closeLapsClearConfirm();
+    });
+  }
+  if (lapsClearConfirmConfirm) {
+    lapsClearConfirmConfirm.addEventListener('click', () => {
+      closeLapsClearConfirm();
+      clearLaps();
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lapsClearConfirmBackdrop && lapsClearConfirmBackdrop.classList.contains('is-open')) {
+      closeLapsClearConfirm();
+    }
+  });
   stopwatchLapsBtn.addEventListener('click', openLapsPage);
   lapsBackBtn.addEventListener('click', closeLapsPage);
   stopwatchHistoryBtn.addEventListener('click', openPage10);
@@ -6876,20 +8844,26 @@
     updateCalendarSelectedInfo();
   });
 
-  // Nav bar'daki "Takvim" sekmesine her basıldığında, ay görünümü en son
-  // seçilen tarihin ayına döner (kullanıcı ok tuşlarıyla başka bir aya
-  // gezinip sekmeden ayrılmışsa bile, sekmeye her dönüşte seçili tarih
-  // yeniden odağa gelir).
-  const page6NavInput = document.querySelector('.nav-input[value="page-6"]');
-  if (page6NavInput) {
-    page6NavInput.addEventListener('change', () => {
-      if (!page6NavInput.checked) return;
-      calendarViewYear = calendarSelectedDate.getFullYear();
-      calendarViewMonth = calendarSelectedDate.getMonth();
-      renderCalendarGrid();
-      updateCalendarSelectedInfo();
-    });
-  }
+  // "Takvim" artık nav bar'da kendi sekmesi olmadığından, Ana Sayfa'daki
+  // widget üzerinden açılıp geri butonuyla Ana Sayfa'ya dönen bağımsız bir
+  // sayfa (Turlarım/Kronometre Geçmişi ile aynı açma/kapama deseni).
+  // Açılışta ay görünümü en son seçilen tarihin ayına döner.
+  const openCalendarPage = () => {
+    document.body.classList.add('is-calendar-open'); // nav bar'ı gizler
+    goToPage('page-6');
+    calendarViewYear = calendarSelectedDate.getFullYear();
+    calendarViewMonth = calendarSelectedDate.getMonth();
+    renderCalendarGrid();
+    updateCalendarSelectedInfo();
+  };
+
+  const closeCalendarPage = () => {
+    document.body.classList.remove('is-calendar-open');
+    goToPage('page-1');
+  };
+
+  const calendarBackBtn = document.getElementById('calendarBackBtn');
+  if (calendarBackBtn) calendarBackBtn.addEventListener('click', closeCalendarPage);
 
   calendarPrevBtn.addEventListener('click', () => {
     calendarViewMonth -= 1;
@@ -7474,7 +9448,10 @@
       });
       input.addEventListener('blur', commit, { once: true });
     };
-    nameSpan.addEventListener('click', startRename);
+    nameSpan.addEventListener('click', () => {
+      if (!page8EditMode) return;
+      startRename();
+    });
 
     const addBtn = document.createElement('button');
     addBtn.type = 'button';
@@ -7518,7 +9495,6 @@
       input.type = 'text';
       input.className = 'page8-item-input';
       input.placeholder = 'Yeni ekle...';
-      input.maxLength = 40;
       row.appendChild(input);
       itemList.appendChild(row);
       input.focus();
@@ -7551,6 +9527,26 @@
   const page8RoutineGroupList = document.getElementById('page8RoutineGroupList');
   const page8AddCategoryBtn = document.getElementById('page8AddCategoryBtn');
   const page8AddRoutineGroupBtn = document.getElementById('page8AddRoutineGroupBtn');
+  const page8EditBtn = document.getElementById('page8EditBtn');
+
+  // Düzenleme modu: kalem ikonuna basılınca hem kategori/rutin grubu
+  // silme çarpısı hem de içindeki her görev/rutin satırının silme
+  // çarpısı ortaya çıkar. Liste yeniden çizilse de .is-edit-mode class'ı
+  // kapsayıcı (#page8CategoryList / #page8RoutineGroupList) üzerinde
+  // kaldığı için mod korunur (Sayfa 9/11'deki aynı mantık).
+  let page8EditMode = false;
+
+  const setPage8EditMode = (on) => {
+    if (on === page8EditMode) return;
+    page8EditMode = on;
+    page8CategoryList.classList.toggle('is-edit-mode', on);
+    page8RoutineGroupList.classList.toggle('is-edit-mode', on);
+    page8EditBtn.classList.toggle('is-active', on);
+    page8EditBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    page8EditBtn.setAttribute('aria-label', on ? 'Düzenlemeyi bitir' : 'Düzenle');
+  };
+
+  page8EditBtn.addEventListener('click', () => setPage8EditMode(!page8EditMode));
 
   // ---- Grup/kategori silme onayı: Ayarlar'daki "Tüm verileri sıfırla"
   //      onayıyla aynı brutalist pop-up, farklı id'lerle genel amaçlı
@@ -7694,21 +9690,19 @@
   const page9DateKey = (d) => `${d.getFullYear()}-${page9Pad2(d.getMonth() + 1)}-${page9Pad2(d.getDate())}`;
   const page9StartOfDay = (d) => { const n = new Date(d); n.setHours(0, 0, 0, 0); return n; };
 
-  // Gerçek YKS sayısal müfredatı: TYT'de 9 branş, AYT'de sayısala özgü 4 branş.
-  const TYT_DEFAULT_SUBJECTS = ['Türkçe', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü ve Ahlak Bilgisi', 'Matematik', 'Fizik', 'Kimya', 'Biyoloji'];
-  const AYT_DEFAULT_SUBJECTS = ['Matematik', 'Fizik', 'Kimya', 'Biyoloji'];
-
-  const page9BuildDefaultSubjects = (names) => names.map((name, i) => ({
-    id: page9GenId(),
-    name,
-    color: WHEEL_PALETTE[i % WHEEL_PALETTE.length]
-  }));
-
+  // Artık dersler her gün otomatik olarak gelmiyor: sayfa her gün boş
+  // açılır, dersler tek tek "+ Ders Ekle" ile o günün listesine eklenir.
+  // Bir dersi düzenleme modundaki pin butonuyla sabitlersek, o ders bir
+  // daha silinene/sabitten çıkarılana kadar her gün otomatik görünür.
   const PAGE9_DEFAULT_STATE = () => ({
-    subjects: {
-      tyt: page9BuildDefaultSubjects(TYT_DEFAULT_SUBJECTS),
-      ayt: page9BuildDefaultSubjects(AYT_DEFAULT_SUBJECTS)
-    },
+    // subjects: derslerin ana tanımı (isim/renk/sabit mi). Bir dersin bu
+    // listede olması onu her gün göstermez; görünürlük aşağıdaki dayLists
+    // (o gün eklenenler) ve pinned (sabitlenenler) alanlarına bağlıdır.
+    subjects: { tyt: [], ayt: [] },
+    // dayLists: { 'YYYY-MM-DD': { tyt: [subjectId, ...], ayt: [subjectId, ...] } }
+    // O gün "+ Ders Ekle" ile eklenmiş (henüz sabitlenmemiş) derslerin
+    // kimlikleri; sadece o günün sayfasında görünmelerini sağlar.
+    dayLists: {},
     logs: [] // { id, date:'YYYY-MM-DD', track:'tyt'|'ayt', subjectId, count, ts }
   });
 
@@ -7719,18 +9713,70 @@
     ? savedPage9
     : PAGE9_DEFAULT_STATE();
 
+  // Geriye dönük uyumluluk: eski kayıtlarda "pinned" alanı ve "dayLists"
+  // henüz yoktu. Eksik dersler sabit olmayan (pinned:false) kabul edilir;
+  // daha önce girilmiş log kayıtları da ait oldukları günün listesine
+  // eklenir, böylece geçmişte girilmiş veriler görünürlüğünü kaybetmez.
+  ['tyt', 'ayt'].forEach((track) => {
+    page9State.subjects[track].forEach((s) => { if (typeof s.pinned !== 'boolean') s.pinned = false; });
+  });
+  if (!page9State.dayLists || typeof page9State.dayLists !== 'object' || Array.isArray(page9State.dayLists)) {
+    page9State.dayLists = {};
+  }
+  page9State.logs.forEach((log) => {
+    const entry = page9State.dayLists[log.date] || (page9State.dayLists[log.date] = { tyt: [], ayt: [] });
+    if (!Array.isArray(entry[log.track])) entry[log.track] = [];
+    if (!entry[log.track].includes(log.subjectId)) entry[log.track].push(log.subjectId);
+  });
+
   const savePage9State = () => saveAppState({ page9: page9State });
   savePage9State(); // ilk yükleme/sıfırlama sonrası durumu hemen kaydet
+
+  // Belirli bir gün + branş için "o gün eklenmiş ders id'leri" dizisini
+  // döndürür; yoksa oluşturup state'e bağlar (referans olarak döner, bu
+  // yüzden üzerine push etmek state'i doğrudan günceller).
+  const page9GetDayList = (dateKey, track) => {
+    const entry = page9State.dayLists[dateKey] || (page9State.dayLists[dateKey] = { tyt: [], ayt: [] });
+    if (!Array.isArray(entry[track])) entry[track] = [];
+    return entry[track];
+  };
 
   let page9Track = 'tyt';
   let page9Range = 'day';
   let page9SelectedDate = page9StartOfDay(new Date());
+
+  // Seçili gün + sekme için görünmesi gereken dersler: sabitlenmiş (pinned)
+  // olanlar her zaman, sabit olmayanlar ise sadece o gün eklenmişlerse.
+  const page9VisibleSubjects = () => {
+    const dateKey = page9DateKey(page9SelectedDate);
+    const dayIds = (page9State.dayLists[dateKey] && page9State.dayLists[dateKey][page9Track]) || [];
+    return page9State.subjects[page9Track].filter((s) => s.pinned || dayIds.includes(s.id));
+  };
 
   const page9TrackSegmented = document.getElementById('page9TrackSegmented');
   const page9TrackSlider = document.getElementById('page9TrackSlider');
   const page9TrackOptions = Array.from(page9TrackSegmented.querySelectorAll('.settings-segmented-option'));
   const page9SubjectList = document.getElementById('page9SubjectList');
   const page9AddSubjectBtn = document.getElementById('page9AddSubjectBtn');
+  const page9EditBtn = document.getElementById('page9EditBtn');
+
+  // Düzenleme modu: kalem ikonuna basılınca branş kartlarındaki silme
+  // butonları ortaya çıkar ve isimler yeniden adlandırılabilir olur
+  // (Sayfa 11'deki denemeler listesiyle aynı mantık). Liste yeniden
+  // çizilse de .is-edit-mode class'ı kapsayıcı üzerinde kaldığı için
+  // mod korunur.
+  let page9EditMode = false;
+
+  const setPage9EditMode = (on) => {
+    if (on === page9EditMode) return;
+    page9EditMode = on;
+    page9SubjectList.classList.toggle('is-edit-mode', on);
+    page9EditBtn.classList.toggle('is-active', on);
+    page9EditBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    page9EditBtn.setAttribute('aria-label', on ? 'Düzenlemeyi bitir' : 'Branşları düzenle');
+  };
+
+  page9EditBtn.addEventListener('click', () => setPage9EditMode(!page9EditMode));
   const page9DateLabel = document.getElementById('page9DateLabel');
   const page9PrevDayBtn = document.getElementById('page9PrevDayBtn');
   const page9NextDayBtn = document.getElementById('page9NextDayBtn');
@@ -7769,34 +9815,43 @@
 
   const page9NextColor = (track) => WHEEL_PALETTE[page9State.subjects[track].length % WHEEL_PALETTE.length];
 
-  const page9AddLog = (subjectId, count) => {
-    if (!count || count <= 0) return;
-    page9State.logs.push({
-      id: page9GenId(),
-      date: page9DateKey(page9SelectedDate),
-      track: page9Track,
-      subjectId,
-      count,
-      ts: Date.now()
-    });
+  // Seçili tarih + branş için tek bir log kaydını doğrudan istenen sayıya
+  // ayarlar (ekleme değil, o günkü toplamı belirleme). count 0 ise kayıt
+  // tamamen silinir; aksi halde mevcut kayıt güncellenir ya da oluşturulur.
+  const page9SetCount = (subjectId, count) => {
+    const key = page9DateKey(page9SelectedDate);
+    const existing = page9State.logs.find((log) => log.date === key && log.subjectId === subjectId);
+    if (!count || count <= 0) {
+      if (existing) {
+        page9State.logs = page9State.logs.filter((log) => log !== existing);
+        savePage9State();
+        renderPage9Summary();
+      }
+      return;
+    }
+    if (existing) {
+      existing.count = count;
+      existing.ts = Date.now();
+    } else {
+      page9State.logs.push({
+        id: page9GenId(),
+        date: key,
+        track: page9Track,
+        subjectId,
+        count,
+        ts: Date.now()
+      });
+    }
     savePage9State();
-    renderPage9SubjectList();
     renderPage9Summary();
   };
 
-  // Tek bir ders kartı: renk noktası (rengi değiştirir), ad (dokununca
-  // yeniden adlandırılır), seçili gündeki toplam rozet, silme butonu ve
-  // altında hızlı soru girişi (eksi/artı, sayı kutusu, Ekle butonu).
+  // Tek bir ders satırı: renk noktası (rengi değiştirir), ad (dokununca
+  // yeniden adlandırılır), silme butonu ve hızlı soru girişi (eksi/artı,
+  // sayı kutusu) — hepsi tek satırda, dış özet kartının içinde.
   const createPage9SubjectCard = (subject) => {
-    const card = document.createElement('div');
-    card.className = 'page9-subject-card';
-
-    const accent = document.createElement('div');
-    accent.className = 'page9-subject-accent';
-    accent.style.background = subject.color;
-
-    const top = document.createElement('div');
-    top.className = 'page9-subject-top';
+    const row = document.createElement('div');
+    row.className = 'page9-subject-row';
 
     const dot = document.createElement('button');
     dot.type = 'button';
@@ -7806,7 +9861,6 @@
     dot.addEventListener('click', () => {
       openColorPicker(subject.name, subject.color, (color) => {
         subject.color = color;
-        accent.style.background = color;
         dot.style.background = color;
         savePage9State();
         renderPage9Summary();
@@ -7848,11 +9902,30 @@
       });
       input.addEventListener('blur', commit, { once: true });
     };
-    nameSpan.addEventListener('click', startRename);
+    nameSpan.addEventListener('click', () => {
+      if (!page9EditMode) return;
+      if (row.dataset.justDragged === '1') { row.dataset.justDragged = ''; return; }
+      startRename();
+    });
 
-    const badge = document.createElement('span');
-    badge.className = 'page9-subject-badge';
-    badge.textContent = `${page9SelectedCountFor(subject.id)} soru`;
+    // Sabitleme (pin) butonu: sadece düzenleme modunda görünür. Bir ders
+    // sabitlenirse artık her gün otomatik olarak listede çıkar; sabit
+    // değilse sadece eklendiği günde görünür.
+    const pinBtn = document.createElement('button');
+    pinBtn.type = 'button';
+    pinBtn.className = 'page9-subject-pin';
+    pinBtn.classList.toggle('is-active', !!subject.pinned);
+    pinBtn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="13" x2="12" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    const page9PinLabel = () => (subject.pinned ? `"${subject.name}" sabitlemesini kaldır` : `"${subject.name}" dersini sabitle`);
+    pinBtn.setAttribute('aria-label', page9PinLabel());
+    pinBtn.setAttribute('aria-pressed', subject.pinned ? 'true' : 'false');
+    pinBtn.addEventListener('click', () => {
+      subject.pinned = !subject.pinned;
+      pinBtn.classList.toggle('is-active', subject.pinned);
+      pinBtn.setAttribute('aria-pressed', subject.pinned ? 'true' : 'false');
+      pinBtn.setAttribute('aria-label', page9PinLabel());
+      savePage9State();
+    });
 
     const delBtn = document.createElement('button');
     delBtn.type = 'button';
@@ -7864,16 +9937,16 @@
         const list = page9State.subjects[page9Track];
         page9State.subjects[page9Track] = list.filter((s) => s.id !== subject.id);
         page9State.logs = page9State.logs.filter((log) => log.subjectId !== subject.id);
+        Object.values(page9State.dayLists).forEach((entry) => {
+          if (Array.isArray(entry[page9Track])) {
+            entry[page9Track] = entry[page9Track].filter((id) => id !== subject.id);
+          }
+        });
         savePage9State();
         renderPage9SubjectList();
         renderPage9Summary();
       });
     });
-
-    top.appendChild(dot);
-    top.appendChild(nameWrap);
-    top.appendChild(badge);
-    top.appendChild(delBtn);
 
     const controls = document.createElement('div');
     controls.className = 'page9-subject-controls';
@@ -7890,7 +9963,7 @@
     input.className = 'page9-count-input';
     input.min = '0';
     input.max = '999';
-    input.value = '10';
+    input.value = String(page9SelectedCountFor(subject.id));
 
     const plusBtn = document.createElement('button');
     plusBtn.type = 'button';
@@ -7898,45 +9971,328 @@
     plusBtn.innerHTML = '<span class="page9-stepper-plus-icon">+</span>';
     plusBtn.setAttribute('aria-label', 'Sayıyı artır');
 
+    const commitCount = (value) => {
+      const count = Math.max(0, Math.min(999, parseInt(value, 10) || 0));
+      input.value = String(count);
+      page9SetCount(subject.id, count);
+    };
+
     minusBtn.addEventListener('click', () => {
-      const v = Math.max(0, (parseInt(input.value, 10) || 0) - 5);
-      input.value = String(v);
+      commitCount((parseInt(input.value, 10) || 0) - 5);
     });
     plusBtn.addEventListener('click', () => {
-      const v = Math.min(999, (parseInt(input.value, 10) || 0) + 5);
-      input.value = String(v);
+      commitCount((parseInt(input.value, 10) || 0) + 5);
+    });
+    input.addEventListener('change', () => commitCount(input.value));
+    input.addEventListener('blur', () => commitCount(input.value));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
     });
 
-    const addBtn = document.createElement('button');
-    addBtn.type = 'button';
-    addBtn.className = 'add-task-btn page9-add-count-btn';
-    addBtn.textContent = 'Ekle';
-    addBtn.addEventListener('click', () => {
-      const count = parseInt(input.value, 10) || 0;
-      page9AddLog(subject.id, count);
-    });
+    const stepper = document.createElement('div');
+    stepper.className = 'page9-stepper';
+    stepper.appendChild(minusBtn);
+    stepper.appendChild(input);
+    stepper.appendChild(plusBtn);
+    controls.appendChild(stepper);
 
-    controls.appendChild(minusBtn);
-    controls.appendChild(input);
-    controls.appendChild(plusBtn);
-    controls.appendChild(addBtn);
-
-    const body = document.createElement('div');
-    body.appendChild(top);
-    body.appendChild(controls);
-
-    card.appendChild(accent);
-    card.appendChild(body);
-    return card;
+    row.appendChild(dot);
+    row.appendChild(nameWrap);
+    row.appendChild(pinBtn);
+    row.appendChild(delBtn);
+    row.appendChild(controls);
+    row.dataset.subjectId = subject.id;
+    row.style.animationDelay = `-${(Math.random() * 0.3).toFixed(2)}s`;
+    page9AttachRowDrag(row);
+    return row;
   };
+
+  // Sıralamayı DOM'daki güncel satır sırasına göre kalıcı hale getirir.
+  const page9ReorderFromDom = () => {
+    const ids = Array.from(page9SubjectList.querySelectorAll('.page9-subject-row')).map((el) => el.dataset.subjectId);
+    const list = page9State.subjects[page9Track];
+    const byId = new Map(list.map((s) => [s.id, s]));
+    const reordered = ids.map((id) => byId.get(id)).filter(Boolean);
+    list.forEach((s) => { if (!ids.includes(s.id)) reordered.push(s); });
+    page9State.subjects[page9Track] = reordered;
+    savePage9State();
+  };
+
+  // Düzenleme modunda bir satıra basılı tutup sürükleyerek sırasını
+  // değiştirme. Satır önce normal akıştan çıkarılır (position: absolute)
+  // ve parmağı/imleci dikeyde takip eder; boşluğunu bir yer tutucu
+  // (placeholder) korur, bu yer tutucu komşu satırların ortasını geçtikçe
+  // yer değiştirir. Bırakıldığında satır, yer tutucunun konumuna oturur
+  // ve yeni sıralama kalıcı olarak kaydedilir.
+  const page9AttachRowDrag = (row) => {
+    row.addEventListener('pointerdown', (e) => {
+      if (!page9EditMode) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (e.target.closest('.page9-subject-dot, .page9-subject-delete, .page9-stepper-btn, .page9-count-input')) return;
+
+      const pointerId = e.pointerId;
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const container = page9SubjectList;
+      let dragging = false;
+      let placeholder = null;
+      let initialTop = 0;
+      let rowHeight = 0;
+
+      const onMove = (ev) => {
+        if (ev.pointerId !== pointerId) return;
+        const dx = ev.clientX - startX;
+        const dy = ev.clientY - startY;
+
+        if (!dragging) {
+          if (Math.abs(dy) < 6 && Math.abs(dx) < 6) return;
+          dragging = true;
+          row.dataset.justDragged = '1';
+
+          const containerRect = container.getBoundingClientRect();
+          const rowRect = row.getBoundingClientRect();
+          rowHeight = rowRect.height;
+          initialTop = rowRect.top - containerRect.top;
+
+          placeholder = document.createElement('div');
+          placeholder.className = 'page9-subject-row-placeholder';
+          placeholder.style.height = `${rowHeight}px`;
+          container.insertBefore(placeholder, row);
+
+          row.classList.add('is-dragging');
+          row.style.position = 'absolute';
+          row.style.left = '0';
+          row.style.right = '0';
+          row.style.top = `${initialTop}px`;
+
+          try { row.setPointerCapture(pointerId); } catch (err) { /* yoksay */ }
+        }
+
+        ev.preventDefault();
+        const containerRect = container.getBoundingClientRect();
+        const newTop = initialTop + dy;
+        row.style.top = `${newTop}px`;
+
+        const rowCenter = newTop + rowHeight / 2;
+        const siblings = Array.from(container.children).filter((el) => el !== row && el !== placeholder);
+        let target = null;
+        for (const sib of siblings) {
+          const sibRect = sib.getBoundingClientRect();
+          const sibCenter = (sibRect.top - containerRect.top) + sibRect.height / 2;
+          if (rowCenter < sibCenter) { target = sib; break; }
+        }
+        if (target) {
+          if (placeholder.nextSibling !== target) container.insertBefore(placeholder, target);
+        } else if (placeholder.nextSibling) {
+          container.appendChild(placeholder);
+        }
+      };
+
+      const onUp = (ev) => {
+        if (ev.pointerId !== pointerId) return;
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        document.removeEventListener('pointercancel', onUp);
+
+        if (dragging) {
+          row.classList.remove('is-dragging');
+          row.style.position = '';
+          row.style.left = '';
+          row.style.right = '';
+          row.style.top = '';
+          container.insertBefore(row, placeholder);
+          placeholder.remove();
+          page9ReorderFromDom();
+          setTimeout(() => { row.dataset.justDragged = ''; }, 250);
+        }
+      };
+
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+      document.addEventListener('pointercancel', onUp);
+    });
+  };
+
+  // Hazır TYT/AYT branş adları: "+ Ders Ekle" pop-up'ında listelenir.
+  const PAGE9_PRESET_SUBJECTS = {
+    tyt: ['Türkçe', 'Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Tarih', 'Coğrafya', 'Felsefe', 'Din'],
+    ayt: ['Matematik', 'Fizik', 'Kimya', 'Biyoloji']
+  };
+
+  const page9AddBackdrop = document.getElementById('page9AddBackdrop');
+  const page9AddSubtitle = document.getElementById('page9AddSubtitle');
+  const page9AddClose = document.getElementById('page9AddClose');
+  const page9AddSelectAll = document.getElementById('page9AddSelectAll');
+  const page9AddGrid = document.getElementById('page9AddGrid');
+  const page9AddCustomInput = document.getElementById('page9AddCustomInput');
+  const page9AddCustomBtn = document.getElementById('page9AddCustomBtn');
+  const page9AddConfirm = document.getElementById('page9AddConfirm');
+
+  // Pop-up açıkken kullanılan geçici liste: { name, isCustom, disabled, selected }.
+  // disabled = o gün için zaten görünen (eklenmiş ya da sabitlenmiş) bir ders.
+  let page9AddEntries = [];
+
+  const page9BuildAddEntries = () => {
+    const visibleNames = new Set(page9VisibleSubjects().map((s) => s.name.trim().toLowerCase()));
+    const presets = PAGE9_PRESET_SUBJECTS[page9Track] || [];
+    page9AddEntries = presets.map((name) => ({
+      name,
+      isCustom: false,
+      disabled: visibleNames.has(name.trim().toLowerCase()),
+      selected: false
+    }));
+  };
+
+  const page9UpdateAddConfirmState = () => {
+    page9AddConfirm.disabled = !page9AddEntries.some((e) => e.selected);
+  };
+
+  const page9UpdateSelectAllState = () => {
+    const selectable = page9AddEntries.filter((e) => !e.disabled);
+    const allSelected = selectable.length > 0 && selectable.every((e) => e.selected);
+    page9AddSelectAll.classList.toggle('is-active', allSelected);
+    page9AddSelectAll.textContent = allSelected ? 'Tümünü Kaldır' : 'Tümünü Seç';
+    page9AddSelectAll.disabled = selectable.length === 0;
+  };
+
+  // Pop-up içeriğini (hazır branşlar + varsa eklenmiş kendi dersleri)
+  // baştan çizer. Bir çipe tıklamak seçimi açar/kapatır; zaten o gün
+  // görünen bir branş "Eklendi" notuyla devre dışı bırakılır.
+  const page9RenderAddGrid = () => {
+    page9AddGrid.innerHTML = '';
+    page9AddEntries.forEach((entry, idx) => {
+      const chip = document.createElement('div');
+      chip.className = 'page9-add-chip';
+      chip.classList.toggle('is-selected', entry.selected);
+      chip.classList.toggle('is-disabled', entry.disabled);
+
+      const box = document.createElement('span');
+      box.className = 'page9-add-chip-box';
+      box.textContent = '✓';
+      chip.appendChild(box);
+
+      const name = document.createElement('span');
+      name.className = 'page9-add-chip-name';
+      name.textContent = entry.name;
+      chip.appendChild(name);
+
+      if (entry.disabled) {
+        const note = document.createElement('span');
+        note.className = 'page9-add-chip-note';
+        note.textContent = 'Eklendi';
+        chip.appendChild(note);
+      } else if (entry.isCustom) {
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'delete-btn page9-add-chip-delete';
+        del.textContent = '×';
+        del.setAttribute('aria-label', `"${entry.name}" dersini listeden çıkar`);
+        del.addEventListener('click', (e) => {
+          e.stopPropagation();
+          page9AddEntries.splice(idx, 1);
+          page9RenderAddGrid();
+          page9UpdateAddConfirmState();
+        });
+        chip.appendChild(del);
+      }
+
+      if (!entry.disabled) {
+        chip.addEventListener('click', () => {
+          entry.selected = !entry.selected;
+          page9RenderAddGrid();
+          page9UpdateAddConfirmState();
+        });
+      }
+
+      page9AddGrid.appendChild(chip);
+    });
+    page9UpdateSelectAllState();
+  };
+
+  page9AddSelectAll.addEventListener('click', () => {
+    const selectable = page9AddEntries.filter((e) => !e.disabled);
+    const allSelected = selectable.length > 0 && selectable.every((e) => e.selected);
+    selectable.forEach((e) => { e.selected = !allSelected; });
+    page9RenderAddGrid();
+    page9UpdateAddConfirmState();
+  });
+
+  // Kendi ders adını yazıp "+" ile listeye ekler (otomatik seçili gelir).
+  // Aynı isim zaten listede varsa (devre dışı değilse) tekrar eklemek
+  // yerine sadece onu seçili hale getirir.
+  const page9AddCustomEntry = () => {
+    const raw = page9AddCustomInput.value.trim();
+    if (!raw) return;
+    const lower = raw.toLowerCase();
+    const existing = page9AddEntries.find((e) => e.name.trim().toLowerCase() === lower);
+    if (existing) {
+      if (!existing.disabled) existing.selected = true;
+    } else {
+      page9AddEntries.push({ name: raw, isCustom: true, disabled: false, selected: true });
+    }
+    page9AddCustomInput.value = '';
+    page9RenderAddGrid();
+    page9UpdateAddConfirmState();
+    page9AddCustomInput.focus();
+  };
+  page9AddCustomBtn.addEventListener('click', page9AddCustomEntry);
+  page9AddCustomInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); page9AddCustomEntry(); }
+  });
+
+  const openPage9AddPopup = () => {
+    page9BuildAddEntries();
+    page9AddSubtitle.textContent = `${PAGE9_TRACK_LABELS[page9Track]} branşları`;
+    page9AddCustomInput.value = '';
+    page9RenderAddGrid();
+    page9UpdateAddConfirmState();
+    page9AddBackdrop.classList.add('is-open');
+  };
+
+  const closePage9AddPopup = () => {
+    page9AddBackdrop.classList.remove('is-open');
+  };
+
+  page9AddClose.addEventListener('click', closePage9AddPopup);
+  page9AddBackdrop.addEventListener('click', (e) => {
+    if (e.target === page9AddBackdrop) closePage9AddPopup();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && page9AddBackdrop.classList.contains('is-open')) closePage9AddPopup();
+  });
+
+  // Seçilen (hazır + kendi eklenen) tüm dersleri o günün listesine ekler.
+  // Aynı isimde ders zaten ana listede varsa (başka bir günde eklenmiş/
+  // silinmiş olsa da) yeni bir kopya oluşturmak yerine onu yeniden kullanır.
+  page9AddConfirm.addEventListener('click', () => {
+    const selected = page9AddEntries.filter((e) => e.selected && !e.disabled);
+    if (!selected.length) return;
+    const dateKey = page9DateKey(page9SelectedDate);
+    const dayList = page9GetDayList(dateKey, page9Track);
+    const masterList = page9State.subjects[page9Track];
+
+    selected.forEach(({ name }) => {
+      const lower = name.trim().toLowerCase();
+      let subject = masterList.find((s) => s.name.trim().toLowerCase() === lower);
+      if (!subject) {
+        subject = { id: page9GenId(), name: name.trim(), color: page9NextColor(page9Track), pinned: false };
+        masterList.push(subject);
+      }
+      if (!subject.pinned && !dayList.includes(subject.id)) dayList.push(subject.id);
+    });
+
+    savePage9State();
+    renderPage9SubjectList();
+    closePage9AddPopup();
+  });
 
   const renderPage9SubjectList = () => {
     page9SubjectList.innerHTML = '';
-    const subjects = page9State.subjects[page9Track];
+    const subjects = page9VisibleSubjects();
     if (!subjects.length) {
       const empty = document.createElement('div');
       empty.className = 'page9-summary-empty';
-      empty.textContent = 'Henüz ders eklenmedi.';
+      empty.textContent = 'Bu gün için ders eklenmedi.';
       page9SubjectList.appendChild(empty);
       return;
     }
@@ -7945,14 +10301,8 @@
     });
   };
 
-  page9AddSubjectBtn.addEventListener('click', () => {
-    const subject = { id: page9GenId(), name: 'Yeni Ders', color: page9NextColor(page9Track) };
-    page9State.subjects[page9Track].push(subject);
-    savePage9State();
-    renderPage9SubjectList();
-    const nameEl = page9SubjectList.lastElementChild.querySelector('.page9-subject-name');
-    if (nameEl) nameEl.click();
-  });
+  page9AddSubjectBtn.addEventListener('click', openPage9AddPopup);
+
 
   // ---- TYT/AYT sekmesi ----
   const setPage9Track = (value) => {
@@ -8223,22 +10573,36 @@
     return `${PAGE10_MONTHS_TR[start.getMonth()]} ${start.getFullYear()}`;
   };
 
+  // Seçili tarihin ait olduğu aralık (gün/hafta/ay), bugünün ait olduğu
+  // aralıkla aynı veya ondan sonra mı diye bakar. Gün modunda tek günü,
+  // hafta modunda haftanın başlangıcını, ay modunda ayın başlangıcını
+  // karşılaştırır; böylece "ileri" oku hiçbir modda bugünün aralığını
+  // geçemez.
+  const page10IsAtOrAfterTodayRange = (date) => {
+    const today = page10StartOfDay(new Date());
+    if (page10Range === 'day') return date.getTime() >= today.getTime();
+    if (page10Range === 'week') {
+      return page10GetWeekStart(date).getTime() >= page10GetWeekStart(today).getTime();
+    }
+    const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+    const todayMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    return monthStart.getTime() >= todayMonthStart.getTime();
+  };
+
   // Gün seçiliyken üstteki tarih kutusunu gösterir; hafta/ay seçiliyken
   // gezinme okları o aralığı bir birim ileri/geri kaydırır.
   const page10RenderDateRow = () => {
     page10DateLabel.textContent = page10RangeLabelText();
-    const today = page10StartOfDay(new Date());
-    page10NextBtn.disabled = page10Range === 'day' && page10SelectedDate.getTime() >= today.getTime();
+    page10NextBtn.disabled = page10IsAtOrAfterTodayRange(page10SelectedDate);
   };
 
   const shiftPage10Date = (dir) => {
+    if (dir > 0 && page10IsAtOrAfterTodayRange(page10SelectedDate)) return;
     const next = new Date(page10SelectedDate);
     if (page10Range === 'day') next.setDate(next.getDate() + dir);
     else if (page10Range === 'week') next.setDate(next.getDate() + dir * 7);
     else next.setMonth(next.getMonth() + dir);
 
-    const today = page10StartOfDay(new Date());
-    if (page10Range === 'day' && next.getTime() > today.getTime()) return;
     page10SelectedDate = page10StartOfDay(next);
     page10RenderDateRow();
     renderPage10();
@@ -8393,6 +10757,12 @@
 
   const PAGE11_TYPE_LABELS = { tyt: 'TYT', ayt: 'AYT' };
   const PAGE11_BUBBLE_STATES = ['none', 'correct', 'wrong', 'blank'];
+  const PAGE11_ANSWERS = ['A', 'B', 'C', 'D', 'E'];
+
+  // Baloncuk rozetinde kullanılan küçük ikonlar: görsel eklenmemişse
+  // kamera, eklenmişse tik işareti.
+  const PAGE11_PHOTO_CAMERA_ICON = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 8h3l1.6-2.2h6.8L17 8h3a1 1 0 0 1 1 1v9.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="13.2" r="3" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+  const PAGE11_PHOTO_CHECK_ICON = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 12.5l5 5L20 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   // Denemelerdeki branş renkleri artık Soru Takibi (Sayfa 9) çizelgesindeki
   // renklerle birebir eşleşir: isim üzerinden o dersin güncel rengi
@@ -8453,6 +10823,29 @@
       return { subject: subj, correct, wrong, blank, net };
     });
     return { bySubject, totalCorrect, totalWrong, totalBlank, totalNet };
+  };
+
+  // ---- Yanlış/boş bırakılan sorulara eklenen görseller ----
+  // Her deneme, branş anahtarına göre (subjectKey) ve soru sırasına
+  // göre (idx) seyrek (sparse) bir harita tutar: exam.photos[subjectKey][idx]
+  // = { image: dataURL, answer: 'A' }. Eski kayıtlı denemelerde bu alan
+  // hiç yoktur; tüm erişimler bunu güvenle varsayar.
+  const page11GetPhoto = (exam, subjectKey, idx) => (
+    (exam.photos && exam.photos[subjectKey] && exam.photos[subjectKey][idx]) || null
+  );
+
+  const page11SetPhoto = (exam, subjectKey, idx, data) => {
+    if (!exam.photos || typeof exam.photos !== 'object') exam.photos = {};
+    if (!exam.photos[subjectKey] || typeof exam.photos[subjectKey] !== 'object') exam.photos[subjectKey] = {};
+    exam.photos[subjectKey][idx] = data;
+    savePage11State();
+  };
+
+  const page11RemovePhoto = (exam, subjectKey, idx) => {
+    if (exam.photos && exam.photos[subjectKey]) {
+      delete exam.photos[subjectKey][idx];
+    }
+    savePage11State();
   };
 
   const page11FormatNet = (n) => {
@@ -8914,6 +11307,42 @@
           page11CycleBubble(exam, subject.key, idx);
           renderExamDetail();
         });
+
+        // Yanlış yapılan veya boş bırakılan sorularda köşeye bir görsel
+        // ekleme/düzenleme rozeti eklenir. stopPropagation ile ana
+        // baloncuğun doğru/yanlış/boş döngüsünü tetiklemez.
+        // Yanlış yapılan/boş bırakılan sorularda VEYA daha önce görsel
+        // eklenmiş bir soruda (durum sonradan "Tümünü Doğru İşaretle" /
+        // "Tüm İşaretleri Kaldır" ile değişmiş olsa bile) köşeye görsel
+        // ekleme/düzenleme rozeti eklenir; böylece hangi sorunun görseli
+        // olduğu işaretler kaldırılsa da kaybolmaz.
+        const photo = page11GetPhoto(exam, subject.key, idx);
+        if (state === 'wrong' || state === 'blank' || photo) {
+          const photoBtn = document.createElement('span');
+          photoBtn.className = 'exam-detail-bubble-photo-btn';
+          if (photo) photoBtn.classList.add('has-photo');
+          photoBtn.setAttribute('role', 'button');
+          photoBtn.setAttribute('tabindex', '0');
+          photoBtn.setAttribute(
+            'aria-label',
+            photo
+              ? `${subject.name} soru ${idx + 1} görselini düzenle`
+              : `${subject.name} soru ${idx + 1} için görsel ekle`
+          );
+          photoBtn.innerHTML = PAGE11_PHOTO_CAMERA_ICON;
+          photoBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (photo) {
+              openPage11QuestionModal(exam, subject.key, idx, null);
+            } else {
+              page11PendingPhotoTarget = { examId: exam.id, subjectKey: subject.key, idx };
+              page11QuestionFileInput.value = '';
+              page11QuestionFileInput.click();
+            }
+          });
+          bubble.appendChild(photoBtn);
+        }
+
         grid.appendChild(bubble);
       });
 
@@ -8973,8 +11402,759 @@
     });
   });
 
+  // ---- Yanlış/boş bırakılan soruya görsel ekleme pop-up'ı ----
+  const page11QuestionBackdrop = document.getElementById('page11QuestionBackdrop');
+  const page11QuestionClose = document.getElementById('page11QuestionClose');
+  const page11QuestionPreviewImg = document.getElementById('page11QuestionPreviewImg');
+  const page11QuestionChangeBtn = document.getElementById('page11QuestionChangeBtn');
+  const page11QuestionAnswerGrid = document.getElementById('page11QuestionAnswerGrid');
+  const page11QuestionConfirm = document.getElementById('page11QuestionConfirm');
+  const page11QuestionRemoveBtn = document.getElementById('page11QuestionRemoveBtn');
+  const page11QuestionFileInput = document.getElementById('page11QuestionFileInput');
+
+  // Pop-up açıkken hedef soru (hangi deneme/branş/sıra) ve seçilen
+  // değerler; dosya seçici hem yeni görsel eklerken hem de mevcut
+  // görseli değiştirirken aynı input'u kullanır (page11PendingPhotoTarget).
+  let page11QuestionTarget = null;
+  let page11PendingPhotoTarget = null;
+  let page11QuestionPendingImage = null;
+  let page11QuestionPendingAnswer = null;
+
+  const page11UpdateQuestionConfirmState = () => {
+    page11QuestionConfirm.disabled = !(page11QuestionPendingImage && page11QuestionPendingAnswer);
+  };
+
+  const page11BuildQuestionAnswerGrid = () => {
+    page11QuestionAnswerGrid.innerHTML = '';
+    PAGE11_ANSWERS.forEach((letter) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'qhavuz-add-answer-btn';
+      btn.textContent = letter;
+      btn.setAttribute('aria-label', `Doğru cevap ${letter}`);
+      if (page11QuestionPendingAnswer === letter) btn.classList.add('is-selected');
+      btn.addEventListener('click', () => {
+        page11QuestionPendingAnswer = letter;
+        page11BuildQuestionAnswerGrid();
+        page11UpdateQuestionConfirmState();
+      });
+      page11QuestionAnswerGrid.appendChild(btn);
+    });
+  };
+
+  // imageDataUrl verilirse (yeni seçilen/değiştirilen görsel) onu, yoksa
+  // o soruya daha önce kaydedilmiş görseli kullanır; her iki durumda da
+  // önceden kayıtlı doğru cevap varsa ön seçili gelir.
+  const openPage11QuestionModal = (exam, subjectKey, idx, imageDataUrl) => {
+    const existing = page11GetPhoto(exam, subjectKey, idx);
+    page11QuestionTarget = { examId: exam.id, subjectKey, idx };
+    page11QuestionPendingImage = imageDataUrl || (existing && existing.image) || null;
+    page11QuestionPendingAnswer = (existing && existing.answer) || null;
+    if (!page11QuestionPendingImage) return;
+    page11QuestionPreviewImg.src = page11QuestionPendingImage;
+    page11QuestionRemoveBtn.classList.toggle('is-hidden', !existing);
+    page11BuildQuestionAnswerGrid();
+    page11UpdateQuestionConfirmState();
+    page11QuestionBackdrop.classList.add('is-open');
+  };
+
+  const closePage11QuestionModal = () => {
+    page11QuestionBackdrop.classList.remove('is-open');
+    page11QuestionTarget = null;
+    page11PendingPhotoTarget = null;
+    page11QuestionPendingImage = null;
+    page11QuestionPendingAnswer = null;
+    page11QuestionFileInput.value = '';
+  };
+
+  // Rozetten (yeni ekleme) veya "Fotoğrafı Değiştir" butonundan (mevcut
+  // görseli değiştirme) tetiklenen ortak dosya seçici.
+  page11QuestionFileInput.addEventListener('change', () => {
+    const file = page11QuestionFileInput.files && page11QuestionFileInput.files[0];
+    if (!file || !page11PendingPhotoTarget) return;
+    const { examId, subjectKey, idx } = page11PendingPhotoTarget;
+    const exam = page11State.exams.find((it) => it.id === examId);
+    if (!exam) return;
+    const reader = new FileReader();
+    reader.onload = () => openPage11QuestionModal(exam, subjectKey, idx, reader.result);
+    reader.readAsDataURL(file);
+  });
+
+  page11QuestionChangeBtn.addEventListener('click', () => {
+    if (!page11QuestionTarget) return;
+    page11PendingPhotoTarget = { ...page11QuestionTarget };
+    page11QuestionFileInput.value = '';
+    page11QuestionFileInput.click();
+  });
+
+  page11QuestionClose.addEventListener('click', closePage11QuestionModal);
+  page11QuestionBackdrop.addEventListener('click', (e) => {
+    if (e.target === page11QuestionBackdrop) closePage11QuestionModal();
+  });
+
+  page11QuestionConfirm.addEventListener('click', () => {
+    if (!page11QuestionPendingImage || !page11QuestionPendingAnswer || !page11QuestionTarget) return;
+    const { examId, subjectKey, idx } = page11QuestionTarget;
+    const exam = page11State.exams.find((it) => it.id === examId);
+    if (!exam) return;
+    page11SetPhoto(exam, subjectKey, idx, {
+      image: page11QuestionPendingImage,
+      answer: page11QuestionPendingAnswer
+    });
+    closePage11QuestionModal();
+    renderExamDetail();
+  });
+
+  page11QuestionRemoveBtn.addEventListener('click', () => {
+    if (!page11QuestionTarget) return;
+    const { examId, subjectKey, idx } = page11QuestionTarget;
+    const exam = page11State.exams.find((it) => it.id === examId);
+    if (exam) page11RemovePhoto(exam, subjectKey, idx);
+    closePage11QuestionModal();
+    renderExamDetail();
+  });
+
   // ---- İlk render ----
   renderPage11List();
+</script>
+
+<script>
+  // ---------- Soru Havuzu (eski "Kamera" sekmesi) ----------
+  // Çözülemeyen bir sorunun fotoğrafı yüklenince açılan pop-up'ta branş
+  // ve doğru cevap şıkkı seçtirilir; onaylanınca kart olarak listeye
+  // eklenir. Görseller base64 (data URL) olarak, diğer tüm veriler gibi
+  // tek bir APP_STATE anahtarı altında localStorage'a yazılır.
+  const QHAVUZ_SUBJECTS = [
+    { name: 'Türkçe', color: '#ff90e8' },
+    { name: 'Matematik', color: '#c9a6ff' },
+    { name: 'Fizik', color: '#ffb46e' },
+    { name: 'Kimya', color: '#9fb8ff' },
+    { name: 'Biyoloji', color: '#8fe3a0' },
+    { name: 'Tarih', color: '#ffd23f' },
+    { name: 'Coğrafya', color: '#6ec6ff' },
+    { name: 'Felsefe', color: '#ff5c5c' },
+    { name: 'Din', color: '#7452a8' }
+  ];
+  const QHAVUZ_ANSWERS = ['A', 'B', 'C', 'D', 'E'];
+
+  const qhavuzGenId = () => 'soru-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  const savedQhavuz = APP_STATE.questionPool;
+  const qhavuzState = (savedQhavuz && Array.isArray(savedQhavuz.items))
+    ? savedQhavuz
+    : { items: [] };
+
+  const saveQhavuzState = () => saveAppState({ questionPool: qhavuzState });
+
+  const qhavuzGrid = document.getElementById('qhavuzGrid');
+  const qhavuzEditBtn = document.getElementById('qhavuzEditBtn');
+  const qhavuzLightboxBackdrop = document.getElementById('qhavuzLightboxBackdrop');
+  const qhavuzLightboxImg = document.getElementById('qhavuzLightboxImg');
+  const qhavuzLightboxClose = document.getElementById('qhavuzLightboxClose');
+  const qhavuzAddBtn = document.getElementById('qhavuzAddBtn');
+  const qhavuzFileInput = document.getElementById('qhavuzFileInput');
+  const qhavuzAddBackdrop = document.getElementById('qhavuzAddBackdrop');
+  const qhavuzAddClose = document.getElementById('qhavuzAddClose');
+  const qhavuzAddPreviewImg = document.getElementById('qhavuzAddPreviewImg');
+  const qhavuzAddSubjectGrid = document.getElementById('qhavuzAddSubjectGrid');
+  const qhavuzAddAnswerGrid = document.getElementById('qhavuzAddAnswerGrid');
+  const qhavuzAddBookInput = document.getElementById('qhavuzAddBookInput');
+  const qhavuzAddPageInput = document.getElementById('qhavuzAddPageInput');
+  const qhavuzAddConfirm = document.getElementById('qhavuzAddConfirm');
+
+  // Pop-up açıkken seçilen değerler; hepsi doluymadan "Kaydet" pasif kalır.
+  let qhavuzPendingImage = null;
+  let qhavuzPendingSubject = null;
+  let qhavuzPendingAnswer = null;
+
+  const qhavuzUpdateConfirmState = () => {
+    qhavuzAddConfirm.disabled = !(qhavuzPendingImage && qhavuzPendingSubject && qhavuzPendingAnswer);
+  };
+
+  const qhavuzBuildSubjectGrid = () => {
+    qhavuzAddSubjectGrid.innerHTML = '';
+    QHAVUZ_SUBJECTS.forEach((subj) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'qhavuz-add-subject-chip';
+      chip.style.setProperty('--qhavuz-chip-color', subj.color);
+      chip.textContent = subj.name;
+      if (qhavuzPendingSubject === subj.name) chip.classList.add('is-selected');
+      chip.addEventListener('click', () => {
+        qhavuzPendingSubject = subj.name;
+        qhavuzBuildSubjectGrid();
+        qhavuzUpdateConfirmState();
+      });
+      qhavuzAddSubjectGrid.appendChild(chip);
+    });
+  };
+
+  const qhavuzBuildAnswerGrid = () => {
+    qhavuzAddAnswerGrid.innerHTML = '';
+    QHAVUZ_ANSWERS.forEach((letter) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'qhavuz-add-answer-btn';
+      btn.textContent = letter;
+      btn.setAttribute('aria-label', `Doğru cevap ${letter}`);
+      if (qhavuzPendingAnswer === letter) btn.classList.add('is-selected');
+      btn.addEventListener('click', () => {
+        qhavuzPendingAnswer = letter;
+        qhavuzBuildAnswerGrid();
+        qhavuzUpdateConfirmState();
+      });
+      qhavuzAddAnswerGrid.appendChild(btn);
+    });
+  };
+
+  const openQhavuzAddModal = (imageDataUrl) => {
+    qhavuzPendingImage = imageDataUrl;
+    qhavuzPendingSubject = null;
+    qhavuzPendingAnswer = null;
+    qhavuzAddPreviewImg.src = imageDataUrl;
+    qhavuzAddBookInput.value = '';
+    qhavuzAddPageInput.value = '';
+    qhavuzBuildSubjectGrid();
+    qhavuzBuildAnswerGrid();
+    qhavuzUpdateConfirmState();
+    qhavuzAddBackdrop.classList.add('is-open');
+  };
+
+  const closeQhavuzAddModal = () => {
+    qhavuzAddBackdrop.classList.remove('is-open');
+    qhavuzPendingImage = null;
+    qhavuzPendingSubject = null;
+    qhavuzPendingAnswer = null;
+    qhavuzAddBookInput.value = '';
+    qhavuzAddPageInput.value = '';
+    qhavuzFileInput.value = '';
+  };
+
+  // "+ Görsel Yükle" butonu, görünmez dosya seçiciyi tetikler (galeri
+  // veya kamera arasında seçim, tarayıcının/telefonun kendi arayüzüyle
+  // sunulur).
+  qhavuzAddBtn.addEventListener('click', () => qhavuzFileInput.click());
+
+  qhavuzFileInput.addEventListener('change', () => {
+    const file = qhavuzFileInput.files && qhavuzFileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => openQhavuzAddModal(reader.result);
+    reader.readAsDataURL(file);
+  });
+
+  qhavuzAddClose.addEventListener('click', closeQhavuzAddModal);
+  qhavuzAddBackdrop.addEventListener('click', (e) => {
+    if (e.target === qhavuzAddBackdrop) closeQhavuzAddModal();
+  });
+
+  qhavuzAddConfirm.addEventListener('click', () => {
+    if (!qhavuzPendingImage || !qhavuzPendingSubject || !qhavuzPendingAnswer) return;
+    const book = qhavuzAddBookInput.value.trim();
+    const page = qhavuzAddPageInput.value.trim();
+    qhavuzState.items.unshift({
+      id: qhavuzGenId(),
+      image: qhavuzPendingImage,
+      subject: qhavuzPendingSubject,
+      answer: qhavuzPendingAnswer,
+      book: book || null,
+      page: page || null,
+      ts: Date.now()
+    });
+    saveQhavuzState();
+    closeQhavuzAddModal();
+    renderQhavuzGrid();
+  });
+
+  const qhavuzSubjectColor = (name) => {
+    const match = QHAVUZ_SUBJECTS.find((s) => s.name === name);
+    return match ? match.color : '#ff90e8';
+  };
+
+  // ---- Soru Havuzu: Düzenleme modu ----
+  // Kartların üzerindeki silme (×) butonları normalde gizlidir; karta
+  // dokununca soru görseli büyük açılsın diye. Düzenleme butonuna
+  // basılınca .is-edit-mode class'ı grid üzerinde kalır (renderQhavuzGrid
+  // her çağrıldığında da bu class korunur), böylece × butonları belirir.
+  let qhavuzEditMode = false;
+
+  const setQhavuzEditMode = (on) => {
+    qhavuzEditMode = on;
+    qhavuzGrid.classList.toggle('is-edit-mode', on);
+    qhavuzEditBtn.classList.toggle('is-active', on);
+    qhavuzEditBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    qhavuzEditBtn.setAttribute('aria-label', on ? 'Düzenlemeyi bitir' : 'Soruları düzenle');
+  };
+
+  qhavuzEditBtn.addEventListener('click', () => setQhavuzEditMode(!qhavuzEditMode));
+
+  // ---- Ortak: büyütülmüş soru görselinde iki parmakla yakınlaştırma ve
+  // sürükleyerek gezinme (pinch-zoom + pan). Sayfa genelinde pinch/çift
+  // dokunma zoom'u engelleyen global touch dinleyicileri (bkz. dosya
+  // sonu) yalnızca tarayıcının kendi sayfa zoom'unu durdurur; buradaki
+  // manuel transform tabanlı zoom onlarla çakışmaz. Döndürülen reset()
+  // fonksiyonu, görsel değiştiğinde (yeni soru/kapat/aç) zoom'u sıfırlar.
+  const attachPinchZoomPan = (img) => {
+    let scale = 1, panX = 0, panY = 0;
+    let startDist = 0, startScale = 1, startMidX = 0, startMidY = 0, startPanX = 0, startPanY = 0;
+    let isPanning = false, panStartX = 0, panStartY = 0;
+
+    const apply = () => {
+      img.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    };
+
+    const reset = () => {
+      scale = 1; panX = 0; panY = 0;
+      img.style.transition = 'transform 0.2s ease';
+      apply();
+      window.setTimeout(() => { img.style.transition = ''; }, 200);
+    };
+
+    const dist = (t1, t2) => Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+    const mid = (t1, t2) => ({ x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 });
+
+    img.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        img.style.transition = '';
+        startDist = dist(e.touches[0], e.touches[1]);
+        startScale = scale;
+        const m = mid(e.touches[0], e.touches[1]);
+        startMidX = m.x; startMidY = m.y;
+        startPanX = panX; startPanY = panY;
+        isPanning = false;
+      } else if (e.touches.length === 1 && scale > 1) {
+        isPanning = true;
+        panStartX = e.touches[0].clientX - panX;
+        panStartY = e.touches[0].clientY - panY;
+      }
+    }, { passive: true });
+
+    img.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && startDist) {
+        const d = dist(e.touches[0], e.touches[1]);
+        scale = Math.min(Math.max(startScale * (d / startDist), 1), 4);
+        const m = mid(e.touches[0], e.touches[1]);
+        panX = startPanX + (m.x - startMidX);
+        panY = startPanY + (m.y - startMidY);
+        apply();
+      } else if (e.touches.length === 1 && isPanning) {
+        panX = e.touches[0].clientX - panStartX;
+        panY = e.touches[0].clientY - panStartY;
+        apply();
+      }
+    }, { passive: true });
+
+    const onTouchEnd = (e) => {
+      if (e.touches.length < 2) startDist = 0;
+      if (e.touches.length === 0) {
+        isPanning = false;
+        if (scale <= 1.02) reset();
+      }
+    };
+    img.addEventListener('touchend', onTouchEnd, { passive: true });
+    img.addEventListener('touchcancel', onTouchEnd, { passive: true });
+
+    return { reset };
+  };
+
+  // ---- Soru Havuzu: soru görselini büyük gösteren lightbox ----
+  const qhavuzLightboxZoom = attachPinchZoomPan(qhavuzLightboxImg);
+  const qhavuzLightboxAnswerRow = document.getElementById('qhavuzLightboxAnswerRow');
+  const qhavuzLightboxSolveBtn = document.getElementById('qhavuzLightboxSolveBtn');
+  let qhavuzLightboxItem = null;
+
+  const qhavuzSyncLightboxSolveBtn = () => {
+    const isSolved = !!(qhavuzLightboxItem && qhavuzLightboxItem.solved);
+    qhavuzLightboxSolveBtn.classList.toggle('is-checked', isSolved);
+    qhavuzLightboxSolveBtn.setAttribute('aria-pressed', String(isSolved));
+  };
+
+  const renderQhavuzLightboxAnswers = (item) => {
+    qhavuzLightboxAnswerRow.innerHTML = '';
+    QHAVUZ_ANSWERS.forEach((letter) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'qhavuz-lightbox-answer-btn';
+      if (letter === item.answer) btn.classList.add('is-correct');
+      btn.textContent = letter;
+      btn.setAttribute('aria-label', `Doğru cevap ${letter}`);
+
+      // Düzenleme modu aktifken şıklar tıklanabilir olur; kapalıyken
+      // sadece mevcut doğru cevabı gösteren pasif bir gösterge kalır.
+      if (qhavuzEditMode) {
+        btn.classList.add('is-editable');
+        btn.addEventListener('click', () => {
+          if (item.answer === letter) return;
+          item.answer = letter;
+          saveQhavuzState();
+          renderQhavuzLightboxAnswers(item);
+          renderQhavuzGrid();
+        });
+      } else {
+        btn.disabled = true;
+      }
+
+      qhavuzLightboxAnswerRow.appendChild(btn);
+    });
+  };
+
+  const openQhavuzLightbox = (item) => {
+    qhavuzLightboxZoom.reset();
+    qhavuzLightboxItem = item;
+    qhavuzLightboxImg.src = item.image;
+    qhavuzSyncLightboxSolveBtn();
+    renderQhavuzLightboxAnswers(item);
+
+    qhavuzLightboxBackdrop.classList.add('is-open');
+  };
+
+  // Lightbox'taki yuvarlak checkbox, sorunun görselini açmadan doğrudan
+  // "manuel olarak çözüldü" durumunu değiştirir; test modundan bağımsız
+  // olarak kart üzerindeki yeşil tik rozetini de günceller.
+  qhavuzLightboxSolveBtn.addEventListener('click', () => {
+    if (!qhavuzLightboxItem) return;
+    qhavuzLightboxItem.solved = !qhavuzLightboxItem.solved;
+    saveQhavuzState();
+    qhavuzSyncLightboxSolveBtn();
+    renderQhavuzGrid();
+  });
+
+  const closeQhavuzLightbox = () => {
+    qhavuzLightboxBackdrop.classList.remove('is-open');
+    qhavuzLightboxZoom.reset();
+  };
+
+  qhavuzLightboxClose.addEventListener('click', closeQhavuzLightbox);
+  qhavuzLightboxBackdrop.addEventListener('click', (e) => {
+    if (e.target === qhavuzLightboxBackdrop) closeQhavuzLightbox();
+  });
+
+  const renderQhavuzGrid = () => {
+    qhavuzGrid.innerHTML = '';
+    qhavuzGrid.classList.toggle('is-edit-mode', qhavuzEditMode);
+    if (!qhavuzState.items.length) {
+      const empty = document.createElement('div');
+      empty.className = 'qhavuz-empty';
+      empty.textContent = 'Henüz soru eklemedin. Yukarıdaki butondan bir görsel yükle.';
+      qhavuzGrid.appendChild(empty);
+      return;
+    }
+    qhavuzState.items.forEach((item) => {
+      const card = document.createElement('div');
+      card.className = 'qhavuz-card';
+
+      const thumb = document.createElement('div');
+      thumb.className = 'qhavuz-thumb';
+      const img = document.createElement('img');
+      img.src = item.image;
+      img.alt = item.subject + ' sorusu';
+      thumb.appendChild(img);
+
+      const info = document.createElement('div');
+      info.className = 'qhavuz-card-info';
+
+      const subjectBadge = document.createElement('span');
+      subjectBadge.className = 'qhavuz-card-subject';
+      subjectBadge.style.background = qhavuzSubjectColor(item.subject);
+      subjectBadge.textContent = item.subject;
+
+      const answerBadge = document.createElement('span');
+      answerBadge.className = 'qhavuz-card-answer';
+      answerBadge.textContent = item.answer;
+      answerBadge.setAttribute('aria-label', `Doğru cevap ${item.answer}`);
+
+      info.appendChild(subjectBadge);
+      info.appendChild(answerBadge);
+
+      card.appendChild(thumb);
+      card.appendChild(info);
+
+      if (item.book || item.page) {
+        const bookLine = document.createElement('span');
+        bookLine.className = 'qhavuz-card-book';
+        bookLine.textContent = item.book && item.page
+          ? `${item.book} · s. ${item.page}`
+          : item.book
+            ? item.book
+            : `s. ${item.page}`;
+        card.appendChild(bookLine);
+      }
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'delete-btn qhavuz-card-delete';
+      delBtn.setAttribute('aria-label', 'Soruyu sil');
+      delBtn.textContent = '×';
+      delBtn.addEventListener('click', () => {
+        qhavuzState.items = qhavuzState.items.filter((it) => it.id !== item.id);
+        saveQhavuzState();
+        renderQhavuzGrid();
+      });
+
+      card.appendChild(delBtn);
+
+      if (item.solved) {
+        const check = document.createElement('span');
+        check.className = 'qhavuz-card-check';
+        check.setAttribute('aria-label', 'Bu soru test modunda doğru yapıldı');
+        check.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 12l5 5L20 6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        card.appendChild(check);
+      }
+
+      // Silme butonu haricinde karta dokununca soru görseli büyük açılır.
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.qhavuz-card-delete')) return;
+        openQhavuzLightbox(item);
+      });
+
+      qhavuzGrid.appendChild(card);
+    });
+  };
+
+  // ---- İlk render ----
+  renderQhavuzGrid();
+
+  // ---------- Soru Havuzu: Test Modu ----------
+  // "Test Modu" butonu, hangi branştan (ya da tüm branşlardan) test
+  // yapılacağını sorduğu bir pop-up açar; onaylanınca sorular karıştırılıp
+  // tam ekran #page-camera-test'te tek tek gösterilir. Doğru cevap
+  // işaretlenene kadar hiçbir şık renklenmez.
+  const QHAVUZ_ALL_BRANCHES = '__QHAVUZ_ALL__';
+
+  const qhavuzTestBtn = document.getElementById('qhavuzTestBtn');
+  const qhavuzTestSetupBackdrop = document.getElementById('qhavuzTestSetupBackdrop');
+  const qhavuzTestSetupClose = document.getElementById('qhavuzTestSetupClose');
+  const qhavuzTestSetupGrid = document.getElementById('qhavuzTestSetupGrid');
+  const qhavuzTestSetupConfirm = document.getElementById('qhavuzTestSetupConfirm');
+
+  const qhavuzTestTitle = document.getElementById('qhavuzTestTitle');
+  const qhavuzTestProgress = document.getElementById('qhavuzTestProgress');
+  const qhavuzTestQuestionView = document.getElementById('qhavuzTestQuestionView');
+  const qhavuzTestResultView = document.getElementById('qhavuzTestResultView');
+  const qhavuzTestSubjectBadge = document.getElementById('qhavuzTestSubjectBadge');
+  const qhavuzTestImg = document.getElementById('qhavuzTestImg');
+  const qhavuzTestAnswerGrid = document.getElementById('qhavuzTestAnswerGrid');
+  const qhavuzTestFeedback = document.getElementById('qhavuzTestFeedback');
+  const qhavuzTestNextBtn = document.getElementById('qhavuzTestNextBtn');
+  const qhavuzTestBackBtn = document.getElementById('qhavuzTestBackBtn');
+  const qhavuzTestResultScore = document.getElementById('qhavuzTestResultScore');
+  const qhavuzTestCloseBtn = document.getElementById('qhavuzTestCloseBtn');
+
+  const qhavuzTestImgZoom = attachPinchZoomPan(qhavuzTestImg);
+
+  // Artık aynı anda birden fazla branş seçilebiliyor; seçilenler bir
+  // Set içinde tutulur. "Tüm Branşlar" ayrı bir değer değil, sorusu olan
+  // tüm branşları tek seferde seçip kaldırmaya yarayan bir kısayoldur.
+  let qhavuzTestPendingBranches = new Set();
+  let qhavuzTestQuestions = [];
+  let qhavuzTestIndex = 0;
+  let qhavuzTestScore = 0;
+  let qhavuzTestAnswered = false;
+
+  const qhavuzCountForBranch = (name) => (
+    name === QHAVUZ_ALL_BRANCHES
+      ? qhavuzState.items.length
+      : qhavuzState.items.filter((it) => it.subject === name).length
+  );
+
+  const qhavuzAllBranchNames = () => QHAVUZ_SUBJECTS
+    .filter((subj) => qhavuzCountForBranch(subj.name) > 0)
+    .map((subj) => subj.name);
+
+  const qhavuzIsAllBranchesSelected = () => {
+    const all = qhavuzAllBranchNames();
+    return all.length > 0 && all.every((name) => qhavuzTestPendingBranches.has(name));
+  };
+
+  const qhavuzBuildTestSetupGrid = () => {
+    qhavuzTestSetupGrid.innerHTML = '';
+
+    const buildChip = (name, label) => {
+      const isAllChip = name === QHAVUZ_ALL_BRANCHES;
+      const count = qhavuzCountForBranch(name);
+      const chip = document.createElement('div');
+      chip.className = 'page9-add-chip';
+      if (count === 0) chip.classList.add('is-disabled');
+      const isSelected = isAllChip ? qhavuzIsAllBranchesSelected() : qhavuzTestPendingBranches.has(name);
+      if (isSelected) chip.classList.add('is-selected');
+
+      const box = document.createElement('span');
+      box.className = 'page9-add-chip-box';
+      box.textContent = '✓';
+
+      const chipName = document.createElement('span');
+      chipName.className = 'page9-add-chip-name';
+      chipName.textContent = label;
+
+      const note = document.createElement('span');
+      note.className = 'page9-add-chip-note';
+      note.textContent = `${count} soru`;
+
+      chip.appendChild(box);
+      chip.appendChild(chipName);
+      chip.appendChild(note);
+
+      if (count > 0) {
+        chip.addEventListener('click', () => {
+          if (isAllChip) {
+            // Tüm branşlar zaten seçiliyse kaldır, değilse hepsini seç.
+            qhavuzTestPendingBranches = qhavuzIsAllBranchesSelected()
+              ? new Set()
+              : new Set(qhavuzAllBranchNames());
+          } else if (qhavuzTestPendingBranches.has(name)) {
+            qhavuzTestPendingBranches.delete(name);
+          } else {
+            qhavuzTestPendingBranches.add(name);
+          }
+          qhavuzBuildTestSetupGrid();
+          qhavuzTestSetupConfirm.disabled = qhavuzTestPendingBranches.size === 0;
+        });
+      }
+      qhavuzTestSetupGrid.appendChild(chip);
+    };
+
+    buildChip(QHAVUZ_ALL_BRANCHES, 'Tüm Branşlar');
+    QHAVUZ_SUBJECTS.forEach((subj) => buildChip(subj.name, subj.name));
+  };
+
+  const openQhavuzTestSetup = () => {
+    qhavuzTestPendingBranches = new Set();
+    qhavuzTestSetupConfirm.disabled = true;
+    qhavuzBuildTestSetupGrid();
+    qhavuzTestSetupBackdrop.classList.add('is-open');
+  };
+
+  const closeQhavuzTestSetup = () => {
+    qhavuzTestSetupBackdrop.classList.remove('is-open');
+  };
+
+  qhavuzTestBtn.addEventListener('click', openQhavuzTestSetup);
+  qhavuzTestSetupClose.addEventListener('click', closeQhavuzTestSetup);
+  qhavuzTestSetupBackdrop.addEventListener('click', (e) => {
+    if (e.target === qhavuzTestSetupBackdrop) closeQhavuzTestSetup();
+  });
+
+  // Fisher-Yates: test her başlatıldığında sorular farklı sırada gelsin.
+  const qhavuzShuffle = (list) => {
+    const arr = list.slice();
+    for (let i = arr.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+    }
+    return arr;
+  };
+
+  const renderQhavuzTestQuestion = () => {
+    const item = qhavuzTestQuestions[qhavuzTestIndex];
+    qhavuzTestAnswered = false;
+    qhavuzTestProgress.textContent = `${qhavuzTestIndex + 1}/${qhavuzTestQuestions.length}`;
+    qhavuzTestSubjectBadge.textContent = item.subject;
+    qhavuzTestSubjectBadge.style.background = qhavuzSubjectColor(item.subject);
+    qhavuzTestImgZoom.reset();
+    qhavuzTestImg.src = item.image;
+    qhavuzTestImg.alt = item.subject + ' sorusu';
+
+    qhavuzTestFeedback.textContent = '';
+    qhavuzTestFeedback.className = 'qhavuz-test-feedback';
+    qhavuzTestNextBtn.classList.remove('is-visible');
+    qhavuzTestNextBtn.textContent = (qhavuzTestIndex === qhavuzTestQuestions.length - 1)
+      ? 'Testi Bitir'
+      : 'Sonraki Soru';
+
+    qhavuzTestAnswerGrid.innerHTML = '';
+    QHAVUZ_ANSWERS.forEach((letter) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'qhavuz-add-answer-btn';
+      btn.textContent = letter;
+      btn.setAttribute('aria-label', `Cevap ${letter}`);
+      btn.addEventListener('click', () => qhavuzTestHandleAnswer(letter, btn));
+      qhavuzTestAnswerGrid.appendChild(btn);
+    });
+  };
+
+  // Bir şıkka basılınca: doğru cevap her zaman yeşile "zıplar"; kullanıcı
+  // yanlış işaretlediyse kendi seçtiği şık da ayrıca kırmızıya boyanır.
+  // İşaretlendikten sonra tüm şıklar kilitlenir ve "Sonraki Soru"/"Testi
+  // Bitir" butonu belirir.
+  const qhavuzTestHandleAnswer = (letter, btnEl) => {
+    if (qhavuzTestAnswered) return;
+    qhavuzTestAnswered = true;
+
+    const item = qhavuzTestQuestions[qhavuzTestIndex];
+    const isCorrect = letter === item.answer;
+    if (isCorrect) {
+      qhavuzTestScore += 1;
+      // Soru havuzundaki karta yeşil tik atmak için işaretle ve kaydet.
+      if (!item.solved) {
+        item.solved = true;
+        saveQhavuzState();
+      }
+    }
+
+    const buttons = qhavuzTestAnswerGrid.querySelectorAll('.qhavuz-add-answer-btn');
+    buttons.forEach((btn) => {
+      btn.disabled = true;
+      if (btn.textContent === item.answer) btn.classList.add('is-correct');
+      else if (btn === btnEl) btn.classList.add('is-wrong');
+    });
+
+    qhavuzTestFeedback.textContent = isCorrect ? 'Doğru! 🎉' : `Yanlış! Doğru cevap: ${item.answer}`;
+    qhavuzTestFeedback.classList.add('is-visible', isCorrect ? 'is-correct' : 'is-wrong');
+
+    qhavuzTestNextBtn.classList.add('is-visible');
+  };
+
+  const finishQhavuzTest = () => {
+    qhavuzTestQuestionView.classList.add('is-hidden');
+    qhavuzTestResultView.classList.remove('is-hidden');
+    qhavuzTestResultScore.textContent = `${qhavuzTestScore}/${qhavuzTestQuestions.length}`;
+  };
+
+  qhavuzTestNextBtn.addEventListener('click', () => {
+    if (qhavuzTestIndex < qhavuzTestQuestions.length - 1) {
+      qhavuzTestIndex += 1;
+      renderQhavuzTestQuestion();
+    } else {
+      finishQhavuzTest();
+    }
+  });
+
+  const startQhavuzTest = (questions, label) => {
+    qhavuzTestQuestions = qhavuzShuffle(questions);
+    qhavuzTestIndex = 0;
+    qhavuzTestScore = 0;
+    qhavuzTestTitle.textContent = label;
+    qhavuzTestResultView.classList.add('is-hidden');
+    qhavuzTestQuestionView.classList.remove('is-hidden');
+    document.body.classList.add('is-qhavuz-test-open');
+    goToPage('page-camera-test');
+    renderQhavuzTestQuestion();
+  };
+
+  qhavuzTestSetupConfirm.addEventListener('click', () => {
+    if (!qhavuzTestPendingBranches.size) return;
+    const pool = qhavuzState.items.filter((it) => qhavuzTestPendingBranches.has(it.subject));
+    if (!pool.length) return;
+    const label = qhavuzIsAllBranchesSelected()
+      ? 'Tüm Branşlar'
+      : Array.from(qhavuzTestPendingBranches).join(', ');
+    closeQhavuzTestSetup();
+    startQhavuzTest(pool, label);
+  });
+
+  const exitQhavuzTest = () => {
+    document.body.classList.remove('is-qhavuz-test-open');
+    goToPage('page-camera');
+    // Test modunda doğru yapılan sorular varsa, havuza dönünce yeşil
+    // tikler görünsün diye grid'i yeniden çiziyoruz.
+    renderQhavuzGrid();
+  };
+
+  qhavuzTestBackBtn.addEventListener('click', exitQhavuzTest);
+  qhavuzTestCloseBtn.addEventListener('click', exitQhavuzTest);
 </script>
 
 <script>
