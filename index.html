@@ -14724,6 +14724,25 @@
   let isSyncing = false;
   let autoSyncTimer = null;
 
+  // ---- Akışı bozmayan sessiz senkron-sonrası yenileme ----
+  // Kullanıcı bu oturumda (sayfa bu şekilde açıldığından beri) sayfayla
+  // gerçekten etkileşime girdi mi? Girdiyse, buluttan sessizce yeni veri
+  // gelse bile arada location.reload() ile elindeki işi (yazdığı metin,
+  // izlediği kronometre, açık popup vb.) yarıda kesmiyoruz.
+  let appUserHasInteracted = false;
+  document.addEventListener('pointerdown', () => { appUserHasInteracted = true; }, { capture: true, once: true });
+
+  // true ise: buluttan yeni veri geldi ama kullanıcı meşgul olduğu için
+  // hemen yenilemedik; uygulama bir sonraki kez öne geldiğinde (arka
+  // plandan/başka sekmeden dönüldüğünde) sessizce tazelenecek.
+  let appPendingReloadOnResume = false;
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && appPendingReloadOnResume) {
+      appPendingReloadOnResume = false;
+      location.reload();
+    }
+  });
+
   // ---- VERİ KAYBINI ÖNLEYEN BİRLEŞTİRME (MERGE) ----
   // İki APP_STATE'i (yerel ve bulut) tek parça olarak KARŞILAŞTIRMAZ;
   // her üst-seviye bölümü (theme, page9, questionPool, stopwatchLogs vb.)
@@ -15004,9 +15023,14 @@
       if (error) throw error;
 
       if (data && data.state && Object.keys(data.state).length) {
+        // Merge öncesi anlık görüntü: buluttan gerçekten YENİ bir şey gelip
+        // gelmediğini anlamak için (aşağıda reload kararı bu farka bakılarak
+        // veriliyor — reloadOnData=false olsa bile).
+        const beforeSnapshot = JSON.stringify(APP_STATE);
         const merged = mergeAppStates(APP_STATE, data.state);
         Object.keys(APP_STATE).forEach((k) => delete APP_STATE[k]);
         Object.assign(APP_STATE, merged);
+        const remoteBroughtNewData = JSON.stringify(APP_STATE) !== beforeSnapshot;
         localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
         localStorage.setItem(LAST_SYNC_KEY, String(Date.now()));
         try { localStorage.removeItem(PENDING_SYNC_KEY); } catch (err) { /* yok say */ }
@@ -15026,7 +15050,27 @@
         // animasyonunun tarayıcıda gerçekten tamamlanması için bir an
         // tanınıyor; aksi halde reload bu animasyonun ortasına denk gelip
         // klavye araç çubuğunun yeni sayfada asılı kalmasına yol açabiliyor.
+        //
+        // ÖNEMLİ: reloadOnData=false (yani açılışta zaten oturum açıkken
+        // sessizce yapılan pull) durumunda da buluttan GERÇEKTEN yeni bir
+        // şey geldiyse (remoteBroughtNewData) sayfa tazelenmezse, indirilen
+        // veri localStorage'da kalır ama ekrandaki (bellekteki) durum eski
+        // kalmaya devam eder — kullanıcı bir sonraki tam açılışa kadar
+        // "verimi yedekledim ama diğer cihazda göremiyorum" hissi yaşar.
+        // Bunu, kullanıcının o an aktif bir etkileşimini KESMEDEN çözüyoruz:
+        //  - Kullanıcı bu oturumda henüz bir şeye dokunmadıysa (uygulama
+        //    yeni açıldı), hemen tazelemek güvenlidir.
+        //  - Kullanıcı zaten bir şeyle meşgulse, akışını bölmüyoruz;
+        //    bunun yerine uygulamayı bir sonraki sefer öne getirdiğinde
+        //    (visibilitychange → 'visible') sessizce tazeliyoruz.
         if (reloadOnData) { setTimeout(() => location.reload(), 120); return { ok: true }; }
+        if (remoteBroughtNewData) {
+          if (!appUserHasInteracted) {
+            setTimeout(() => location.reload(), 120);
+          } else {
+            appPendingReloadOnResume = true;
+          }
+        }
       } else {
         // Bu hesap için buluta hiç veri yazılmamış: mevcut yerel veriyi
         // (varsa) olduğu gibi buluta gönder.
