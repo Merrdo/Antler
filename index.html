@@ -15029,7 +15029,22 @@
     ensureAuthGateContent();
     authGate.classList.remove('is-hidden');
   };
-  const hideAuthGate = () => { if (authGate) authGate.classList.add('is-hidden'); };
+  const hideAuthGate = () => {
+    if (!authGate) return;
+    // KRİTİK: Giriş/kayıt formundaki e-posta veya şifre alanı hâlâ odaklıyken
+    // (kullanıcı "Giriş Yap"a bastığında input'tan çıkmamış olabilir) kapıyı
+    // sadece CSS ile (opacity/visibility) gizlemek input'un odağını
+    // kaldırmıyor. Sonuç: input artık görünmez olsa da klavye ve üzerindeki
+    // "◂▾ ... Bitti" araç çubuğu ekranda asılı kalmaya devam ediyor ve
+    // kullanıcı asıl sayfaya dokunduğunda bile bir süre daha görünüyor.
+    // Bu yüzden kapıyı gizlemeden hemen önce, içinde odaklı bir
+    // input/textarea varsa bilinçli olarak blur ediyoruz.
+    const active = document.activeElement;
+    if (active && authGate.contains(active) && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
+      active.blur();
+    }
+    authGate.classList.add('is-hidden');
+  };
 
   if (settingsAuthActionBtn) {
     settingsAuthActionBtn.addEventListener('click', async () => {
