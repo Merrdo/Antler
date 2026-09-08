@@ -2367,7 +2367,12 @@
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
     font-size: 0.92rem;
+    line-height: 1.35;
     color: #121212;
+    resize: none;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 
   body.is-anthracite .page8-item-edit-input {
@@ -11069,12 +11074,21 @@
     // (input'a çevirerek) düzenlenebilir hale getirir.
     const startItemTextEdit = (item, row) => {
       const text = row._page8Text;
-      const input = document.createElement('input');
-      input.type = 'text';
+      const input = document.createElement('textarea');
       input.className = 'page8-item-edit-input';
       input.value = item.text;
-      input.maxLength = 60;
+      input.rows = 1;
       text.replaceWith(input);
+
+      // Yazı uzadıkça kutunun boyunu otomatik büyüterek tüm metnin
+      // paragraf halinde, kesilmeden görünmesini sağlar.
+      const autoGrow = () => {
+        input.style.height = 'auto';
+        input.style.height = input.scrollHeight + 'px';
+      };
+      input.addEventListener('input', autoGrow);
+      requestAnimationFrame(autoGrow);
+
       input.focus();
       input.select();
 
@@ -11087,7 +11101,7 @@
       };
 
       input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); input.blur(); }
         else if (e.key === 'Escape') { input.value = item.text; input.blur(); }
       });
       input.addEventListener('blur', commit, { once: true });
