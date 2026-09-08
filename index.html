@@ -11241,6 +11241,15 @@
 
   let page11ActiveExamId = null;
 
+  // Bir sorunun baloncuğuna her tıklandığında tüm branş listesini
+  // (yüzlerce baloncuk + fotoğraf rozeti) baştan yaratmak gözle
+  // görülür bir gecikmeye yol açıyordu. Bunun yerine, tam render
+  // sırasında her baloncuğa ve branş net etiketine doğrudan referans
+  // saklıyoruz; tek bir tıklamada sadece o baloncuk ve toplam sayaçlar
+  // güncelleniyor, geri kalan DOM'a dokunulmuyor.
+  let page11BubbleEls = {};
+  let page11NetEls = {};
+
   // Tek tıklama doğru, 2. tıklama yanlış, 3. tıklama boş, 4. tıklama
   // (yani bir sonraki) işaretsiz eski haline döner.
   const page11CycleBubble = (exam, subjectKey, index) => {
@@ -11248,6 +11257,75 @@
     const nextIdx = (PAGE11_BUBBLE_STATES.indexOf(current) + 1) % PAGE11_BUBBLE_STATES.length;
     exam.answers[subjectKey][index] = PAGE11_BUBBLE_STATES[nextIdx];
     savePage11State();
+  };
+
+  const page11CreatePhotoBtn = (exam, subjectKey, idx, subjectName) => {
+    const photo = page11GetPhoto(exam, subjectKey, idx);
+    const photoBtn = document.createElement('span');
+    photoBtn.className = 'exam-detail-bubble-photo-btn';
+    if (photo) photoBtn.classList.add('has-photo');
+    photoBtn.setAttribute('role', 'button');
+    photoBtn.setAttribute('tabindex', '0');
+    photoBtn.setAttribute(
+      'aria-label',
+      photo
+        ? `${subjectName} soru ${idx + 1} görselini düzenle`
+        : `${subjectName} soru ${idx + 1} için görsel ekle`
+    );
+    photoBtn.innerHTML = PAGE11_PHOTO_CAMERA_ICON;
+    photoBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const currentPhoto = page11GetPhoto(exam, subjectKey, idx);
+      if (currentPhoto) {
+        openPage11QuestionModal(exam, subjectKey, idx, null);
+      } else {
+        page11PendingPhotoTarget = { examId: exam.id, subjectKey, idx };
+        page11QuestionFileInput.value = '';
+        page11QuestionFileInput.click();
+      }
+    });
+    return photoBtn;
+  };
+
+  // Tek bir baloncuğa tıklandığında çağrılan hafif güncelleme: sadece
+  // o baloncuğun durumu/fotoğraf rozeti ve üstteki toplam + branş net
+  // sayaçları tazelenir; tüm liste yeniden çizilmez.
+  const page11UpdateBubbleUI = (exam, subject, idx) => {
+    const bubble = page11BubbleEls[subject.key] && page11BubbleEls[subject.key][idx];
+    if (!bubble) { renderExamDetail(); return; }
+
+    const state = exam.answers[subject.key][idx];
+    bubble.classList.remove('is-correct', 'is-wrong', 'is-blank');
+    if (state !== 'none') bubble.classList.add(`is-${state}`);
+
+    const photo = page11GetPhoto(exam, subject.key, idx);
+    let photoBtn = bubble.querySelector('.exam-detail-bubble-photo-btn');
+    if (state === 'wrong' || state === 'blank' || photo) {
+      if (!photoBtn) {
+        photoBtn = page11CreatePhotoBtn(exam, subject.key, idx, subject.name);
+        bubble.appendChild(photoBtn);
+      } else {
+        photoBtn.classList.toggle('has-photo', !!photo);
+      }
+    } else if (photoBtn) {
+      photoBtn.remove();
+    }
+
+    const result = page11ComputeExam(exam);
+    page11AnimateCounter(examDetailTotalNet, 'examDetailTotal', result.totalNet, { decimals: true, suffix: 'net' });
+    page11AnimateCounter(examDetailCorrectCount, 'examDetailCorrect', result.totalCorrect, { duration: 400 });
+    page11AnimateCounter(examDetailWrongCount, 'examDetailWrong', result.totalWrong, { duration: 400 });
+    page11AnimateCounter(examDetailBlankCount, 'examDetailBlank', result.totalBlank, { duration: 400 });
+
+    const subjectResult = result.bySubject.find((row) => row.subject.key === subject.key);
+    const netEl = page11NetEls[subject.key];
+    if (subjectResult && netEl) {
+      page11AnimateCounter(netEl, `examDetailSubjectNet:${exam.id}:${subject.key}`, subjectResult.net, {
+        decimals: true,
+        suffix: 'net',
+        spacer: true
+      });
+    }
   };
 
   const renderExamDetail = () => {
@@ -11264,6 +11342,8 @@
     page11AnimateCounter(examDetailBlankCount, 'examDetailBlank', result.totalBlank, { duration: 400 });
 
     examDetailSubjectList.innerHTML = '';
+    page11BubbleEls = {};
+    page11NetEls = {};
     result.bySubject.forEach(({ subject, net }) => {
       const card = document.createElement('div');
       card.className = 'exam-detail-subject-card';
@@ -11289,6 +11369,7 @@
         suffix: 'net',
         spacer: true
       });
+      page11NetEls[subject.key] = netEl;
 
       top.appendChild(name);
       top.appendChild(netEl);
@@ -11296,6 +11377,7 @@
       const grid = document.createElement('div');
       grid.className = 'exam-detail-bubble-grid';
 
+      page11BubbleEls[subject.key] = [];
       exam.answers[subject.key].forEach((state, idx) => {
         const bubble = document.createElement('button');
         bubble.type = 'button';
@@ -11305,7 +11387,7 @@
         bubble.setAttribute('aria-label', `${subject.name} soru ${idx + 1}`);
         bubble.addEventListener('click', () => {
           page11CycleBubble(exam, subject.key, idx);
-          renderExamDetail();
+          page11UpdateBubbleUI(exam, subject, idx);
         });
 
         // Yanlış yapılan veya boş bırakılan sorularda köşeye bir görsel
@@ -11318,31 +11400,10 @@
         // olduğu işaretler kaldırılsa da kaybolmaz.
         const photo = page11GetPhoto(exam, subject.key, idx);
         if (state === 'wrong' || state === 'blank' || photo) {
-          const photoBtn = document.createElement('span');
-          photoBtn.className = 'exam-detail-bubble-photo-btn';
-          if (photo) photoBtn.classList.add('has-photo');
-          photoBtn.setAttribute('role', 'button');
-          photoBtn.setAttribute('tabindex', '0');
-          photoBtn.setAttribute(
-            'aria-label',
-            photo
-              ? `${subject.name} soru ${idx + 1} görselini düzenle`
-              : `${subject.name} soru ${idx + 1} için görsel ekle`
-          );
-          photoBtn.innerHTML = PAGE11_PHOTO_CAMERA_ICON;
-          photoBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (photo) {
-              openPage11QuestionModal(exam, subject.key, idx, null);
-            } else {
-              page11PendingPhotoTarget = { examId: exam.id, subjectKey: subject.key, idx };
-              page11QuestionFileInput.value = '';
-              page11QuestionFileInput.click();
-            }
-          });
-          bubble.appendChild(photoBtn);
+          bubble.appendChild(page11CreatePhotoBtn(exam, subject.key, idx, subject.name));
         }
 
+        page11BubbleEls[subject.key].push(bubble);
         grid.appendChild(bubble);
       });
 
@@ -11788,7 +11849,7 @@
           item.answer = letter;
           saveQhavuzState();
           renderQhavuzLightboxAnswers(item);
-          renderQhavuzGrid();
+          qhavuzUpdateCardUI(item);
         });
       } else {
         btn.disabled = true;
@@ -11816,7 +11877,7 @@
     qhavuzLightboxItem.solved = !qhavuzLightboxItem.solved;
     saveQhavuzState();
     qhavuzSyncLightboxSolveBtn();
-    renderQhavuzGrid();
+    qhavuzUpdateCardUI(qhavuzLightboxItem);
   });
 
   const closeQhavuzLightbox = () => {
@@ -11829,8 +11890,38 @@
     if (e.target === qhavuzLightboxBackdrop) closeQhavuzLightbox();
   });
 
+  // Lightbox içinden doğru cevabı değiştirmek veya "çözüldü" durumunu
+  // işaretlemek her seferinde tüm ızgarayı (tüm görseller dahil) baştan
+  // çizip gözle görülür bir gecikmeye yol açıyordu. Bunun yerine tam
+  // render sırasında her kartın referansını saklıyoruz; tek bir
+  // değişiklikte sadece o kartın rozetleri güncelleniyor.
+  let qhavuzCardEls = {};
+
+  const qhavuzUpdateCardUI = (item) => {
+    const refs = qhavuzCardEls[item.id];
+    if (!refs) { renderQhavuzGrid(); return; }
+
+    refs.answerBadge.textContent = item.answer;
+    refs.answerBadge.setAttribute('aria-label', `Doğru cevap ${item.answer}`);
+
+    if (item.solved) {
+      if (!refs.checkEl) {
+        const check = document.createElement('span');
+        check.className = 'qhavuz-card-check';
+        check.setAttribute('aria-label', 'Bu soru test modunda doğru yapıldı');
+        check.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 12l5 5L20 6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        refs.card.appendChild(check);
+        refs.checkEl = check;
+      }
+    } else if (refs.checkEl) {
+      refs.checkEl.remove();
+      refs.checkEl = null;
+    }
+  };
+
   const renderQhavuzGrid = () => {
     qhavuzGrid.innerHTML = '';
+    qhavuzCardEls = {};
     qhavuzGrid.classList.toggle('is-edit-mode', qhavuzEditMode);
     if (!qhavuzState.items.length) {
       const empty = document.createElement('div');
@@ -11893,13 +11984,16 @@
 
       card.appendChild(delBtn);
 
+      let checkEl = null;
       if (item.solved) {
-        const check = document.createElement('span');
-        check.className = 'qhavuz-card-check';
-        check.setAttribute('aria-label', 'Bu soru test modunda doğru yapıldı');
-        check.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 12l5 5L20 6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-        card.appendChild(check);
+        checkEl = document.createElement('span');
+        checkEl.className = 'qhavuz-card-check';
+        checkEl.setAttribute('aria-label', 'Bu soru test modunda doğru yapıldı');
+        checkEl.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 12l5 5L20 6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        card.appendChild(checkEl);
       }
+
+      qhavuzCardEls[item.id] = { card, answerBadge, checkEl };
 
       // Silme butonu haricinde karta dokununca soru görseli büyük açılır.
       card.addEventListener('click', (e) => {
@@ -11913,6 +12007,7 @@
 
   // ---- İlk render ----
   renderQhavuzGrid();
+
 
   // ---------- Soru Havuzu: Test Modu ----------
   // "Test Modu" butonu, hangi branştan (ya da tüm branşlardan) test
