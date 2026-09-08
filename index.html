@@ -14775,7 +14775,18 @@
         .maybeSingle();
       if (error) throw error;
       isSyncing = false;
-      if (data && data.state && Object.keys(data.state).length) {
+      // EK GÜVENLİK AĞI: Buluttaki veri, yereldeki veriden "belirgin şekilde
+      // daha az" görünüyorsa (ör. çok daha küçük bir JSON boyutu), bunu
+      // sessizce yerelin üzerine yazmak riskli olur — bu genellikle
+      // buluta daha önce eksik/eski bir anlık görüntü yazıldığının
+      // işaretidir (ör. bir önceki oturumda gönderim tam tamamlanamamış
+      // olabilir). Böyle bir durumda buluttaki veriyle yereli asla ezme;
+      // bunun yerine yereldeki (daha zengin) veriyi koru ve buluta gönder.
+      const remoteSize = data && data.state ? JSON.stringify(data.state).length : 0;
+      const localSize = JSON.stringify(APP_STATE).length;
+      const remoteLooksSuspiciouslyEmptier = localSize > 200 && remoteSize < localSize * 0.5;
+
+      if (data && data.state && Object.keys(data.state).length && !remoteLooksSuspiciouslyEmptier) {
         Object.keys(APP_STATE).forEach((k) => delete APP_STATE[k]);
         Object.assign(APP_STATE, data.state);
         localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
@@ -14786,8 +14797,11 @@
         // yansısın diye sayfa tazelenir.
         if (reloadOnData) { location.reload(); return { ok: true }; }
       } else {
-        // Bu hesap için buluta hiç veri yazılmamış: mevcut yerel veriyi ilk
-        // kayıt olarak yükle.
+        // Bu hesap için buluta hiç veri yazılmamış OLABİLİR ya da buluttaki
+        // veri yereldekinden şüpheli derecede eksik görünüyor: her iki
+        // durumda da veri kaybını önlemek için mevcut (daha güvenilir)
+        // yerel veriyi buluta gönder.
+        updateSyncStatusUI('success');
         await pushLocalState({ silent: true });
       }
       return { ok: true };
@@ -15007,8 +15021,39 @@
   if (settingsAuthActionBtn) {
     settingsAuthActionBtn.addEventListener('click', async () => {
       if (currentUser) {
+        // KRİTİK VERİ KAYBI DÜZELTMESİ: Çıkış yapmadan önce bekleyen (henüz
+        // buluta gönderilmemiş) değişiklikleri MUTLAKA gönder. Eskiden
+        // signOut() çağrılır çağrılmaz currentUser hemen null yapılıyordu;
+        // eğer son 2.5 saniye içinde bir değişiklik yapılmışsa autosync
+        // zamanlayıcısı hâlâ bekliyor olabiliyordu ve zamanlayıcı sonunda
+        // ateşlendiğinde pushLocalState, currentUser artık null olduğu
+        // için sessizce hiçbir şey yapmadan çıkıyordu. Sonuç: o son
+        // değişiklikler asla buluta ulaşmıyordu ve bir sonraki girişte
+        // (özellikle cihaz değiştiyse veya yerel veri temizlendiyse)
+        // kullanıcı buluttaki eski/eksik veriyle karşılaşıyordu.
+        clearTimeout(autoSyncTimer);
+        autoSyncTimer = null;
+
+        const originalLabel = settingsAuthActionBtn.textContent;
+        settingsAuthActionBtn.disabled = true;
+        settingsAuthActionBtn.textContent = 'Kaydediliyor…';
+
+        const result = await pushLocalState();
+
+        if (!result.ok) {
+          settingsAuthActionBtn.disabled = false;
+          settingsAuthActionBtn.textContent = originalLabel;
+          const proceedAnyway = window.confirm(
+            'Son değişikliklerin buluta gönderilemedi (bağlantı sorunu olabilir).\n\n' +
+            'Yine de çıkış yaparsan bu cihazdaki senkronize olmamış veriler kaybolabilir.\n\n' +
+            'Yine de çıkış yapmak istiyor musun?'
+          );
+          if (!proceedAnyway) return;
+        }
+
         try { await supabaseClient.auth.signOut(); } catch (err) { /* yok say */ }
         currentUser = null;
+        settingsAuthActionBtn.disabled = false;
         updateSyncStatusUI();
       } else {
         showAuthGate();
