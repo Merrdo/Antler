@@ -8395,6 +8395,19 @@
   const goToPage = (id) => {
     const nextPage = document.getElementById(id);
     if (!nextPage || nextPage === activePage) return;
+
+    // iOS'ta bir metin/numara alanına yazıp klavyeyi kapatmadan alt
+    // menüden başka bir sayfaya geçilirse, odak (focus) o input'ta takılı
+    // kalabiliyor. Klavyenin kendisi ekrandan gitse bile üstündeki "◂ ▸ ...
+    // Bitti" araç çubuğu (accessory bar) ekranda asılı kalabiliyor ve
+    // hangi sayfaya gidilirse gidilsin görünmeye devam ediyor. Sayfa
+    // değişirken hâlâ odaklı bir input/textarea varsa onu bilinçli olarak
+    // "blur" ediyoruz ki klavye ve araç çubuğu düzgünce kapansın.
+    const active = document.activeElement;
+    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
+      active.blur();
+    }
+
     const prevPage = activePage;
     activePage = nextPage;
 
