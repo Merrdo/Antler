@@ -21,6 +21,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@700;800&display=swap" rel="stylesheet">
+
+<!-- Bulut eşitleme (Supabase) için istemci kütüphanesi -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   * {
     margin: 0;
@@ -6796,6 +6799,337 @@
     background: var(--dark-card-color, #3b3e42);
     color: #f2f2f4;
   }
+
+  /* ================= Kayıt / Giriş Ekranı (Auth Gate) ================= */
+  /* Uygulamaya ilk kez girildiğinde her şeyin üzerinde duran, tam ekran
+     kapı. Oturum bulunursa ya da kullanıcı "Şimdilik geç" derse JS
+     tarafından .is-hidden eklenerek kapatılır. */
+  .auth-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+    background: #2b2f4a;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s linear 0s;
+  }
+
+  .auth-gate.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+  }
+
+  .auth-gate-card {
+    transition: transform 0.3s cubic-bezier(0.34, 1.15, 0.64, 1);
+  }
+
+  .auth-gate.is-hidden .auth-gate-card {
+    transform: scale(0.96) translateY(6px);
+  }
+
+  .auth-gate-card {
+    width: 100%;
+    max-width: 360px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.3em;
+    box-shadow: 7px 7px 0px 0px #000;
+    padding: 1.5rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .auth-gate-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .auth-gate-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ff90e8;
+    border: 3px solid #000;
+    border-radius: 50%;
+    box-shadow: 3px 3px 0px 0px #000;
+    color: #121212;
+  }
+
+  .auth-gate-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: #121212;
+  }
+
+  .auth-gate-sub {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: rgba(18, 18, 18, 0.6);
+    line-height: 1.35;
+  }
+
+  .auth-gate-tabs {
+    position: relative;
+    display: flex;
+    gap: 0.5rem;
+    background: #f2f2f2;
+    border: 3px solid #000;
+    border-radius: 0.9rem;
+    padding: 4px;
+  }
+
+  /* Sekmenin altında kayarak ilerleyen siyah gösterge; nav bar'daki
+     .nav-slider ile aynı mantık: konum yerine transform ile taşınır. */
+  .auth-gate-tab-slider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc((100% - 8px - 0.5rem) / 2);
+    height: calc(100% - 8px);
+    background: #121212;
+    border-radius: 0.65rem;
+    transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+    z-index: 0;
+  }
+
+  .auth-gate-tabs[data-active="register"] .auth-gate-tab-slider {
+    transform: translateX(calc(100% + 0.5rem));
+  }
+
+  .auth-gate-tab {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    padding: 0.55rem 0.4rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #121212;
+    background: transparent;
+    border: none;
+    border-radius: 0.65rem;
+    cursor: pointer;
+    transition: color 0.25s ease;
+  }
+
+  .auth-gate-tab.is-active {
+    color: #fff;
+  }
+
+  /* Giriş/Kayıt formları arasında yumuşak, kayan bir geçiş: her iki form
+     da aynı grid hücresini paylaşır (üst üste biner), aktif olan
+     opaklaşıp yerine otururken diğeri solup kenara kayar. Böylece panel
+     değişimi "display: none" ile anide kesilmek yerine animasyonlu olur. */
+  .auth-gate-panels {
+    position: relative;
+    display: grid;
+  }
+
+  .auth-gate-form {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    opacity: 0;
+    transform: translateX(16px);
+    transition: opacity 0.28s ease, transform 0.32s cubic-bezier(0.34, 1.15, 0.64, 1), visibility 0s linear 0.32s;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .auth-gate-form.is-active {
+    opacity: 1;
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.3s ease 0.05s, transform 0.38s cubic-bezier(0.34, 1.15, 0.64, 1) 0.05s;
+  }
+
+  .auth-gate-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: rgba(18, 18, 18, 0.65);
+  }
+
+  .auth-gate-input {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #121212;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.7rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .auth-gate-error {
+    display: none;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: #d61f4a;
+    line-height: 1.35;
+  }
+
+  .auth-gate-error.is-visible {
+    display: block;
+  }
+
+  .auth-gate-info {
+    display: none;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: #1c8a4c;
+    line-height: 1.35;
+  }
+
+  .auth-gate-info.is-visible {
+    display: block;
+  }
+
+  .auth-gate-submit {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #fff;
+    background-color: #121212;
+    border: 3px solid #000;
+    border-radius: 0.9rem;
+    box-shadow: 3px 3px 0px 0px #000;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .auth-gate-submit:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
+  }
+
+  .auth-gate-submit:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+
+  .auth-gate-skip {
+    align-self: center;
+    background: transparent;
+    border: none;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: rgba(18, 18, 18, 0.5);
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0.2rem;
+  }
+
+  /* ================= Ayarlar: Hesap ve Eşitleme ================= */
+  .settings-sync-btn {
+    background-color: #121212;
+    color: #fff;
+    flex: 1;
+  }
+
+  .settings-sync-btn:hover {
+    background-color: #121212;
+    opacity: 0.9;
+  }
+
+  .settings-sync-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+    transform: none !important;
+    box-shadow: 3px 3px 0px 0px #000 !important;
+  }
+
+  .settings-row-account {
+    gap: 0.7rem;
+  }
+
+  .settings-sync-dot {
+    flex-shrink: 0;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: #9a9a9a;
+    border: 2px solid #000;
+  }
+
+  .settings-sync-dot.is-ok {
+    background: #38c172;
+  }
+
+  .settings-sync-dot.is-error {
+    background: #ff5c5c;
+  }
+
+  .settings-sync-dot.is-syncing {
+    background: #ffcf44;
+    animation: settingsSyncPulse 0.9s ease-in-out infinite;
+  }
+
+  @keyframes settingsSyncPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  .settings-sync-actions {
+    gap: 0.6rem;
+  }
+
+  body.is-anthracite .auth-gate-card {
+    background-color: var(--dark-card-color, #3b3e42);
+  }
+
+  body.is-anthracite .auth-gate-title,
+  body.is-anthracite .auth-gate-tab {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .auth-gate-sub {
+    color: rgba(242, 242, 244, 0.6);
+  }
+
+  body.is-anthracite .auth-gate-tabs {
+    background: #2a2c2f;
+  }
+
+  body.is-anthracite .auth-gate-input {
+    background-color: #2a2c2f;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .auth-gate-label {
+    color: rgba(242, 242, 244, 0.6);
+  }
 </style>
 </head>
 <body oncopy="return false" oncut="return false" onselectstart="return false" ondragstart="return false">
@@ -6803,6 +7137,56 @@
 <div class="theme-layer is-visible" id="themeLayerA"></div>
 <div class="theme-layer" id="themeLayerB"></div>
 <div class="pattern-layer" id="patternLayer"></div>
+
+<!-- Kayıt / Giriş ekranı: uygulamaya ilk giren biri için, verileri
+     Supabase üzerinden eşitleyebilmesi amacıyla önce bu ekran gösterilir. -->
+<div class="auth-gate is-hidden" id="authGate">
+  <div class="auth-gate-card">
+    <div class="auth-gate-header">
+      <span class="auth-gate-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.24-8 5v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1c0-2.76-3.6-5-8-5Z"/></svg>
+      </span>
+      <h1 class="auth-gate-title">Takvimim'e Hoş Geldin</h1>
+      <p class="auth-gate-sub">Verilerini cihazlar arasında eşitlemek için hesap oluştur ya da giriş yap.</p>
+    </div>
+
+    <div class="auth-gate-tabs" id="authGateTabs" data-active="login">
+      <div class="auth-gate-tab-slider" aria-hidden="true"></div>
+      <button type="button" class="auth-gate-tab is-active" data-panel="login">Giriş Yap</button>
+      <button type="button" class="auth-gate-tab" data-panel="register">Kayıt Ol</button>
+    </div>
+
+    <div class="auth-gate-panels" id="authGatePanels">
+      <form class="auth-gate-form is-active" id="authLoginForm" data-panel="login">
+        <label class="auth-gate-label">E-posta
+          <input type="email" class="auth-gate-input" id="authLoginEmail" autocomplete="email" required>
+        </label>
+        <label class="auth-gate-label">Şifre
+          <input type="password" class="auth-gate-input" id="authLoginPassword" autocomplete="current-password" required>
+        </label>
+        <span class="auth-gate-error" id="authLoginError"></span>
+        <button type="submit" class="auth-gate-submit" id="authLoginSubmit">Giriş Yap</button>
+      </form>
+
+      <form class="auth-gate-form" id="authRegisterForm" data-panel="register">
+        <label class="auth-gate-label">E-posta
+          <input type="email" class="auth-gate-input" id="authRegisterEmail" autocomplete="email" required>
+        </label>
+        <label class="auth-gate-label">Şifre
+          <input type="password" class="auth-gate-input" id="authRegisterPassword" autocomplete="new-password" minlength="6" required>
+        </label>
+        <label class="auth-gate-label">Şifre (Tekrar)
+          <input type="password" class="auth-gate-input" id="authRegisterPassword2" autocomplete="new-password" minlength="6" required>
+        </label>
+        <span class="auth-gate-error" id="authRegisterError"></span>
+        <span class="auth-gate-info" id="authRegisterInfo"></span>
+        <button type="submit" class="auth-gate-submit" id="authRegisterSubmit">Kayıt Ol</button>
+      </form>
+    </div>
+
+    <button type="button" class="auth-gate-skip" id="authGateSkipBtn">Şimdilik geç</button>
+  </div>
+</div>
 
 <div class="app">
 
@@ -7026,6 +7410,24 @@
           </svg>
         </span>
         <h1 class="settings-title">Ayarlar</h1>
+      </div>
+
+      <div class="settings-section">
+        <span class="settings-section-label">Hesap ve Eşitleme</span>
+        <div class="settings-card">
+          <div class="settings-row settings-row-account">
+            <div class="settings-row-text">
+              <span class="settings-row-title" id="settingsAccountEmail">Giriş yapılmadı</span>
+              <span class="settings-row-desc" id="settingsSyncStatusText">Verilerini eşitlemek için giriş yap</span>
+            </div>
+            <span class="settings-sync-dot" id="settingsSyncDot" aria-hidden="true"></span>
+          </div>
+          <div class="settings-divider"></div>
+          <div class="settings-row settings-sync-actions">
+            <button type="button" class="settings-danger-btn settings-sync-btn" id="settingsSyncBtn">Verileri Şimdi Eşitle</button>
+            <button type="button" class="settings-danger-btn" id="settingsAuthActionBtn">Giriş Yap</button>
+          </div>
+        </div>
       </div>
 
       <div class="settings-section">
@@ -8117,6 +8519,11 @@
     try {
       Object.assign(APP_STATE, patch);
       localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
+      // Giriş yapılmışsa, her değişiklikten sonra arka planda (gecikmeli)
+      // bulut eşitlemesi tetiklenir. scheduleAutoSync bu script'ten daha
+      // sonra tanımlansa da, gerçek çağrı her zaman sayfa tam yüklendikten
+      // ve kullanıcı bir şey değiştirdikten sonra olur; bu yüzden güvenlidir.
+      if (typeof scheduleAutoSync === 'function') scheduleAutoSync();
     } catch (err) {
       console.warn('Uygulama verisi kaydedilemedi:', err);
     }
@@ -12638,7 +13045,14 @@
     const exam = page11State.exams.find((it) => it.id === examId);
     if (!exam) return;
     const reader = new FileReader();
-    reader.onload = () => openPage11QuestionModal(exam, subjectKey, idx, reader.result);
+    reader.onload = async () => {
+      // Kaliteyi bozmadan dosya boyutunu küçültür; hem localStorage hem de
+      // bulut eşitlemesi için daha hafif bir görsel elde edilir.
+      const compressed = typeof compressImageDataUrl === 'function'
+        ? await compressImageDataUrl(reader.result)
+        : reader.result;
+      openPage11QuestionModal(exam, subjectKey, idx, compressed);
+    };
     reader.readAsDataURL(file);
   });
 
@@ -13356,7 +13770,12 @@
     const file = qhavuzFileInput.files && qhavuzFileInput.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => openQhavuzAddModal(reader.result);
+    reader.onload = async () => {
+      const compressed = typeof compressImageDataUrl === 'function'
+        ? await compressImageDataUrl(reader.result)
+        : reader.result;
+      openQhavuzAddModal(compressed);
+    };
     reader.readAsDataURL(file);
   });
 
@@ -14020,6 +14439,451 @@
       });
     });
   }
+</script>
+
+<script>
+  // ================= Bulut Eşitleme (Supabase) =================
+  // Bu bölüm; e-posta/şifre ile kayıt/giriş akışını, görsellerin kaliteyi
+  // bozmadan sıkıştırılmasını ve APP_STATE içindeki TÜM verilerin
+  // (görevler, soru havuzu, sınav soruları, görseller vb.) Supabase
+  // üzerinden hesaba bağlı olarak eşitlenmesini yönetir.
+  //
+  // ---- KURULUM (zorunlu) ----
+  // 1) https://supabase.com üzerinde bir proje oluşturun.
+  // 2) Project Settings > API bölümünden "Project URL" ve "anon public"
+  //    anahtarını aşağıdaki SUPABASE_URL / SUPABASE_ANON_KEY alanlarına yapıştırın.
+  // 3) SQL Editor'de gerekli tabloyu ve güvenlik kurallarını oluşturun,
+  //    Storage'da "question-images" adında bir bucket açın.
+  //    (Tam SQL ve adımlar ayrı olarak paylaşıldı.)
+  // Bu alanlar doldurulmadan uygulama normal şekilde, eşitleme olmadan
+  // çalışmaya devam eder; kayıt/giriş ekranı otomatik olarak devre dışı kalır.
+  const SUPABASE_URL = 'https://ilkmdfxdwaxfjzytlsgu.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_unJT_r3N_7Z9YfUmSKMnjA_g8_kqJKb';
+  const SYNC_TABLE = 'app_states';
+  const IMAGE_BUCKET = 'question-images';
+  const LAST_SYNC_KEY = 'takvimim_last_sync_v1';
+  const AUTH_SKIP_KEY = 'takvimim_auth_skipped_v1';
+
+  const supabaseConfigured = !SUPABASE_URL.includes('YOUR-PROJECT-REF') && !SUPABASE_ANON_KEY.includes('YOUR-ANON-PUBLIC-KEY');
+  const supabaseClient = (supabaseConfigured && window.supabase)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+  let currentUser = null;
+  let isSyncing = false;
+  let autoSyncTimer = null;
+
+  // ---- Görsel sıkıştırma ----
+  // Uzun kenarı 1600px'i geçen görseller orantılı küçültülür ve JPEG
+  // kalite 0.82 ile yeniden kodlanır. Bu değerler; ekranda/ışıkta gözle
+  // fark edilecek bir kalite kaybı yaratmadan dosya boyutunu (ve
+  // dolayısıyla hem localStorage hem de eşitleme trafiğini) belirgin
+  // biçimde azaltacak şekilde seçildi.
+  const compressImageDataUrl = (dataUrl, maxDim = 1600, quality = 0.82) => new Promise((resolve) => {
+    if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image')) {
+      resolve(dataUrl);
+      return;
+    }
+    try {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (!width || !height) { resolve(dataUrl); return; }
+        if (width > maxDim || height > maxDim) {
+          const scale = maxDim / Math.max(width, height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        try {
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } catch (err) {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    } catch (err) {
+      resolve(dataUrl);
+    }
+  });
+
+  const dataUrlToBlob = async (dataUrl) => (await fetch(dataUrl)).blob();
+
+  const randomFileId = () => (
+    window.crypto && window.crypto.randomUUID
+      ? window.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  );
+
+  // APP_STATE ağacını gezip, hâlâ base64 (data:image) olarak duran her
+  // görseli Supabase Storage'a yükler ve yerine herkese açık URL'sini
+  // yazar. Böylece hem localStorage hem de eşitlenen JSON küçük kalır,
+  // görseller ise ayrı olarak (sıkıştırılmış haliyle) saklanır.
+  const uploadPendingImages = async (node, seen) => {
+    if (!node || typeof node !== 'object') return;
+    seen = seen || new WeakSet();
+    if (seen.has(node)) return;
+    seen.add(node);
+    const keys = Object.keys(node);
+    for (let i = 0; i < keys.length; i += 1) {
+      const key = keys[i];
+      const val = node[key];
+      if (typeof val === 'string' && val.startsWith('data:image')) {
+        try {
+          const blob = await dataUrlToBlob(val);
+          const path = `${currentUser.id}/${randomFileId()}.jpg`;
+          const { error: upErr } = await supabaseClient
+            .storage.from(IMAGE_BUCKET)
+            .upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+          if (!upErr) {
+            const { data: pub } = supabaseClient.storage.from(IMAGE_BUCKET).getPublicUrl(path);
+            if (pub && pub.publicUrl) node[key] = pub.publicUrl;
+          } else {
+            console.warn('Görsel yüklenemedi:', upErr);
+          }
+        } catch (err) {
+          console.warn('Görsel yüklenemedi:', err);
+        }
+      } else if (val && typeof val === 'object') {
+        await uploadPendingImages(val, seen);
+      }
+    }
+  };
+
+  // ---- Ayarlar sayfasındaki eşitleme durumu arayüzü ----
+  const settingsAccountEmail = document.getElementById('settingsAccountEmail');
+  const settingsSyncStatusText = document.getElementById('settingsSyncStatusText');
+  const settingsSyncDot = document.getElementById('settingsSyncDot');
+  const settingsSyncBtn = document.getElementById('settingsSyncBtn');
+  const settingsAuthActionBtn = document.getElementById('settingsAuthActionBtn');
+
+  const formatRelativeSyncTime = (ts) => {
+    if (!ts) return 'Hiç eşitlenmedi';
+    const diffSec = Math.max(0, Math.floor((Date.now() - Number(ts)) / 1000));
+    if (diffSec < 10) return 'az önce eşitlendi';
+    if (diffSec < 60) return `${diffSec} saniye önce eşitlendi`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin} dakika önce eşitlendi`;
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return `${diffHour} saat önce eşitlendi`;
+    const diffDay = Math.floor(diffHour / 24);
+    return `${diffDay} gün önce eşitlendi`;
+  };
+
+  const updateSyncStatusUI = (mode) => {
+    if (!settingsAccountEmail) return;
+
+    if (!supabaseConfigured) {
+      settingsAccountEmail.textContent = 'Bulut eşitleme yapılandırılmadı';
+      settingsSyncStatusText.textContent = 'Bu özellik henüz etkin değil';
+      if (settingsSyncDot) settingsSyncDot.className = 'settings-sync-dot';
+      if (settingsSyncBtn) settingsSyncBtn.disabled = true;
+      if (settingsAuthActionBtn) settingsAuthActionBtn.style.display = 'none';
+      return;
+    }
+
+    if (!currentUser) {
+      settingsAccountEmail.textContent = 'Giriş yapılmadı';
+      settingsSyncStatusText.textContent = 'Verilerini eşitlemek için giriş yap';
+      if (settingsSyncDot) settingsSyncDot.className = 'settings-sync-dot';
+      if (settingsSyncBtn) settingsSyncBtn.disabled = true;
+      if (settingsAuthActionBtn) {
+        settingsAuthActionBtn.style.display = '';
+        settingsAuthActionBtn.textContent = 'Giriş Yap';
+      }
+      return;
+    }
+
+    settingsAccountEmail.textContent = currentUser.email || 'Hesabım';
+    if (settingsSyncBtn) settingsSyncBtn.disabled = isSyncing;
+    if (settingsAuthActionBtn) {
+      settingsAuthActionBtn.style.display = '';
+      settingsAuthActionBtn.textContent = 'Çıkış Yap';
+    }
+
+    const dotClass = { syncing: 'is-syncing', success: 'is-ok', error: 'is-error' }[mode] || '';
+    if (settingsSyncDot) settingsSyncDot.className = `settings-sync-dot ${dotClass}`.trim();
+
+    if (mode === 'syncing') {
+      settingsSyncStatusText.textContent = 'Eşitleniyor…';
+    } else if (mode === 'error') {
+      settingsSyncStatusText.textContent = 'Eşitleme başarısız, tekrar deneyin';
+    } else {
+      const lastSync = localStorage.getItem(LAST_SYNC_KEY);
+      settingsSyncStatusText.textContent = formatRelativeSyncTime(lastSync);
+    }
+  };
+
+  // ---- Eşitleme: yerelden buluta gönder ----
+  const pushLocalState = async ({ silent } = {}) => {
+    if (!supabaseClient || !currentUser || isSyncing) return { ok: false };
+    isSyncing = true;
+    updateSyncStatusUI('syncing');
+    try {
+      await uploadPendingImages(APP_STATE);
+      localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
+      const { error } = await supabaseClient
+        .from(SYNC_TABLE)
+        .upsert({ user_id: currentUser.id, state: APP_STATE, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+      if (error) throw error;
+      localStorage.setItem(LAST_SYNC_KEY, String(Date.now()));
+      isSyncing = false;
+      updateSyncStatusUI('success');
+      return { ok: true };
+    } catch (err) {
+      console.warn('Eşitleme (gönderme) başarısız:', err);
+      isSyncing = false;
+      updateSyncStatusUI('error');
+      return { ok: false, error: err };
+    }
+  };
+
+  // ---- Eşitleme: buluttan yerele indir (girişte kullanılır) ----
+  const pullRemoteState = async ({ reloadOnData } = {}) => {
+    if (!supabaseClient || !currentUser || isSyncing) return { ok: false };
+    isSyncing = true;
+    updateSyncStatusUI('syncing');
+    try {
+      const { data, error } = await supabaseClient
+        .from(SYNC_TABLE)
+        .select('state, updated_at')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+      if (error) throw error;
+      isSyncing = false;
+      if (data && data.state && Object.keys(data.state).length) {
+        Object.keys(APP_STATE).forEach((k) => delete APP_STATE[k]);
+        Object.assign(APP_STATE, data.state);
+        localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
+        localStorage.setItem(LAST_SYNC_KEY, String(Date.now()));
+        updateSyncStatusUI('success');
+        // Uygulamanın pek çok bölümü kendi durumunu APP_STATE'ten yalnızca
+        // sayfa yüklenirken bir kez okuyor; indirilen veri her yerde anında
+        // yansısın diye sayfa tazelenir.
+        if (reloadOnData) { location.reload(); return { ok: true }; }
+      } else {
+        // Bu hesap için buluta hiç veri yazılmamış: mevcut yerel veriyi ilk
+        // kayıt olarak yükle.
+        await pushLocalState({ silent: true });
+      }
+      return { ok: true };
+    } catch (err) {
+      console.warn('Eşitleme (indirme) başarısız:', err);
+      isSyncing = false;
+      updateSyncStatusUI('error');
+      return { ok: false, error: err };
+    }
+  };
+
+  const scheduleAutoSync = () => {
+    if (!supabaseClient || !currentUser) return;
+    clearTimeout(autoSyncTimer);
+    autoSyncTimer = setTimeout(() => { pushLocalState({ silent: true }); }, 2500);
+  };
+
+  if (settingsSyncBtn) {
+    settingsSyncBtn.addEventListener('click', () => pushLocalState());
+  }
+
+  // ================= Kayıt / Giriş ekranı (Auth Gate) =================
+  const authGate = document.getElementById('authGate');
+  const authGateTabs = document.getElementById('authGateTabs');
+  const authLoginForm = document.getElementById('authLoginForm');
+  const authRegisterForm = document.getElementById('authRegisterForm');
+  const authGateSkipBtn = document.getElementById('authGateSkipBtn');
+  const authLoginError = document.getElementById('authLoginError');
+  const authRegisterError = document.getElementById('authRegisterError');
+  const authRegisterInfo = document.getElementById('authRegisterInfo');
+  const authLoginSubmit = document.getElementById('authLoginSubmit');
+  const authRegisterSubmit = document.getElementById('authRegisterSubmit');
+
+  const showAuthGate = () => { if (authGate) authGate.classList.remove('is-hidden'); };
+  const hideAuthGate = () => { if (authGate) authGate.classList.add('is-hidden'); };
+
+  const setAuthPanel = (panel) => {
+    if (!authGateTabs) return;
+    const prevPanel = authGateTabs.dataset.active || 'login';
+    authGateTabs.dataset.active = panel;
+    authGateTabs.querySelectorAll('.auth-gate-tab').forEach((tab) => {
+      tab.classList.toggle('is-active', tab.dataset.panel === panel);
+    });
+
+    // Giriş <-> Kayıt formları arasında yönlü (soldan/sağdan) kayan
+    // geçiş: hangi yöne gidildiğine göre çıkan form ters yöne kayıp
+    // solarken, giren form karşı yönden gelip yerine oturur.
+    if (authLoginForm && authRegisterForm && panel !== prevPanel) {
+      const dir = panel === 'register' ? 1 : -1; // 1: sağa doğru ilerleme, -1: geri dönüş
+      const outgoing = prevPanel === 'login' ? authLoginForm : authRegisterForm;
+      const incoming = panel === 'login' ? authLoginForm : authRegisterForm;
+
+      outgoing.classList.remove('is-active');
+      outgoing.style.transform = `translateX(${-dir * 16}px)`;
+
+      incoming.style.transition = 'none';
+      incoming.style.transform = `translateX(${dir * 16}px)`;
+      // Yeni konumu boyamadan (reflow) önce uygula ki geçiş oradan başlasın.
+      void incoming.offsetWidth;
+      incoming.style.transition = '';
+      incoming.classList.add('is-active');
+      incoming.style.transform = '';
+    } else {
+      if (authLoginForm) authLoginForm.classList.toggle('is-active', panel === 'login');
+      if (authRegisterForm) authRegisterForm.classList.toggle('is-active', panel === 'register');
+    }
+
+    if (authLoginError) authLoginError.classList.remove('is-visible');
+    if (authRegisterError) authRegisterError.classList.remove('is-visible');
+    if (authRegisterInfo) authRegisterInfo.classList.remove('is-visible');
+  };
+
+  if (authGateTabs) {
+    authGateTabs.querySelectorAll('.auth-gate-tab').forEach((tab) => {
+      tab.addEventListener('click', () => setAuthPanel(tab.dataset.panel));
+    });
+  }
+
+  if (authGateSkipBtn) {
+    authGateSkipBtn.addEventListener('click', () => {
+      try { localStorage.setItem(AUTH_SKIP_KEY, '1'); } catch (err) { /* yok say */ }
+      hideAuthGate();
+    });
+  }
+
+  const authErrorMessage = (err) => {
+    const msg = (err && err.message) || '';
+    if (/invalid login credentials/i.test(msg)) return 'E-posta veya şifre hatalı.';
+    if (/already registered/i.test(msg)) return 'Bu e-posta ile zaten bir hesap var.';
+    if (/password/i.test(msg) && /6/.test(msg)) return 'Şifre en az 6 karakter olmalı.';
+    return msg || 'Bir şeyler ters gitti, tekrar dene.';
+  };
+
+  if (authLoginForm) {
+    authLoginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!supabaseClient) return;
+      const email = document.getElementById('authLoginEmail').value.trim();
+      const password = document.getElementById('authLoginPassword').value;
+      if (authLoginError) authLoginError.classList.remove('is-visible');
+      authLoginSubmit.disabled = true;
+      authLoginSubmit.textContent = 'Giriş yapılıyor…';
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        currentUser = data.user;
+        try { localStorage.removeItem(AUTH_SKIP_KEY); } catch (err) { /* yok say */ }
+        hideAuthGate();
+        updateSyncStatusUI();
+        await pullRemoteState({ reloadOnData: true });
+      } catch (err) {
+        if (authLoginError) {
+          authLoginError.textContent = authErrorMessage(err);
+          authLoginError.classList.add('is-visible');
+        }
+      } finally {
+        authLoginSubmit.disabled = false;
+        authLoginSubmit.textContent = 'Giriş Yap';
+      }
+    });
+  }
+
+  if (authRegisterForm) {
+    authRegisterForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!supabaseClient) return;
+      const email = document.getElementById('authRegisterEmail').value.trim();
+      const password = document.getElementById('authRegisterPassword').value;
+      const password2 = document.getElementById('authRegisterPassword2').value;
+      if (authRegisterError) authRegisterError.classList.remove('is-visible');
+      if (authRegisterInfo) authRegisterInfo.classList.remove('is-visible');
+
+      if (password !== password2) {
+        authRegisterError.textContent = 'Şifreler eşleşmiyor.';
+        authRegisterError.classList.add('is-visible');
+        return;
+      }
+      if (password.length < 6) {
+        authRegisterError.textContent = 'Şifre en az 6 karakter olmalı.';
+        authRegisterError.classList.add('is-visible');
+        return;
+      }
+
+      authRegisterSubmit.disabled = true;
+      authRegisterSubmit.textContent = 'Kayıt olunuyor…';
+      try {
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) throw error;
+        try { localStorage.removeItem(AUTH_SKIP_KEY); } catch (err) { /* yok say */ }
+        if (data.session) {
+          // E-posta doğrulaması kapalı bir projede oturum hemen açılır.
+          currentUser = data.user;
+          hideAuthGate();
+          updateSyncStatusUI();
+          await pushLocalState();
+        } else {
+          authRegisterInfo.textContent = 'Kayıt başarılı! Devam etmek için e-postana gelen bağlantıyı onayla, ardından giriş yap.';
+          authRegisterInfo.classList.add('is-visible');
+          setAuthPanel('login');
+        }
+      } catch (err) {
+        authRegisterError.textContent = authErrorMessage(err);
+        authRegisterError.classList.add('is-visible');
+      } finally {
+        authRegisterSubmit.disabled = false;
+        authRegisterSubmit.textContent = 'Kayıt Ol';
+      }
+    });
+  }
+
+  if (settingsAuthActionBtn) {
+    settingsAuthActionBtn.addEventListener('click', async () => {
+      if (currentUser) {
+        try { await supabaseClient.auth.signOut(); } catch (err) { /* yok say */ }
+        currentUser = null;
+        updateSyncStatusUI();
+      } else {
+        setAuthPanel('login');
+        showAuthGate();
+      }
+    });
+  }
+
+  // ---- Açılışta oturum kontrolü ----
+  const initAuthGate = async () => {
+    if (!supabaseClient) {
+      updateSyncStatusUI();
+      return;
+    }
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      const session = data && data.session;
+      if (session && session.user) {
+        currentUser = session.user;
+        hideAuthGate();
+        updateSyncStatusUI();
+        await pullRemoteState({ reloadOnData: false });
+      } else {
+        let skipped = false;
+        try { skipped = localStorage.getItem(AUTH_SKIP_KEY) === '1'; } catch (err) { /* yok say */ }
+        if (!skipped) showAuthGate();
+        updateSyncStatusUI();
+      }
+    } catch (err) {
+      console.warn('Oturum kontrolü başarısız:', err);
+      updateSyncStatusUI();
+    }
+
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      currentUser = session && session.user ? session.user : null;
+      updateSyncStatusUI();
+    });
+  };
+
+  initAuthGate();
 </script>
 
 </body>
