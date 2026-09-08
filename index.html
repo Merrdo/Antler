@@ -13231,7 +13231,8 @@
     page11QuestionPendingImage = imageDataUrl || (existing && existing.image) || null;
     page11QuestionPendingAnswer = (existing && existing.answer) || null;
     if (!page11QuestionPendingImage) return;
-    page11QuestionPreviewImg.src = page11QuestionPendingImage;
+    page11QuestionPreviewImg.src = '';
+    resolveImageSrc(page11QuestionPendingImage).then((url) => { page11QuestionPreviewImg.src = url; });
     page11QuestionRemoveBtn.classList.toggle('is-hidden', !existing);
     page11BuildQuestionAnswerGrid();
     page11UpdateQuestionConfirmState();
@@ -13279,24 +13280,41 @@
     if (e.target === page11QuestionBackdrop) closePage11QuestionModal();
   });
 
-  page11QuestionConfirm.addEventListener('click', () => {
+  page11QuestionConfirm.addEventListener('click', async () => {
     if (!page11QuestionPendingImage || !page11QuestionPendingAnswer || !page11QuestionTarget) return;
     const { examId, subjectKey, idx } = page11QuestionTarget;
     const exam = page11State.exams.find((it) => it.id === examId);
     if (!exam) return;
+    const existing = page11GetPhoto(exam, subjectKey, idx);
+    // page11QuestionPendingImage, kullanıcı yeni bir dosya seçtiyse ham
+    // (sıkıştırılmış) bir data:image URL'idir; mevcut görsel değiştirilmeden
+    // pop-up tekrar açıldıysa zaten bir "idb://" veya bulut URL'sidir —
+    // bu durumda tekrar IndexedDB'ye yazmaya gerek yoktur.
+    const isNewImage = typeof page11QuestionPendingImage === 'string'
+      && page11QuestionPendingImage.startsWith('data:image');
+    const imageRef = isNewImage
+      ? await storeImageAndGetRef(page11QuestionPendingImage)
+      : page11QuestionPendingImage;
+    if (isNewImage && existing && existing.image && existing.image !== imageRef) {
+      await deleteImageRef(existing.image);
+    }
     page11SetPhoto(exam, subjectKey, idx, {
-      image: page11QuestionPendingImage,
+      image: imageRef,
       answer: page11QuestionPendingAnswer
     });
     closePage11QuestionModal();
     renderExamDetail();
   });
 
-  page11QuestionRemoveBtn.addEventListener('click', () => {
+  page11QuestionRemoveBtn.addEventListener('click', async () => {
     if (!page11QuestionTarget) return;
     const { examId, subjectKey, idx } = page11QuestionTarget;
     const exam = page11State.exams.find((it) => it.id === examId);
-    if (exam) page11RemovePhoto(exam, subjectKey, idx);
+    if (exam) {
+      const existing = page11GetPhoto(exam, subjectKey, idx);
+      if (existing && existing.image) await deleteImageRef(existing.image);
+      page11RemovePhoto(exam, subjectKey, idx);
+    }
     closePage11QuestionModal();
     renderExamDetail();
   });
@@ -13995,13 +14013,16 @@
     if (e.target === qhavuzAddBackdrop) closeQhavuzAddModal();
   });
 
-  qhavuzAddConfirm.addEventListener('click', () => {
+  qhavuzAddConfirm.addEventListener('click', async () => {
     if (!qhavuzPendingImage || !qhavuzPendingSubject || !qhavuzPendingAnswer) return;
     const book = qhavuzAddBookInput.value.trim();
     const page = qhavuzAddPageInput.value.trim();
+    // Ham base64 yerine görsel IndexedDB'ye Blob olarak yazılır; APP_STATE
+    // (ve dolayısıyla localStorage) içinde sadece küçük bir referans kalır.
+    const imageRef = await storeImageAndGetRef(qhavuzPendingImage);
     qhavuzState.items.unshift({
       id: qhavuzGenId(),
-      image: qhavuzPendingImage,
+      image: imageRef,
       subject: qhavuzPendingSubject,
       answer: qhavuzPendingAnswer,
       book: book || null,
@@ -14187,7 +14208,8 @@
   const openQhavuzLightbox = (item) => {
     qhavuzLightboxZoom.reset();
     qhavuzLightboxItem = item;
-    qhavuzLightboxImg.src = item.image;
+    qhavuzLightboxImg.src = '';
+    resolveImageSrc(item.image).then((url) => { qhavuzLightboxImg.src = url; });
     qhavuzSyncLightboxSolveBtn();
     renderQhavuzLightboxAnswers(item);
 
@@ -14262,9 +14284,9 @@
       const thumb = document.createElement('div');
       thumb.className = 'qhavuz-thumb';
       const img = document.createElement('img');
-      img.src = item.image;
       img.alt = item.subject + ' sorusu';
       thumb.appendChild(img);
+      resolveImageSrc(item.image).then((url) => { if (url) img.src = url; });
 
       const info = document.createElement('div');
       info.className = 'qhavuz-card-info';
@@ -14301,7 +14323,8 @@
       delBtn.className = 'delete-btn qhavuz-card-delete';
       delBtn.setAttribute('aria-label', 'Soruyu sil');
       delBtn.textContent = '×';
-      delBtn.addEventListener('click', () => {
+      delBtn.addEventListener('click', async () => {
+        await deleteImageRef(item.image);
         qhavuzState.items = qhavuzState.items.filter((it) => it.id !== item.id);
         saveQhavuzState();
         renderQhavuzGrid();
@@ -14473,7 +14496,8 @@
     qhavuzTestSubjectBadge.textContent = item.subject;
     qhavuzTestSubjectBadge.style.background = qhavuzSubjectColor(item.subject);
     qhavuzTestImgZoom.reset();
-    qhavuzTestImg.src = item.image;
+    qhavuzTestImg.src = '';
+    resolveImageSrc(item.image).then((url) => { qhavuzTestImg.src = url; });
     qhavuzTestImg.alt = item.subject + ' sorusu';
 
     qhavuzTestFeedback.textContent = '';
@@ -14813,6 +14837,134 @@
       : `${Date.now()}-${Math.random().toString(36).slice(2)}`
   );
 
+  // ---- Görsel yerel deposu (IndexedDB) ----
+  // Sıkıştırılmış görseller artık doğrudan base64 olarak APP_STATE/
+  // localStorage içine gömülmüyor: localStorage'ın hem boyut limiti
+  // (genelde ~5-10MB) hızla dolar hem de her okuma/yazmada tüm JSON'un
+  // string'e çevrilmesi gerekir. Bunun yerine her görsel bir Blob olarak
+  // IndexedDB'de saklanır; APP_STATE içinde sadece "idb://<id>" biçiminde
+  // küçük bir referans tutulur. Buluta (Supabase) yüklenip herkese açık
+  // bir URL alan görseller için referans doğrudan o URL olur; eski
+  // kayıtlarda hâlâ duran ham "data:image" değerleri de geriye dönük
+  // uyumluluk için olduğu gibi çalışmaya devam eder.
+  const IDB_NAME = 'takvimim_images_v1';
+  const IDB_STORE = 'images';
+  let idbPromise = null;
+
+  const openImageDB = () => {
+    if (idbPromise) return idbPromise;
+    idbPromise = new Promise((resolve) => {
+      if (!('indexedDB' in window)) { resolve(null); return; }
+      try {
+        const req = window.indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      } catch (err) {
+        resolve(null);
+      }
+    });
+    return idbPromise;
+  };
+
+  // Bir Blob'u IndexedDB'ye rastgele bir kimlikle yazar ve "idb://<id>"
+  // referansını döndürür. IndexedDB kullanılamıyorsa null döner.
+  const idbPutImageBlob = async (blob) => {
+    const db = await openImageDB();
+    if (!db) return null;
+    const id = randomFileId();
+    try {
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).put(blob, id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      return `idb://${id}`;
+    } catch (err) {
+      return null;
+    }
+  };
+
+  const idbGetImageBlob = async (id) => {
+    const db = await openImageDB();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction(IDB_STORE, 'readonly');
+        const req = tx.objectStore(IDB_STORE).get(id);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
+      } catch (err) {
+        resolve(null);
+      }
+    });
+  };
+
+  const idbDeleteImage = async (id) => {
+    const db = await openImageDB();
+    if (!db) return;
+    await new Promise((resolve) => {
+      try {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).delete(id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      } catch (err) {
+        resolve();
+      }
+    });
+  };
+
+  // Sıkıştırılmış bir data URL'i Blob'a çevirip IndexedDB'ye kaydeder ve
+  // APP_STATE'te tutulacak küçük referansı döndürür. IndexedDB hiç
+  // kullanılamıyorsa (çok eski bir tarayıcı vb.) eski davranışa, yani
+  // ham base64'ü olduğu gibi saklamaya sessizce geri döner.
+  const storeImageAndGetRef = async (dataUrl) => {
+    if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image')) return dataUrl;
+    try {
+      const blob = await dataUrlToBlob(dataUrl);
+      const ref = await idbPutImageBlob(blob);
+      return ref || dataUrl;
+    } catch (err) {
+      return dataUrl;
+    }
+  };
+
+  // Aynı referans birden çok kez ekrana basılırken IndexedDB'ye tekrar
+  // gitmemek için üretilen object URL'ler burada önbelleğe alınır.
+  const resolvedImageUrlCache = new Map();
+
+  // "idb://<id>" referansını <img src> için kullanılabilir geçici bir
+  // object URL'ye çevirir. Zaten normal bir URL veya ham data:image ise
+  // (eski kayıtlar, Supabase'e yüklenmiş görseller) olduğu gibi döner.
+  const resolveImageSrc = async (ref) => {
+    if (typeof ref !== 'string' || !ref.startsWith('idb://')) return ref || '';
+    if (resolvedImageUrlCache.has(ref)) return resolvedImageUrlCache.get(ref);
+    const id = ref.slice('idb://'.length);
+    const blob = await idbGetImageBlob(id);
+    if (!blob) return '';
+    const url = URL.createObjectURL(blob);
+    resolvedImageUrlCache.set(ref, url);
+    return url;
+  };
+
+  // Bir görsel referansı artık hiçbir yerde kullanılmayacaksa (kullanıcı
+  // sildi veya buluta yüklenip yerelden temizlendi) IndexedDB'deki Blob'u
+  // da siler; aksi halde kullanılmayan görseller cihazda sonsuza kadar
+  // birikir.
+  const deleteImageRef = async (ref) => {
+    if (typeof ref !== 'string' || !ref.startsWith('idb://')) return;
+    if (resolvedImageUrlCache.has(ref)) {
+      try { URL.revokeObjectURL(resolvedImageUrlCache.get(ref)); } catch (err) { /* yok say */ }
+      resolvedImageUrlCache.delete(ref);
+    }
+    await idbDeleteImage(ref.slice('idb://'.length));
+  };
+
   // APP_STATE ağacını gezip, hâlâ base64 (data:image) olarak duran her
   // görseli Supabase Storage'a yükler ve yerine herkese açık URL'sini
   // yazar. Böylece hem localStorage hem de eşitlenen JSON küçük kalır,
@@ -14826,16 +14978,29 @@
     for (let i = 0; i < keys.length; i += 1) {
       const key = keys[i];
       const val = node[key];
-      if (typeof val === 'string' && val.startsWith('data:image')) {
+      if (typeof val === 'string' && (val.startsWith('data:image') || val.startsWith('idb://'))) {
         try {
-          const blob = await dataUrlToBlob(val);
+          // Görsel artık IndexedDB'de bir Blob olarak duruyorsa (yeni
+          // akış) doğrudan oradan okunur; eski kayıtlarda hâlâ ham
+          // base64 kalmışsa (geriye dönük uyumluluk) data URL'den
+          // Blob'a çevrilir.
+          const blob = val.startsWith('idb://')
+            ? await idbGetImageBlob(val.slice('idb://'.length))
+            : await dataUrlToBlob(val);
+          if (!blob) continue;
           const path = `${currentUser.id}/${randomFileId()}.jpg`;
           const { error: upErr } = await supabaseClient
             .storage.from(IMAGE_BUCKET)
             .upload(path, blob, { contentType: 'image/jpeg', upsert: true });
           if (!upErr) {
             const { data: pub } = supabaseClient.storage.from(IMAGE_BUCKET).getPublicUrl(path);
-            if (pub && pub.publicUrl) node[key] = pub.publicUrl;
+            if (pub && pub.publicUrl) {
+              // Buluta başarıyla yüklendiği için artık yerel IndexedDB
+              // kopyasına gerek kalmaz; referansı herkese açık URL ile
+              // değiştirip yerel Blob'u temizliyoruz.
+              if (val.startsWith('idb://')) await deleteImageRef(val);
+              node[key] = pub.publicUrl;
+            }
           } else {
             console.warn('Görsel yüklenemedi:', upErr);
           }
