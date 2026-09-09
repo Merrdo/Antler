@@ -2768,6 +2768,12 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.22s ease;
+    /* Pop-up açıkken arkadaki sayfanın kaydırma/rubber-band hareketiyle
+       birlikte hareket etmesini (iOS'ta sık görülen) engeller; sadece
+       kart içindeki .page9-add-card kendi overflow-y'siyle kaydırılabilir
+       kalır. */
+    touch-action: none;
+    overscroll-behavior: contain;
   }
 
   .page9-add-backdrop.is-open {
@@ -2780,6 +2786,10 @@
     max-width: 420px;
     max-height: 82vh;
     overflow-y: auto;
+    /* Kartın kendisi dikey olarak kaydırılabilir kalsın diye backdrop'un
+       "touch-action: none" kısıtlamasını burada geri açıyoruz. */
+    touch-action: pan-y;
+    overscroll-behavior: contain;
     background: #fff;
     border: 4px solid #000;
     border-radius: 1.1em;
@@ -11608,31 +11618,12 @@
     if (e.key === 'Enter') { e.preventDefault(); page9AddCustomEntry(); }
   });
 
-  const openPage9AddPopup = () => {
-    page9BuildAddEntries();
-    page9AddSubtitle.textContent = `${PAGE9_TRACK_LABELS[page9Track]} branşları`;
-    page9AddCustomInput.value = '';
-    page9RenderAddGrid();
-    page9UpdateAddConfirmState();
-    page9AddBackdrop.classList.add('is-open');
-  };
-
-  const closePage9AddPopup = () => {
-    page9AddBackdrop.classList.remove('is-open');
-  };
-
-  page9AddClose.addEventListener('click', closePage9AddPopup);
-  page9AddBackdrop.addEventListener('click', (e) => {
-    if (e.target === page9AddBackdrop) closePage9AddPopup();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && page9AddBackdrop.classList.contains('is-open')) closePage9AddPopup();
-  });
-
-  // Seçilen (hazır + kendi eklenen) tüm dersleri o günün listesine ekler.
-  // Aynı isimde ders zaten ana listede varsa (başka bir günde eklenmiş/
-  // silinmiş olsa da) yeni bir kopya oluşturmak yerine onu yeniden kullanır.
-  page9AddConfirm.addEventListener('click', () => {
+  // Pop-up'ta seçili (işaretli) dersleri o günün listesine kalıcı olarak
+  // ekler. Hem "Seçilenleri Ekle" butonuna basıldığında hem de pop-up
+  // kapatılırken (X, dış tıklama veya Escape) çağrılır: böylece bir
+  // branşı seçip pop-up'ı "Seçilenleri Ekle"ye basmadan kapatmak seçimi
+  // sessizce silmez, kullanıcının seçtiği ders her durumda kaydedilir.
+  const page9CommitSelectedSubjects = () => {
     const selected = page9AddEntries.filter((e) => e.selected && !e.disabled);
     if (!selected.length) return;
     const dateKey = page9DateKey(page9SelectedDate);
@@ -11661,7 +11652,43 @@
 
     savePage9State();
     renderPage9SubjectList();
-    closePage9AddPopup();
+    // Kaydedilenler artık "Eklendi" notuyla devre dışı görünsün ve tekrar
+    // kaydedilmesin diye pop-up içi seçim listesini tazeliyoruz.
+    page9BuildAddEntries();
+    page9RenderAddGrid();
+    page9UpdateAddConfirmState();
+  };
+
+  const openPage9AddPopup = () => {
+    page9BuildAddEntries();
+    page9AddSubtitle.textContent = `${PAGE9_TRACK_LABELS[page9Track]} branşları`;
+    page9AddCustomInput.value = '';
+    page9RenderAddGrid();
+    page9UpdateAddConfirmState();
+    page9AddBackdrop.classList.add('is-open');
+  };
+
+  const closePage9AddPopup = () => {
+    // Kullanıcı "Seçilenleri Ekle"ye basmadan pop-up'ı kapatsa bile,
+    // o ana kadar işaretlediği dersler kaybolmasın diye önce kaydedilir.
+    page9CommitSelectedSubjects();
+    page9AddBackdrop.classList.remove('is-open');
+  };
+
+  page9AddClose.addEventListener('click', closePage9AddPopup);
+  page9AddBackdrop.addEventListener('click', (e) => {
+    if (e.target === page9AddBackdrop) closePage9AddPopup();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && page9AddBackdrop.classList.contains('is-open')) closePage9AddPopup();
+  });
+
+  // Seçilen (hazır + kendi eklenen) tüm dersleri o günün listesine ekler.
+  // Aynı isimde ders zaten ana listede varsa (başka bir günde eklenmiş/
+  // silinmiş olsa da) yeni bir kopya oluşturmak yerine onu yeniden kullanır.
+  page9AddConfirm.addEventListener('click', () => {
+    page9CommitSelectedSubjects();
+    page9AddBackdrop.classList.remove('is-open');
   });
 
   const renderPage9SubjectList = () => {
@@ -13588,6 +13615,27 @@
   ];
   const QHAVUZ_ANSWERS = ['A', 'B', 'C', 'D', 'E'];
 
+  // Soru Havuzu'ndaki branş seçimi artık sabit listeyle sınırlı değil:
+  // Soru Takibi (Sayfa 9) sayfasında "Ders Ekle" ile eklediğiniz her
+  // branş (TYT veya AYT fark etmez) burada da otomatik seçenek olarak
+  // çıkar; o dersi Soru Takibi'nden tamamen silerseniz burada da bir
+  // daha görünmez. Renk tutarlılığı için Sayfa 9'daki dersin kendi
+  // rengi kullanılır.
+  const qhavuzAllSubjects = () => {
+    const baseNames = new Set(QHAVUZ_SUBJECTS.map((s) => s.name.trim().toLowerCase()));
+    const seen = new Set();
+    const extra = [];
+    ['tyt', 'ayt'].forEach((track) => {
+      (page9State.subjects[track] || []).forEach((s) => {
+        const lower = s.name.trim().toLowerCase();
+        if (baseNames.has(lower) || seen.has(lower)) return;
+        seen.add(lower);
+        extra.push({ name: s.name, color: s.color || '#c9a6ff' });
+      });
+    });
+    return [...QHAVUZ_SUBJECTS, ...extra];
+  };
+
   const qhavuzGenId = () => 'soru-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
   const savedQhavuz = APP_STATE.questionPool;
@@ -13624,7 +13672,7 @@
 
   const qhavuzBuildSubjectGrid = () => {
     qhavuzAddSubjectGrid.innerHTML = '';
-    QHAVUZ_SUBJECTS.forEach((subj) => {
+    qhavuzAllSubjects().forEach((subj) => {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'qhavuz-add-subject-chip';
@@ -13726,7 +13774,7 @@
   });
 
   const qhavuzSubjectColor = (name) => {
-    const match = QHAVUZ_SUBJECTS.find((s) => s.name === name);
+    const match = qhavuzAllSubjects().find((s) => s.name === name);
     return match ? match.color : '#ff90e8';
   };
 
@@ -14054,7 +14102,15 @@
   };
 
   // ---- İlk render ----
-  renderQhavuzGrid();
+  // NOT: resolveImageSrc / openImageDB gibi görsel yardımcıları dosyanın
+  // en altındaki ayrı bir <script> bloğunda tanımlanıyor. Sayfa ilk
+  // açıldığında renderQhavuzGrid() hemen çağrılırsa o fonksiyonlar henüz
+  // tanımlanmamış oluyordu; bu yüzden uygulama yeniden açıldığında
+  // eklenmiş sorular görünmüyor, yeni bir soru eklenip liste tekrar
+  // çizilince (o an tüm script'ler zaten yüklenmiş olduğu için) hepsi
+  // birden ortaya çıkıyordu. DOMContentLoaded'a kadar bekleyerek tüm
+  // script bloklarının çalışmış olmasını garantiliyoruz.
+  document.addEventListener('DOMContentLoaded', renderQhavuzGrid);
 
 
   // ---------- Soru Havuzu: Test Modu ----------
@@ -14100,7 +14156,7 @@
       : qhavuzState.items.filter((it) => it.subject === name).length
   );
 
-  const qhavuzAllBranchNames = () => QHAVUZ_SUBJECTS
+  const qhavuzAllBranchNames = () => qhavuzAllSubjects()
     .filter((subj) => qhavuzCountForBranch(subj.name) > 0)
     .map((subj) => subj.name);
 
@@ -14157,7 +14213,7 @@
     };
 
     buildChip(QHAVUZ_ALL_BRANCHES, 'Tüm Branşlar');
-    QHAVUZ_SUBJECTS.forEach((subj) => buildChip(subj.name, subj.name));
+    qhavuzAllSubjects().forEach((subj) => buildChip(subj.name, subj.name));
   };
 
   const openQhavuzTestSetup = () => {
