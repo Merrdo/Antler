@@ -2364,7 +2364,12 @@
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
     font-size: 0.92rem;
+    line-height: 1.35;
     color: #121212;
+    resize: none;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 
   body.is-anthracite .page8-item-edit-input {
@@ -2441,6 +2446,38 @@
   .page8-copy-toast.is-visible {
     opacity: 1;
     transform: translate(-50%, 0);
+  }
+
+  /* ---- Uygulama geneli bildirim (kayıt/yedekleme hataları ve onayları) ---- */
+  .app-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 1.6rem;
+    z-index: 900;
+    max-width: calc(100% - 2.4rem);
+    padding: 0.65rem 1.2rem;
+    background: #121212;
+    color: #fff;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    text-align: center;
+    border-radius: 1.1rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 10px);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .app-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .app-toast.app-toast-error {
+    background: #d32f2f;
   }
 
   .page8-add-group-btn {
@@ -6616,6 +6653,35 @@
     background-color: #ff5c5c;
   }
 
+  /* ---------- Dışa/İçe aktar butonları (Sıfırla ile aynı brütalist stil,
+     ancak tehlikeli olmadıkları için hover'da kırmızı değil nötr gri) ---------- */
+  .settings-outline-btn {
+    flex-shrink: 0;
+    padding: 0.6rem 1rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: #121212;
+    background-color: #fff;
+    border: 3px solid #000;
+    border-radius: 0.8rem;
+    box-shadow: 3px 3px 0px 0px #000;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .settings-outline-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px 0px #000;
+    background-color: #e4e4e4;
+  }
+
+  .settings-outline-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
+    background-color: #e4e4e4;
+  }
+
   .settings-footer {
     text-align: center;
     padding: 0.4rem 0 0.2rem;
@@ -6774,6 +6840,12 @@
   }
 
   body.is-anthracite .settings-danger-btn {
+    background-color: var(--dark-card-color, #3b3e42);
+    border-color: #000;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .settings-outline-btn {
     background-color: var(--dark-card-color, #3b3e42);
     border-color: #000;
     color: #f2f2f4;
@@ -7121,8 +7193,29 @@
         <div class="settings-card">
           <div class="settings-row">
             <div class="settings-row-text">
+              <span class="settings-row-title">Yedeği dışa aktar</span>
+              <span class="settings-row-desc">Tüm verilerini (görseller dahil) bir dosyaya kaydet</span>
+            </div>
+            <button type="button" class="settings-outline-btn" id="settingsExportBtn">Dışa Aktar</button>
+          </div>
+
+          <div class="settings-divider"></div>
+
+          <div class="settings-row">
+            <div class="settings-row-text">
+              <span class="settings-row-title">Yedeği içe aktar</span>
+              <span class="settings-row-desc">Başka bir cihazdan aldığın yedeği bu cihaza yükle</span>
+            </div>
+            <button type="button" class="settings-outline-btn" id="settingsImportBtn">İçe Aktar</button>
+            <input type="file" id="settingsImportFileInput" class="qhavuz-file-input" accept="application/json,.json">
+          </div>
+
+          <div class="settings-divider"></div>
+
+          <div class="settings-row">
+            <div class="settings-row-text">
               <span class="settings-row-title">Tüm verileri sıfırla</span>
-              <span class="settings-row-desc">Görevler, tema ve kayıtlar silinir</span>
+              <span class="settings-row-desc">Görevler, tema ve kayıtlar silinir. Önce yedek almanı öneririz.</span>
             </div>
             <button type="button" class="settings-danger-btn" id="settingsResetBtn">Sıfırla</button>
           </div>
@@ -7143,6 +7236,18 @@
       <div class="settings-confirm-actions">
         <button type="button" class="settings-confirm-cancel" id="settingsConfirmCancel">Vazgeç</button>
         <button type="button" class="settings-confirm-confirm" id="settingsConfirmConfirm">Evet, sıfırla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ayarlar: yedek içe aktarma onay pop-up'ı -->
+  <div class="settings-confirm-backdrop" id="importConfirmBackdrop">
+    <div class="settings-confirm-card">
+      <span class="settings-confirm-title">Emin misin?</span>
+      <span class="settings-confirm-desc">Seçtiğin yedek dosyası, bu cihazdaki mevcut tüm verilerin (görevler, tema, görseller) üzerine yazılacak. Bu işlem geri alınamaz.</span>
+      <div class="settings-confirm-actions">
+        <button type="button" class="settings-confirm-cancel" id="importConfirmCancel">Vazgeç</button>
+        <button type="button" class="settings-confirm-confirm" id="importConfirmConfirm">Evet, içe aktar</button>
       </div>
     </div>
   </div>
@@ -7971,6 +8076,19 @@
   const goToPage = (id) => {
     const nextPage = document.getElementById(id);
     if (!nextPage || nextPage === activePage) return;
+
+    // iOS'ta bir metin/numara alanına yazıp klavyeyi kapatmadan alt
+    // menüden başka bir sayfaya geçilirse, odak (focus) o input'ta takılı
+    // kalabiliyor. Klavyenin kendisi ekrandan gitse bile üstündeki "◂ ▸ ...
+    // Bitti" araç çubuğu (accessory bar) ekranda asılı kalabiliyor ve
+    // hangi sayfaya gidilirse gidilsin görünmeye devam ediyor. Sayfa
+    // değişirken hâlâ odaklı bir input/textarea varsa onu bilinçli olarak
+    // "blur" ediyoruz ki klavye ve araç çubuğu düzgünce kapansın.
+    const active = document.activeElement;
+    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
+      active.blur();
+    }
+
     const prevPage = activePage;
     activePage = nextPage;
 
@@ -8046,6 +8164,29 @@
 </script>
 
 <script>
+  // ---------- PWA Kısayolları (manifest.json "shortcuts"): derin bağlantı ----------
+  // Ana ekrandaki ikona basılı tutunca çıkan kısayollar (ör. "Kronometre")
+  // uygulamayı "./index.html#page-5" gibi bir hash ile açar. Uygulama
+  // tek sayfa (SPA) olduğundan ve sekmeler arada URL değişmeden radio
+  // butonlarla değiştiğinden, hash'i okuyup ilgili nav sekmesini/sayfayı
+  // burada elle etkinleştiriyoruz.
+  const openTabFromHash = () => {
+    const targetId = (location.hash || '').slice(1).trim();
+    if (!targetId || !/^[a-zA-Z0-9_-]+$/.test(targetId)) return;
+    const targetInput = document.querySelector(`.nav-input[value="${targetId}"]`);
+    if (!targetInput) return;
+    targetInput.checked = true;
+    goToPage(targetId);
+    moveSlider(targetInput);
+  };
+
+  // Uygulama bir kısayoldan (hash'li bir URL ile) açıldıysa hemen uygula.
+  openTabFromHash();
+  // Uygulama zaten açıkken bir derin bağlantıya gelinirse de çalışsın.
+  window.addEventListener('hashchange', openTabFromHash);
+</script>
+
+<script>
   // ---------- Sayfa 1: Karşılama metni ----------
   // Saate göre değişen selamlama ("Günaydın"/"İyi günler"/...) ve bugünün
   // tarihi; dakikada bir tazelenir ki gece yarısını/saat dilimini geçen
@@ -8097,7 +8238,63 @@
   // uygulama tamamen kapatılıp yeniden açılsa bile kullanıcı verileri
   // kaybolmaz. Bu script, ona ihtiyaç duyan diğer script'lerden (tema,
   // anahtar vb.) önce çalışması için burada, dosyanın başında tanımlanır.
+  //
+  // NOT: Depolama burada "yerel" (localStorage + IndexedDB) olsa da, veri
+  // biçimi kasıtlı olarak ileride bir cihazlar-arası senkronizasyon
+  // katmanına (ör. bulut yedekleme) kolayca taşınabilecek şekilde
+  // tasarlanmıştır: her kayıtta bir `updatedAt` zaman damgası ve her
+  // cihaz için kalıcı, rastgele bir `deviceId` tutulur. Bugün bu ikisi
+  // yalnızca dışa/içe aktarma (bkz. "Yerel Yedekleme" bölümü) için
+  // kullanılıyor; yarın gerçek bir sunucu senkronizasyonu eklendiğinde
+  // aynı alanlar çakışma çözümü (hangi cihazın verisi daha güncel) için
+  // yeniden kullanılabilir. Bu yüzden veriler artık "yalnızca bu cihazda
+  // kalır" diye sabitlenmiş değil; kullanıcı istediğinde bir yedek dosyası
+  // üzerinden başka bir cihaza taşıyabilir.
   const APP_STORAGE_KEY = 'takvimim_app_state_v1';
+  const APP_SCHEMA_VERSION = 1;
+  const DEVICE_ID_KEY = 'takvimim_device_id_v1';
+
+  // Cihazı ileride (senkronizasyon/çakışma çözümü için) tanımlayacak,
+  // kalıcı ve rastgele bir kimlik. Sunucuya hiçbir şekilde gönderilmez;
+  // şu an yalnızca dışa aktarılan yedeklerin içine damgalanır.
+  const getOrCreateDeviceId = () => {
+    try {
+      let id = localStorage.getItem(DEVICE_ID_KEY);
+      if (!id) {
+        id = (window.crypto && window.crypto.randomUUID)
+          ? window.crypto.randomUUID()
+          : `dev-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        localStorage.setItem(DEVICE_ID_KEY, id);
+      }
+      return id;
+    } catch (err) {
+      return 'unknown-device';
+    }
+  };
+
+  // ---- Basit, uygulama geneli bildirim (toast) ----
+  // "Kaydedilemedi" gibi sessizce yutulan hatalar artık kullanıcıya
+  // görünür şekilde bildiriliyor; bkz. saveAppState'in catch bloğu.
+  let appToastEl = null;
+  let appToastTimer = null;
+  const showAppToast = (message, variant = 'default') => {
+    try {
+      if (!appToastEl) {
+        appToastEl = document.createElement('div');
+        appToastEl.className = 'app-toast';
+        document.body.appendChild(appToastEl);
+      }
+      appToastEl.textContent = message;
+      appToastEl.classList.toggle('app-toast-error', variant === 'error');
+      appToastEl.classList.remove('is-visible');
+      void appToastEl.offsetWidth;
+      appToastEl.classList.add('is-visible');
+      if (appToastTimer) clearTimeout(appToastTimer);
+      appToastTimer = setTimeout(() => {
+        appToastEl.classList.remove('is-visible');
+      }, variant === 'error' ? 3200 : 1800);
+    } catch (err) { /* toast gösterilemese bile uygulama akışını bozma */ }
+  };
 
   const loadAppState = () => {
     try {
@@ -8113,12 +8310,20 @@
   const APP_STATE = loadAppState();
 
   // Verilen alanları mevcut duruma ekleyip tamamını localStorage'a yazar.
+  // Önceden bir hata olduğunda (ör. depolama kotası dolduğunda) veri
+  // sessizce kaybolabiliyordu; artık kullanıcı görünür bir uyarı alıyor
+  // ve fonksiyon başarı/başarısızlık bilgisini döndürüyor.
   const saveAppState = (patch) => {
     try {
       Object.assign(APP_STATE, patch);
+      APP_STATE.updatedAt = new Date().toISOString();
+      APP_STATE.schemaVersion = APP_SCHEMA_VERSION;
       localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
+      return true;
     } catch (err) {
       console.warn('Uygulama verisi kaydedilemedi:', err);
+      showAppToast('Kaydedilemedi: depolama alanı dolu olabilir. Yer açmak için bir yedek alıp bazı görselleri silmeyi deneyin.', 'error');
+      return false;
     }
   };
 </script>
@@ -10465,12 +10670,21 @@
     // (input'a çevirerek) düzenlenebilir hale getirir.
     const startItemTextEdit = (item, row) => {
       const text = row._page8Text;
-      const input = document.createElement('input');
-      input.type = 'text';
+      const input = document.createElement('textarea');
       input.className = 'page8-item-edit-input';
       input.value = item.text;
-      input.maxLength = 60;
+      input.rows = 1;
       text.replaceWith(input);
+
+      // Yazı uzadıkça kutunun boyunu otomatik büyüterek tüm metnin
+      // paragraf halinde, kesilmeden görünmesini sağlar.
+      const autoGrow = () => {
+        input.style.height = 'auto';
+        input.style.height = input.scrollHeight + 'px';
+      };
+      input.addEventListener('input', autoGrow);
+      requestAnimationFrame(autoGrow);
+
       input.focus();
       input.select();
 
@@ -10483,7 +10697,7 @@
       };
 
       input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); input.blur(); }
         else if (e.key === 'Escape') { input.value = item.text; input.blur(); }
       });
       input.addEventListener('blur', commit, { once: true });
@@ -12613,7 +12827,8 @@
     page11QuestionPendingImage = imageDataUrl || (existing && existing.image) || null;
     page11QuestionPendingAnswer = (existing && existing.answer) || null;
     if (!page11QuestionPendingImage) return;
-    page11QuestionPreviewImg.src = page11QuestionPendingImage;
+    page11QuestionPreviewImg.src = '';
+    resolveImageSrc(page11QuestionPendingImage).then((url) => { page11QuestionPreviewImg.src = url; });
     page11QuestionRemoveBtn.classList.toggle('is-hidden', !existing);
     page11BuildQuestionAnswerGrid();
     page11UpdateQuestionConfirmState();
@@ -12638,7 +12853,14 @@
     const exam = page11State.exams.find((it) => it.id === examId);
     if (!exam) return;
     const reader = new FileReader();
-    reader.onload = () => openPage11QuestionModal(exam, subjectKey, idx, reader.result);
+    reader.onload = async () => {
+      // Kaliteyi bozmadan dosya boyutunu küçültür; hem localStorage hem de
+      // bulut eşitlemesi için daha hafif bir görsel elde edilir.
+      const compressed = typeof compressImageDataUrl === 'function'
+        ? await compressImageDataUrl(reader.result)
+        : reader.result;
+      openPage11QuestionModal(exam, subjectKey, idx, compressed);
+    };
     reader.readAsDataURL(file);
   });
 
@@ -12654,24 +12876,41 @@
     if (e.target === page11QuestionBackdrop) closePage11QuestionModal();
   });
 
-  page11QuestionConfirm.addEventListener('click', () => {
+  page11QuestionConfirm.addEventListener('click', async () => {
     if (!page11QuestionPendingImage || !page11QuestionPendingAnswer || !page11QuestionTarget) return;
     const { examId, subjectKey, idx } = page11QuestionTarget;
     const exam = page11State.exams.find((it) => it.id === examId);
     if (!exam) return;
+    const existing = page11GetPhoto(exam, subjectKey, idx);
+    // page11QuestionPendingImage, kullanıcı yeni bir dosya seçtiyse ham
+    // (sıkıştırılmış) bir data:image URL'idir; mevcut görsel değiştirilmeden
+    // pop-up tekrar açıldıysa zaten bir "idb://" veya bulut URL'sidir —
+    // bu durumda tekrar IndexedDB'ye yazmaya gerek yoktur.
+    const isNewImage = typeof page11QuestionPendingImage === 'string'
+      && page11QuestionPendingImage.startsWith('data:image');
+    const imageRef = isNewImage
+      ? await storeImageAndGetRef(page11QuestionPendingImage)
+      : page11QuestionPendingImage;
+    if (isNewImage && existing && existing.image && existing.image !== imageRef) {
+      await deleteImageRef(existing.image);
+    }
     page11SetPhoto(exam, subjectKey, idx, {
-      image: page11QuestionPendingImage,
+      image: imageRef,
       answer: page11QuestionPendingAnswer
     });
     closePage11QuestionModal();
     renderExamDetail();
   });
 
-  page11QuestionRemoveBtn.addEventListener('click', () => {
+  page11QuestionRemoveBtn.addEventListener('click', async () => {
     if (!page11QuestionTarget) return;
     const { examId, subjectKey, idx } = page11QuestionTarget;
     const exam = page11State.exams.find((it) => it.id === examId);
-    if (exam) page11RemovePhoto(exam, subjectKey, idx);
+    if (exam) {
+      const existing = page11GetPhoto(exam, subjectKey, idx);
+      if (existing && existing.image) await deleteImageRef(existing.image);
+      page11RemovePhoto(exam, subjectKey, idx);
+    }
     closePage11QuestionModal();
     renderExamDetail();
   });
@@ -13356,7 +13595,12 @@
     const file = qhavuzFileInput.files && qhavuzFileInput.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => openQhavuzAddModal(reader.result);
+    reader.onload = async () => {
+      const compressed = typeof compressImageDataUrl === 'function'
+        ? await compressImageDataUrl(reader.result)
+        : reader.result;
+      openQhavuzAddModal(compressed);
+    };
     reader.readAsDataURL(file);
   });
 
@@ -13365,13 +13609,16 @@
     if (e.target === qhavuzAddBackdrop) closeQhavuzAddModal();
   });
 
-  qhavuzAddConfirm.addEventListener('click', () => {
+  qhavuzAddConfirm.addEventListener('click', async () => {
     if (!qhavuzPendingImage || !qhavuzPendingSubject || !qhavuzPendingAnswer) return;
     const book = qhavuzAddBookInput.value.trim();
     const page = qhavuzAddPageInput.value.trim();
+    // Ham base64 yerine görsel IndexedDB'ye Blob olarak yazılır; APP_STATE
+    // (ve dolayısıyla localStorage) içinde sadece küçük bir referans kalır.
+    const imageRef = await storeImageAndGetRef(qhavuzPendingImage);
     qhavuzState.items.unshift({
       id: qhavuzGenId(),
-      image: qhavuzPendingImage,
+      image: imageRef,
       subject: qhavuzPendingSubject,
       answer: qhavuzPendingAnswer,
       book: book || null,
@@ -13557,7 +13804,8 @@
   const openQhavuzLightbox = (item) => {
     qhavuzLightboxZoom.reset();
     qhavuzLightboxItem = item;
-    qhavuzLightboxImg.src = item.image;
+    qhavuzLightboxImg.src = '';
+    resolveImageSrc(item.image).then((url) => { qhavuzLightboxImg.src = url; });
     qhavuzSyncLightboxSolveBtn();
     renderQhavuzLightboxAnswers(item);
 
@@ -13632,9 +13880,9 @@
       const thumb = document.createElement('div');
       thumb.className = 'qhavuz-thumb';
       const img = document.createElement('img');
-      img.src = item.image;
       img.alt = item.subject + ' sorusu';
       thumb.appendChild(img);
+      resolveImageSrc(item.image).then((url) => { if (url) img.src = url; });
 
       const info = document.createElement('div');
       info.className = 'qhavuz-card-info';
@@ -13671,7 +13919,8 @@
       delBtn.className = 'delete-btn qhavuz-card-delete';
       delBtn.setAttribute('aria-label', 'Soruyu sil');
       delBtn.textContent = '×';
-      delBtn.addEventListener('click', () => {
+      delBtn.addEventListener('click', async () => {
+        await deleteImageRef(item.image);
         qhavuzState.items = qhavuzState.items.filter((it) => it.id !== item.id);
         saveQhavuzState();
         renderQhavuzGrid();
@@ -13843,7 +14092,8 @@
     qhavuzTestSubjectBadge.textContent = item.subject;
     qhavuzTestSubjectBadge.style.background = qhavuzSubjectColor(item.subject);
     qhavuzTestImgZoom.reset();
-    qhavuzTestImg.src = item.image;
+    qhavuzTestImg.src = '';
+    resolveImageSrc(item.image).then((url) => { qhavuzTestImg.src = url; });
     qhavuzTestImg.alt = item.subject + ' sorusu';
 
     qhavuzTestFeedback.textContent = '';
@@ -13974,8 +14224,39 @@
   // hızlıca dokunmak çift-dokunma DEĞİLDİR; bunu da engellersek her
   // butondan sonra ~300ms beklemeden bir sonrakine dokunulamaz hale gelir
   // (click olayı hiç tetiklenmez), ki asıl şikayet edilen sorun buydu.
+  //
+  // ÖNEMLİ 2: Parmak belirgin şekilde hareket ettiyse (yani kullanıcı
+  // aslında kaydırma/flick yapıyorsa) bu bir çift-dokunma-zoom jesti
+  // DEĞİLDİR. Böyle bir durumda touchend'de preventDefault çağırmak,
+  // iOS'ta kaydırmanın ataletle devam eden ("momentum") hareketini anında
+  // kesiyor ve kaydırma "takılıp" sonra tamamen tepkisiz kalıyormuş gibi
+  // hissettiriyordu — Ayarlar gibi uzun sayfalarda art arda hızlı
+  // kaydırınca (flick) fark ediliyordu. Bu yüzden hareketi takip edip
+  // gerçek bir sürükleme/kaydırma olduğunda hiç preventDefault UYGULAMIYORUZ.
   let lastTouchEndAt = 0;
   let lastTouchEndTarget = null;
+  let touchGestureStartX = 0;
+  let touchGestureStartY = 0;
+  let touchGestureMoved = false;
+
+  // passive:true — kaydırmayı senkron olarak bloke etmez, tarayıcı
+  // kaydırmayı hemen (JS'i beklemeden) başlatabilir.
+  document.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      touchGestureStartX = e.touches[0].clientX;
+      touchGestureStartY = e.touches[0].clientY;
+      touchGestureMoved = false;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    if (Math.abs(t.clientX - touchGestureStartX) > 10 || Math.abs(t.clientY - touchGestureStartY) > 10) {
+      touchGestureMoved = true;
+    }
+  }, { passive: true });
+
   document.addEventListener('touchend', (e) => {
     const now = Date.now();
     const target = e.target;
@@ -13988,19 +14269,28 @@
     const isInteractiveControl = target.closest(
       'button, input, a, label, select, textarea, [role="button"]'
     );
-    if (!isInteractiveControl && target === lastTouchEndTarget && now - lastTouchEndAt <= 300) {
+    if (
+      !touchGestureMoved &&
+      !isInteractiveControl &&
+      target === lastTouchEndTarget &&
+      now - lastTouchEndAt <= 300
+    ) {
       e.preventDefault();
     }
     lastTouchEndAt = now;
     lastTouchEndTarget = target;
   }, { passive: false });
 
-  // İki parmakla dokunmayı (pinch) daha da erken aşamada engelle.
-  document.addEventListener('touchmove', (e) => {
-    if (e.touches.length > 1) {
-      e.preventDefault();
-    }
-  }, { passive: false });
+  // Not: İki parmakla yakınlaştırma (pinch) zaten CSS `touch-action:
+  // pan-x pan-y` (html/body) ve yukarıdaki gesturestart/change/end
+  // engellemesiyle (Safari) durduruluyor. Önceden burada ayrıca
+  // `touchmove` üzerinde `e.touches.length > 1` kontrolüyle bir de JS
+  // engeli vardı; document üzerinde passive:false bir touchmove
+  // dinleyicisinin var olması TEK PARMAKLA yapılan normal kaydırmalarda
+  // bile tarayıcının her karede JS'in bitmesini beklemesine (senkron
+  // "scroll-blocking listener") neden oluyordu — Ayarlar sayfasında
+  // hissedilen "takılma" şikayetinin asıl kaynağı buydu. O dinleyici,
+  // pinch koruması zaten başka yollarla sağlandığı için kaldırıldı.
 
   // Ctrl/Cmd + tekerlek ile (trackpad pinch) tarayıcı yakınlaştırmasını engelle.
   document.addEventListener('wheel', (e) => {
@@ -14013,11 +14303,442 @@
   // Uygulamayı çevrimdışı çalışır ve "gerçek uygulama" gibi açılır hale
   // getirir. file:// üzerinden açıldığında service worker desteklenmez;
   // bu yalnızca https:// veya localhost üzerinden yayınlandığında etkinleşir.
+  //
+  // NOT: index.html artık service worker içinde network-first sunuluyor
+  // (bkz. service-worker.js), bu yüzden içerik güncellemeleri normalde
+  // bir sonraki sayfa açılışında zaten görünür. Ama service-worker.js'in
+  // KENDİSİ değiştiğinde (ör. CACHE_VERSION bump'landığında) tarayıcının
+  // yeni worker'ı devreye alması için normalde bir sayfa yenilemesi
+  // gerekir; aşağıdaki kod bunu kullanıcı adına otomatik yapar.
   if ('serviceWorker' in navigator) {
+    let hasAutoReloaded = false;
+
+    // Yeni bir service worker kontrolü ele aldığında (güncelleme sonrası)
+    // sayfayı bir kez otomatik yeniler; böylece kullanıcı elle önbellek
+    // temizlemek zorunda kalmaz.
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hasAutoReloaded) return;
+      hasAutoReloaded = true;
+      location.reload();
+    });
+
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js').catch((err) => {
+      navigator.serviceWorker.register('service-worker.js').then((registration) => {
+        // Sayfa her yüklendiğinde ve uygulama her ön plana geldiğinde
+        // arka planda yeni bir service worker sürümü var mı diye
+        // kontrol eder (tarayıcı bunu kendiliğinden günde en fazla bir
+        // kez yapar; bu ek kontrol, geliştirme/yayın sonrası daha hızlı
+        // yansımasını sağlar).
+        registration.update().catch(() => {});
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            registration.update().catch(() => {});
+          }
+        });
+      }).catch((err) => {
         console.warn('Service worker kaydı başarısız:', err);
       });
+    });
+  }
+</script>
+
+<script>
+  // ================= Yerel Depolama + Dışa/İçe Aktarma =================
+  // Bu bölüm; görsellerin kaliteyi bozmadan sıkıştırılmasını ve
+  // görsellerin IndexedDB'de saklanmasını yönetir. Varsayılan depo yerel
+  // (localStorage + IndexedDB) olsa da bu, verinin "yalnızca bu cihazda"
+  // kalmak zorunda olduğu anlamına gelmiyor: aşağıdaki dışa/içe aktarma
+  // fonksiyonları (exportBackup / importBackupFromFile), tüm APP_STATE'i
+  // ve tüm görselleri (base64 olarak) tek bir JSON dosyasına paketleyip
+  // geri yükleyebiliyor. Böylece kullanıcı bugün verisini elle bir
+  // dosya üzerinden başka bir cihaza taşıyabilir; ileride gerçek bir
+  // sunucu/bulut senkronizasyonu eklenmek istendiğinde de aynı JSON
+  // şeması (schemaVersion + deviceId + updatedAt alanları) doğrudan
+  // kullanılabilir — mimari buna göre kuruldu.
+
+  // ---- Görsel sıkıştırma ----
+  // Uzun kenarı 1600px'i geçen görseller orantılı küçültülür ve JPEG
+  // kalite 0.82 ile yeniden kodlanır. Bu değerler; ekranda/ışıkta gözle
+  // fark edilecek bir kalite kaybı yaratmadan dosya boyutunu (ve
+  // dolayısıyla hem localStorage hem de eşitleme trafiğini) belirgin
+  // biçimde azaltacak şekilde seçildi.
+  const compressImageDataUrl = (dataUrl, maxDim = 1600, quality = 0.82) => new Promise((resolve) => {
+    if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image')) {
+      resolve(dataUrl);
+      return;
+    }
+    try {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (!width || !height) { resolve(dataUrl); return; }
+        if (width > maxDim || height > maxDim) {
+          const scale = maxDim / Math.max(width, height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        try {
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } catch (err) {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    } catch (err) {
+      resolve(dataUrl);
+    }
+  });
+
+  const dataUrlToBlob = async (dataUrl) => (await fetch(dataUrl)).blob();
+
+  const randomFileId = () => (
+    window.crypto && window.crypto.randomUUID
+      ? window.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  );
+
+  // ---- Görsel yerel deposu (IndexedDB) ----
+  // Sıkıştırılmış görseller artık doğrudan base64 olarak APP_STATE/
+  // localStorage içine gömülmüyor: localStorage'ın hem boyut limiti
+  // (genelde ~5-10MB) hızla dolar hem de her okuma/yazmada tüm JSON'un
+  // string'e çevrilmesi gerekir. Bunun yerine her görsel bir Blob olarak
+  // IndexedDB'de saklanır; APP_STATE içinde sadece "idb://<id>" biçiminde
+  // küçük bir referans tutulur. Eski kayıtlarda hâlâ duran ham
+  // "data:image" değerleri de geriye dönük uyumluluk için olduğu gibi
+  // çalışmaya devam eder.
+  const IDB_NAME = 'takvimim_images_v1';
+  const IDB_STORE = 'images';
+  let idbPromise = null;
+
+  const openImageDB = () => {
+    if (idbPromise) return idbPromise;
+    idbPromise = new Promise((resolve) => {
+      if (!('indexedDB' in window)) { resolve(null); return; }
+      try {
+        const req = window.indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      } catch (err) {
+        resolve(null);
+      }
+    });
+    return idbPromise;
+  };
+
+  // Bir Blob'u IndexedDB'ye rastgele bir kimlikle yazar ve "idb://<id>"
+  // referansını döndürür. IndexedDB kullanılamıyorsa null döner.
+  const idbPutImageBlob = async (blob) => {
+    const db = await openImageDB();
+    if (!db) return null;
+    const id = randomFileId();
+    try {
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).put(blob, id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      return `idb://${id}`;
+    } catch (err) {
+      return null;
+    }
+  };
+
+  // idbPutImageBlob'un aksine, verilen kimliği OLDUĞU GİBİ kullanır
+  // (üzerine yazar). Yedek geri yüklenirken APP_STATE içindeki
+  // "idb://<id>" referanslarının bozulmaması için gereklidir.
+  const idbPutImageBlobWithId = async (id, blob) => {
+    const db = await openImageDB();
+    if (!db) return false;
+    try {
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).put(blob, id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  // Depodaki tüm görselleri {id, blob} olarak döndürür. Dışa aktarma
+  // (yedekleme) sırasında, APP_STATE'te referansı unutulmuş olsa bile
+  // hiçbir görselin kaybolmamasını sağlamak için tüm store taranır.
+  const idbGetAllEntries = async () => {
+    const db = await openImageDB();
+    if (!db) return [];
+    return new Promise((resolve) => {
+      try {
+        const entries = [];
+        const tx = db.transaction(IDB_STORE, 'readonly');
+        const store = tx.objectStore(IDB_STORE);
+        const cursorReq = store.openCursor();
+        cursorReq.onsuccess = (e) => {
+          const cursor = e.target.result;
+          if (cursor) {
+            entries.push({ id: cursor.key, blob: cursor.value });
+            cursor.continue();
+          } else {
+            resolve(entries);
+          }
+        };
+        cursorReq.onerror = () => resolve(entries);
+      } catch (err) {
+        resolve([]);
+      }
+    });
+  };
+
+  // Blob -> base64 data URL (dataUrlToBlob'un tersi). Dışa aktarma
+  // sırasında görselleri taşınabilir tek bir JSON dosyasına gömmek için
+  // kullanılır.
+  const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+
+  const idbGetImageBlob = async (id) => {
+    const db = await openImageDB();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction(IDB_STORE, 'readonly');
+        const req = tx.objectStore(IDB_STORE).get(id);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
+      } catch (err) {
+        resolve(null);
+      }
+    });
+  };
+
+  const idbDeleteImage = async (id) => {
+    const db = await openImageDB();
+    if (!db) return;
+    await new Promise((resolve) => {
+      try {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).delete(id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      } catch (err) {
+        resolve();
+      }
+    });
+  };
+
+  // Sıkıştırılmış bir data URL'i Blob'a çevirip IndexedDB'ye kaydeder ve
+  // APP_STATE'te tutulacak küçük referansı döndürür. IndexedDB hiç
+  // kullanılamıyorsa (çok eski bir tarayıcı vb.) eski davranışa, yani
+  // ham base64'ü olduğu gibi saklamaya sessizce geri döner.
+  const storeImageAndGetRef = async (dataUrl) => {
+    if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image')) return dataUrl;
+    try {
+      const blob = await dataUrlToBlob(dataUrl);
+      const ref = await idbPutImageBlob(blob);
+      return ref || dataUrl;
+    } catch (err) {
+      return dataUrl;
+    }
+  };
+
+  // Aynı referans birden çok kez ekrana basılırken IndexedDB'ye tekrar
+  // gitmemek için üretilen object URL'ler burada önbelleğe alınır.
+  const resolvedImageUrlCache = new Map();
+
+  // "idb://<id>" referansını <img src> için kullanılabilir geçici bir
+  // object URL'ye çevirir. Zaten normal bir URL veya ham data:image ise
+  // (eski kayıtlar) olduğu gibi döner.
+  const resolveImageSrc = async (ref) => {
+    if (typeof ref !== 'string' || !ref.startsWith('idb://')) return ref || '';
+    if (resolvedImageUrlCache.has(ref)) return resolvedImageUrlCache.get(ref);
+    const id = ref.slice('idb://'.length);
+    const blob = await idbGetImageBlob(id);
+    if (!blob) {
+      console.warn(`Görsel bulunamadı (idb://${id}); silinmiş veya bir yedek geri yüklemesi sırasında taşınamamış olabilir.`);
+      return '';
+    }
+    const url = URL.createObjectURL(blob);
+    resolvedImageUrlCache.set(ref, url);
+    return url;
+  };
+
+  // Bir görsel referansı artık hiçbir yerde kullanılmayacaksa (kullanıcı
+  // sildi veya buluta yüklenip yerelden temizlendi) IndexedDB'deki Blob'u
+  // da siler; aksi halde kullanılmayan görseller cihazda sonsuza kadar
+  // birikir.
+  const deleteImageRef = async (ref) => {
+    if (typeof ref !== 'string' || !ref.startsWith('idb://')) return;
+    if (resolvedImageUrlCache.has(ref)) {
+      try { URL.revokeObjectURL(resolvedImageUrlCache.get(ref)); } catch (err) { /* yok say */ }
+      resolvedImageUrlCache.delete(ref);
+    }
+    await idbDeleteImage(ref.slice('idb://'.length));
+  };
+
+  // ================= Yedeği Dışa/İçe Aktarma =================
+  // Tüm APP_STATE + tüm görseller (IndexedDB) tek bir .json dosyasında
+  // paketlenir/geri yüklenir. Bu, kullanıcının verisini başka bir
+  // cihaza/tarayıcıya taşıyabildiği, tarayıcı verisi silinse bile
+  // elinde tutabildiği ve ileride kurulacak gerçek bir bulut
+  // senkronizasyonunun da üzerine inşa edilebileceği ortak formattır.
+
+  const BACKUP_FILENAME_PREFIX = 'takvimim-yedek';
+
+  const exportBackup = async () => {
+    try {
+      const rawState = localStorage.getItem(APP_STORAGE_KEY);
+      const appStateSnapshot = rawState ? JSON.parse(rawState) : {};
+
+      const entries = await idbGetAllEntries();
+      const images = {};
+      for (const { id, blob } of entries) {
+        try {
+          images[`idb://${id}`] = await blobToDataUrl(blob);
+        } catch (err) {
+          console.warn(`Görsel dışa aktarılamadı (idb://${id}):`, err);
+        }
+      }
+
+      const payload = {
+        schemaVersion: APP_SCHEMA_VERSION,
+        exportedAt: new Date().toISOString(),
+        deviceId: getOrCreateDeviceId(),
+        appState: appStateSnapshot,
+        images,
+      };
+
+      const json = JSON.stringify(payload);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${BACKUP_FILENAME_PREFIX}-${dateStamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+
+      showAppToast('Yedek indirildi');
+      return true;
+    } catch (err) {
+      console.warn('Yedek dışa aktarılamadı:', err);
+      showAppToast('Yedek oluşturulamadı. Lütfen tekrar deneyin.', 'error');
+      return false;
+    }
+  };
+
+  // Bir yedek dosyasını (File) okuyup doğrular; geçerliyse mevcut tüm
+  // veriyi bunun üzerine yazar ve sayfayı yeniden yükler. Onay,
+  // çağıran arayüz kodu tarafından (bkz. Ayarlar sayfası) kullanıcıya
+  // sorulduktan sonra bu fonksiyon çağrılmalıdır.
+  const importBackupFromFile = async (file) => {
+    let payload;
+    try {
+      const text = await file.text();
+      payload = JSON.parse(text);
+    } catch (err) {
+      showAppToast('Dosya okunamadı: geçerli bir yedek dosyası değil.', 'error');
+      return false;
+    }
+
+    if (!payload || typeof payload !== 'object' || typeof payload.appState !== 'object') {
+      showAppToast('Geçersiz yedek dosyası.', 'error');
+      return false;
+    }
+
+    try {
+      const images = payload.images && typeof payload.images === 'object' ? payload.images : {};
+      for (const [ref, dataUrl] of Object.entries(images)) {
+        if (!ref.startsWith('idb://') || typeof dataUrl !== 'string') continue;
+        const id = ref.slice('idb://'.length);
+        try {
+          const blob = await dataUrlToBlob(dataUrl);
+          await idbPutImageBlobWithId(id, blob);
+        } catch (err) {
+          console.warn(`Görsel geri yüklenemedi (${ref}):`, err);
+        }
+      }
+
+      const restoredState = { ...payload.appState, schemaVersion: APP_SCHEMA_VERSION, updatedAt: new Date().toISOString() };
+      localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(restoredState));
+      showAppToast('Yedek geri yüklendi, uygulama yenileniyor…');
+      setTimeout(() => location.reload(), 700);
+      return true;
+    } catch (err) {
+      console.warn('Yedek içe aktarılamadı:', err);
+      showAppToast('Yedek geri yüklenemedi. Depolama alanı dolu olabilir.', 'error');
+      return false;
+    }
+  };
+
+  // ---- Ayarlar > Veri: Dışa/İçe aktarma butonlarını bağla ----
+  const settingsExportBtn = document.getElementById('settingsExportBtn');
+  const settingsImportBtn = document.getElementById('settingsImportBtn');
+  const settingsImportFileInput = document.getElementById('settingsImportFileInput');
+  const importConfirmBackdrop = document.getElementById('importConfirmBackdrop');
+  const importConfirmCancel = document.getElementById('importConfirmCancel');
+  const importConfirmConfirm = document.getElementById('importConfirmConfirm');
+
+  if (settingsExportBtn) {
+    settingsExportBtn.addEventListener('click', () => { exportBackup(); });
+  }
+
+  if (settingsImportBtn && settingsImportFileInput) {
+    settingsImportBtn.addEventListener('click', () => settingsImportFileInput.click());
+  }
+
+  // Seçilen dosyayı hemen içe aktarmadan önce, verileri sıfırlamayla aynı
+  // brütalist onay pop-up'ını göster (üzerine yazma geri alınamaz).
+  let pendingImportFile = null;
+
+  if (settingsImportFileInput) {
+    settingsImportFileInput.addEventListener('change', () => {
+      const file = settingsImportFileInput.files && settingsImportFileInput.files[0];
+      settingsImportFileInput.value = '';
+      if (!file) return;
+      pendingImportFile = file;
+      if (importConfirmBackdrop) importConfirmBackdrop.classList.add('is-open');
+    });
+  }
+
+  if (importConfirmCancel) {
+    importConfirmCancel.addEventListener('click', () => {
+      pendingImportFile = null;
+      if (importConfirmBackdrop) importConfirmBackdrop.classList.remove('is-open');
+    });
+  }
+
+  if (importConfirmBackdrop) {
+    importConfirmBackdrop.addEventListener('click', (e) => {
+      if (e.target === importConfirmBackdrop) {
+        pendingImportFile = null;
+        importConfirmBackdrop.classList.remove('is-open');
+      }
+    });
+  }
+
+  if (importConfirmConfirm) {
+    importConfirmConfirm.addEventListener('click', async () => {
+      const file = pendingImportFile;
+      pendingImportFile = null;
+      if (importConfirmBackdrop) importConfirmBackdrop.classList.remove('is-open');
+      if (file) await importBackupFromFile(file);
     });
   }
 </script>
