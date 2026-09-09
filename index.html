@@ -6824,78 +6824,98 @@
     opacity: 0;
     pointer-events: none;
   }
+  /* ---- Kart: uygulamanın genelindeki pop-up/modal dili ile aynı
+     (bkz. .page8-name-card / .page11-modal-card): 4px siyah kenarlık,
+     köşeleri yuvarlatılmış, sağ-alta düşen sert (flat) gölge. ---- */
   .auth-card {
     width: 100%;
     max-width: 340px;
+    box-sizing: border-box;
     background: #fff;
-    border: 2px solid #121212;
-    border-radius: 24px;
-    box-shadow: 6px 6px #121212;
-    padding: 28px 24px 24px;
+    border: 4px solid #000;
+    border-radius: 1.1em;
+    box-shadow: 6px 6px 0px 0px #000;
+    padding: 1.6rem 1.3rem 1.3rem;
   }
   .auth-title {
     font-family: "Archivo Expanded", -apple-system, sans-serif;
     font-weight: 800;
-    font-size: 22px;
+    font-size: 1.3rem;
     color: #121212;
-    margin-bottom: 4px;
+    margin-bottom: 0.2rem;
   }
   .auth-subtitle {
-    font-size: 13px;
-    color: #6b6f80;
-    margin-bottom: 20px;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: rgba(18, 18, 18, 0.6);
+    margin-bottom: 1.2rem;
+    line-height: 1.4;
   }
   .auth-field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-bottom: 14px;
+    gap: 0.35rem;
+    margin-bottom: 0.9rem;
   }
   .auth-field label {
-    font-size: 12px;
-    font-weight: 700;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 800;
     color: #121212;
   }
+  /* ---- Input: .page8-name-field-input ile aynı dil ---- */
   .auth-field input {
     width: 100%;
-    padding: 12px 14px;
-    border: 2px solid #121212;
-    border-radius: 14px;
-    font-size: 15px;
-    background: #f5f5f7;
+    box-sizing: border-box;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
     color: #121212;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.7rem;
+    padding: 0.6rem 0.75rem;
     -webkit-user-select: text;
     user-select: text;
   }
   .auth-field input:focus {
-    background: #fff;
+    background-color: #fff;
   }
   .auth-error {
     display: none;
-    font-size: 12.5px;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.78rem;
     color: #d92d20;
-    font-weight: 600;
-    margin: -4px 0 12px;
+    font-weight: 700;
+    margin: -0.3rem 0 0.8rem;
     line-height: 1.4;
   }
   .auth-error.is-visible { display: block; }
+  /* ---- Buton: .page11-modal-confirm / .settings-confirm-confirm ile
+     aynı etkileşim dili (3px kenarlık, sert gölge, hover/active). ---- */
   .auth-submit-btn {
     width: 100%;
-    padding: 14px;
-    border: 2px solid #121212;
-    border-radius: 16px;
+    padding: 0.75rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    border: 3px solid #000;
+    border-radius: 0.8rem;
     background: #121212;
     color: #fff;
-    font-size: 15px;
-    font-weight: 700;
-    box-shadow: 4px 4px #121212;
     cursor: pointer;
-    margin-top: 4px;
-    transition: transform 0.08s ease;
+    margin-top: 0.2rem;
+    box-shadow: 3px 3px 0px 0px #000;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .auth-submit-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px 0px #000;
   }
   .auth-submit-btn:active {
-    transform: translate(3px, 3px);
-    box-shadow: 1px 1px #121212;
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
   }
   .auth-submit-btn[disabled] {
     opacity: 0.6;
@@ -6903,22 +6923,86 @@
   }
   .auth-switch {
     text-align: center;
-    margin-top: 16px;
-    font-size: 13px;
-    color: #6b6f80;
+    margin-top: 1rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(18, 18, 18, 0.6);
   }
   .auth-switch button {
     background: none;
     border: none;
     color: #121212;
-    font-weight: 700;
+    font-weight: 800;
     text-decoration: underline;
     cursor: pointer;
     padding: 0;
-    font-size: 13px;
+    font-size: 0.82rem;
+    font-family: "Space Grotesk", sans-serif;
   }
   .auth-view { display: none; }
   .auth-view.is-active { display: block; }
+
+  /* ---- Karanlık mod (anthracite) desteği ---- */
+  body.is-anthracite .auth-card {
+    background-color: var(--dark-card-color, #3b3e42);
+  }
+  body.is-anthracite .auth-title,
+  body.is-anthracite .auth-field label {
+    color: #f2f2f4;
+  }
+  body.is-anthracite .auth-subtitle,
+  body.is-anthracite .auth-switch {
+    color: rgba(242, 242, 244, 0.65);
+  }
+  body.is-anthracite .auth-switch button {
+    color: #f2f2f4;
+  }
+  body.is-anthracite .auth-field input {
+    background-color: #2a2c2f;
+    color: #f2f2f4;
+  }
+
+  /* ---- Ayarlar > Hesap: senkronizasyon durumu ve butonlar ---- */
+  .settings-account-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .settings-account-btn {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.82rem;
+    padding: 0.55rem 0.9rem;
+    border: 3px solid #000;
+    border-radius: 0.75rem;
+    box-shadow: 3px 3px 0px 0px #000;
+    cursor: pointer;
+    background: #121212;
+    color: #fff;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  }
+  .settings-account-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px 0px #000;
+  }
+  .settings-account-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
+  }
+  .settings-account-btn[disabled] {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .settings-account-btn-danger {
+    background: #ff5c5c;
+  }
+  .settings-sync-status {
+    font-weight: 700;
+    transition: color 0.2s ease;
+  }
+  .settings-sync-status.is-syncing { color: #c98a00; }
+  .settings-sync-status.is-success { color: #1a9c4a; }
+  .settings-sync-status.is-error { color: #d92d20; }
 </style>
 
 <div class="auth-overlay" id="authOverlay">
@@ -7379,12 +7463,24 @@
               <span class="settings-row-desc" id="settingsAccountEmail">—</span>
             </div>
           </div>
+
           <div class="settings-divider"></div>
-          <button type="button" class="settings-row settings-row-link" id="settingsLogoutBtn">
+
+          <div class="settings-row settings-row-column">
             <div class="settings-row-text">
-              <span class="settings-row-title" style="color:#d92d20;">Çıkış Yap</span>
+              <span class="settings-row-title">Veri senkronizasyonu</span>
+              <span class="settings-row-desc settings-sync-status" id="settingsSyncStatus">Henüz senkronize edilmedi</span>
             </div>
-          </button>
+            <div class="settings-account-actions">
+              <button type="button" class="settings-account-btn" id="settingsSyncNowBtn">Şimdi Senkronize Et</button>
+            </div>
+          </div>
+
+          <div class="settings-divider"></div>
+
+          <div class="settings-account-actions">
+            <button type="button" class="settings-account-btn settings-account-btn-danger" id="settingsLogoutBtn">Çıkış Yap</button>
+          </div>
         </div>
       </div>
 
@@ -8508,14 +8604,18 @@
     if (!window.currentUserId || typeof supabaseClient === 'undefined') return;
     if (cloudSyncInFlight) { cloudSyncPending = true; return; }
     cloudSyncInFlight = true;
+    if (typeof window.setSyncStatusUI === 'function') window.setSyncStatusUI('syncing');
     try {
-      await supabaseClient.from('app_state').upsert({
+      const { error } = await supabaseClient.from('app_state').upsert({
         user_id: window.currentUserId,
         data: APP_STATE,
         updated_at: new Date().toISOString(),
       });
+      if (error) throw error;
+      if (typeof window.setSyncStatusUI === 'function') window.setSyncStatusUI('success', new Date());
     } catch (err) {
       console.warn('Bulut senkronizasyonu başarısız:', err);
+      if (typeof window.setSyncStatusUI === 'function') window.setSyncStatusUI('error', new Date());
     } finally {
       cloudSyncInFlight = false;
       if (cloudSyncPending) {
@@ -8539,12 +8639,52 @@
   // bir sonraki girişte de anahtar açık olarak yüklenir.
   const settingsLogoutBtn = document.getElementById('settingsLogoutBtn');
   const settingsAccountEmail = document.getElementById('settingsAccountEmail');
+  const settingsSyncStatus = document.getElementById('settingsSyncStatus');
+  const settingsSyncNowBtn = document.getElementById('settingsSyncNowBtn');
+
   if (settingsAccountEmail && window.currentUserEmail) {
     settingsAccountEmail.textContent = window.currentUserEmail;
   }
   if (settingsLogoutBtn) {
     settingsLogoutBtn.addEventListener('click', () => {
       if (typeof window.handleLogout === 'function') window.handleLogout();
+    });
+  }
+
+  // Senkronizasyon durumunu (senkronize ediliyor / başarılı / başarısız)
+  // saati ve renk koduyla birlikte Ayarlar > Hesap kartında gösterir.
+  // pushAppStateToCloud (otomatik veya manuel tetiklenmiş olsun fark
+  // etmez) her çağrıldığında bu fonksiyonu tetikler.
+  window.setSyncStatusUI = (state, date) => {
+    if (!settingsSyncStatus) return;
+    const timeStr = date
+      ? date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+      : '';
+    settingsSyncStatus.classList.remove('is-syncing', 'is-success', 'is-error');
+    if (state === 'syncing') {
+      settingsSyncStatus.classList.add('is-syncing');
+      settingsSyncStatus.textContent = 'Senkronize ediliyor...';
+      if (settingsSyncNowBtn) settingsSyncNowBtn.disabled = true;
+    } else if (state === 'success') {
+      settingsSyncStatus.classList.add('is-success');
+      settingsSyncStatus.textContent = `Son senkronizasyon: ${timeStr}`;
+      if (settingsSyncNowBtn) settingsSyncNowBtn.disabled = false;
+    } else if (state === 'error') {
+      settingsSyncStatus.classList.add('is-error');
+      settingsSyncStatus.textContent = `Senkronizasyon başarısız: ${timeStr}`;
+      if (settingsSyncNowBtn) settingsSyncNowBtn.disabled = false;
+    }
+  };
+
+  if (settingsSyncNowBtn) {
+    settingsSyncNowBtn.addEventListener('click', () => {
+      if (!window.currentUserId) {
+        window.setSyncStatusUI('error', new Date());
+        return;
+      }
+      // Bekleyen debounce varsa iptal edip hemen gönder.
+      if (typeof cloudSyncTimer !== 'undefined' && cloudSyncTimer) clearTimeout(cloudSyncTimer);
+      if (typeof pushAppStateToCloud === 'function') pushAppStateToCloud();
     });
   }
 
