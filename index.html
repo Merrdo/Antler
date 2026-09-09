@@ -2193,7 +2193,7 @@
   .page8-item-list {
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
+    gap: 1rem;
     padding: 0 0.8rem 0.8rem;
   }
 
@@ -5657,6 +5657,25 @@
     pointer-events: none;
   }
 
+  /* Başlık ve Geçmiş butonunu aynı satırda tutan üst bar. Grid'in kenar
+     kolonları eşit (1fr) olduğu için ortadaki başlık, sağdaki buton farklı
+     genişlikte olsa da her zaman tam ortada kalır. */
+  .stopwatch-top-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: 100%;
+  }
+
+  .stopwatch-top-bar .stopwatch-title {
+    grid-column: 2;
+  }
+
+  .stopwatch-top-bar .stopwatch-history-btn {
+    grid-column: 3;
+    justify-self: end;
+  }
+
   .stopwatch-title {
     font-family: "Space Grotesk", sans-serif;
     font-weight: 800;
@@ -5724,33 +5743,22 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    /* Sabit bir "gap" kullanmıyoruz: Turlarım/Sıfırla satırı görünür
-       olmadığında bu boşluğun da kaybolması gerekiyor ki Geçmiş butonu
-       yukarıda dursun; boşluk artık .stopwatch-controls-top'un kendi
-       max-height/margin geçişiyle kontrol ediliyor (aşağıya bakınız). */
   }
 
   /* Turlarım ve Sıfırla butonlarını eskisi gibi birbirine yakın ve
-     hizalı tutan üst satır. Süre sıfırken (Turlarım/Sıfırla gizliyken)
-     bu satırın kapladığı yükseklik ve altındaki boşluk da sıfırlanır,
-     böylece Geçmiş butonu yukarıda durur; süre birikip butonlar
-     belirdiğinde satır yumuşakça açılır ve Geçmiş aşağı kayar. */
+     hizalı tutan satır. Bu satırın yüksekliği artık her zaman sabit
+     (butonlar gizliyken de aynı boşluk ayrılır); böylece süre sıfırdan
+     çıkıp butonlar belirdiğinde kart ve üstündeki başlık yerinden
+     oynamaz — sadece butonların kendisi (aşağıda tanımlı opacity/transform
+     geçişiyle) yumuşakça "belirir".*/
   .stopwatch-controls-top {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     gap: 0.5rem;
-    overflow: hidden;
-    max-height: 5.5rem;
+    min-height: 3.6rem;
     padding: 0.3rem 0.3rem 0.5rem;
-    margin-bottom: 0.6rem;
-    transition: max-height 0.3s ease, margin-bottom 0.3s ease;
-  }
-
-  .stopwatch-controls-top:has(.stopwatch-laps-btn.is-hidden) {
-    max-height: 0;
-    margin-bottom: 0;
   }
 
   .stopwatch-reset-btn {
@@ -5783,12 +5791,13 @@
     pointer-events: none;
   }
 
-  /* Kronometre Geçmişi (Sayfa 10) sayfasını açan buton; Turlarım/Sıfırla'nın
-     aksine süre sıfır olsa da her zaman görünür, çünkü geçmiş kayıtlara
-     sayaç çalışmıyorken de bakılabilmeli. */
+  /* Kronometre Geçmişi (Sayfa 10) sayfasını açan buton; artık başlıkla
+     aynı üst satırda, sağ kenarda duruyor. Turlarım/Sıfırla'nın aksine
+     süre sıfır olsa da her zaman görünür, çünkü geçmiş kayıtlara sayaç
+     çalışmıyorken de bakılabilmeli. */
   .stopwatch-history-btn {
-    padding: 0.75rem 1.6rem;
-    font-size: 1.05rem;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.85rem;
   }
 
   /* Sayaç çalışırken devreye giren tam ekran görünüm: sayı sayacı,
@@ -6732,7 +6741,11 @@
   .settings-confirm-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 40;
+    /* Diğer pop-up'ların (z-index 40) üzerinden, bir pop-up içinden
+       açıldığında da (ör. "Ders Ekle" pop-up'ındaki silme onayı) her
+       zaman en üstte görünsün diye takvim pop-up'ıyla aynı 60 katmanı
+       kullanılıyor. */
+    z-index: 60;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -7024,7 +7037,10 @@
     <!-- Kronometre: sayaç çalışırken sadece rakam kartı ekranda kalır,
          başlık, butonlar ve alt nav bar (is-stopwatch-running sınıfıyla) gizlenir. -->
     <div class="stopwatch-page" id="stopwatchPage">
-      <h1 class="stopwatch-title">Kronometre</h1>
+      <div class="stopwatch-top-bar">
+        <h1 class="stopwatch-title">Kronometre</h1>
+        <button type="button" class="add-task-btn stopwatch-history-btn" id="stopwatchHistoryBtn">Geçmiş</button>
+      </div>
 
       <div class="stopwatch-display" id="stopwatchDisplay" role="button" tabindex="0" aria-label="Kronometreyi başlat veya duraklat">
         <div class="stopwatch-time-row">
@@ -7038,7 +7054,6 @@
           <button type="button" class="add-task-btn stopwatch-laps-btn is-hidden" id="stopwatchLapsBtn">Turlarım</button>
           <button type="button" class="add-task-btn stopwatch-reset-btn is-hidden" id="stopwatchResetBtn">Sıfırla</button>
         </div>
-        <button type="button" class="add-task-btn stopwatch-history-btn" id="stopwatchHistoryBtn">Geçmiş</button>
       </div>
     </div>
 
@@ -7878,6 +7893,19 @@
     </div>
 
     <button type="button" class="add-task-btn page9-add-confirm" id="page9AddConfirm">Seçilenleri Ekle</button>
+  </div>
+</div>
+
+<!-- Sayfa 9: zaten eklenmiş bir dersin işaretini kaldırıp o günün
+     listesinden çıkarmadan önce sorulan onay pop-up'ı. -->
+<div class="settings-confirm-backdrop" id="page9RemoveConfirmBackdrop">
+  <div class="settings-confirm-card">
+    <span class="settings-confirm-title">Emin misin?</span>
+    <span class="settings-confirm-desc" id="page9RemoveConfirmDesc">Bu ders bugünün listesinden çıkarılacak.</span>
+    <div class="settings-confirm-actions">
+      <button type="button" class="settings-confirm-cancel" id="page9RemoveConfirmCancel">Vazgeç</button>
+      <button type="button" class="settings-confirm-confirm" id="page9RemoveConfirmConfirm">Evet, çıkar</button>
+    </div>
   </div>
 </div>
 
@@ -11539,13 +11567,102 @@
   // Pop-up içeriğini (hazır branşlar + varsa eklenmiş kendi dersleri)
   // baştan çizer. Bir çipe tıklamak seçimi açar/kapatır; zaten o gün
   // görünen bir branş "Eklendi" notuyla devre dışı bırakılır.
+  // ---- Zaten eklenmiş bir dersi pop-up üzerinden çıkarma onayı ----
+  // Bir çip "Eklendi" durumundayken (o gün için zaten görünüyorken)
+  // üzerine tıklanırsa, işareti kaldırmak/o günden çıkarmak istediğinden
+  // emin olmak için önce bu onay pop-up'ı açılır; "Evet" denmeden hiçbir
+  // ders günün listesinden çıkmaz.
+  const page9RemoveConfirmBackdrop = document.getElementById('page9RemoveConfirmBackdrop');
+  const page9RemoveConfirmDesc = document.getElementById('page9RemoveConfirmDesc');
+  const page9RemoveConfirmCancel = document.getElementById('page9RemoveConfirmCancel');
+  const page9RemoveConfirmConfirm = document.getElementById('page9RemoveConfirmConfirm');
+  let page9PendingRemoveName = null;
+
+  const closePage9RemoveConfirm = () => {
+    page9RemoveConfirmBackdrop.classList.remove('is-open');
+    page9PendingRemoveName = null;
+  };
+
+  const openPage9RemoveConfirm = (name) => {
+    page9RemoveConfirmDesc.textContent = `"${name}" bugünün listesinden çıkarılacak.`;
+    page9PendingRemoveName = name;
+    page9RemoveConfirmBackdrop.classList.add('is-open');
+  };
+
+  // Onaylanınca dersi sadece seçili günün listesinden çıkarır (ana ders
+  // tanımı ve kalıcı havuzdaki kaydı silinmez, ders bir dahaki sefere
+  // tekrar eklenebilir olarak kalır).
+  const page9RemoveSubjectFromDay = (rawName) => {
+    const lower = rawName.trim().toLowerCase();
+    const dateKey = page9DateKey(page9SelectedDate);
+    const dayList = page9GetDayList(dateKey, page9Track);
+    const subject = page9State.subjects[page9Track].find(
+      (s) => s.name.trim().toLowerCase() === lower
+    );
+    if (subject) {
+      const i = dayList.indexOf(subject.id);
+      if (i !== -1) dayList.splice(i, 1);
+    }
+    savePage9State();
+    renderPage9SubjectList();
+    page9BuildAddEntries();
+    page9RenderAddGrid();
+    page9UpdateAddConfirmState();
+  };
+
+  // Kullanıcının kendi yazdığı bir dersi her yerden komple siler: ana ders
+  // tanımından, o güne kadar girilen tüm soru sayılarından (logs), tüm
+  // günlerin listelerinden ve kalıcı "kendi dersin" havuzundan — sanki
+  // hiç eklenmemiş gibi. Hazır TYT/AYT branşları için kullanılmaz.
+  const page9DeleteSubjectCompletely = (rawName) => {
+    const lower = rawName.trim().toLowerCase();
+    const list = page9State.subjects[page9Track];
+    const subject = list.find((s) => s.name.trim().toLowerCase() === lower);
+    if (subject) {
+      page9State.subjects[page9Track] = list.filter((s) => s.id !== subject.id);
+      page9State.logs = page9State.logs.filter((log) => log.subjectId !== subject.id);
+      Object.values(page9State.dayLists).forEach((entry) => {
+        if (Array.isArray(entry[page9Track])) {
+          entry[page9Track] = entry[page9Track].filter((id) => id !== subject.id);
+        }
+      });
+    }
+    page9State.customSubjectPool[page9Track] = page9State.customSubjectPool[page9Track].filter(
+      (n) => n.trim().toLowerCase() !== lower
+    );
+    savePage9State();
+    renderPage9SubjectList();
+    renderPage9Summary();
+  };
+
+  if (page9RemoveConfirmCancel) page9RemoveConfirmCancel.addEventListener('click', closePage9RemoveConfirm);
+  if (page9RemoveConfirmBackdrop) {
+    page9RemoveConfirmBackdrop.addEventListener('click', (e) => {
+      if (e.target === page9RemoveConfirmBackdrop) closePage9RemoveConfirm();
+    });
+  }
+  if (page9RemoveConfirmConfirm) {
+    page9RemoveConfirmConfirm.addEventListener('click', () => {
+      const name = page9PendingRemoveName;
+      closePage9RemoveConfirm();
+      if (name) page9RemoveSubjectFromDay(name);
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && page9RemoveConfirmBackdrop && page9RemoveConfirmBackdrop.classList.contains('is-open')) {
+      closePage9RemoveConfirm();
+    }
+  });
+
+  // Zaten eklenmiş (disabled) bir dersin çipi de artık tıklanabilir:
+  // "Eklendi" yazısı yerine kutucuğu işaretli görünür, üzerine tıklanınca
+  // işareti kaldırmak/o günden çıkarmak isteyip istemediği sorulur.
   const page9RenderAddGrid = () => {
     page9AddGrid.innerHTML = '';
     page9AddEntries.forEach((entry, idx) => {
       const chip = document.createElement('div');
       chip.className = 'page9-add-chip';
-      chip.classList.toggle('is-selected', entry.selected);
-      chip.classList.toggle('is-disabled', entry.disabled);
+      chip.classList.toggle('is-selected', entry.selected || entry.disabled);
 
       const box = document.createElement('span');
       box.className = 'page9-add-chip-box';
@@ -11557,33 +11674,37 @@
       name.textContent = entry.name;
       chip.appendChild(name);
 
-      if (entry.disabled) {
-        const note = document.createElement('span');
-        note.className = 'page9-add-chip-note';
-        note.textContent = 'Eklendi';
-        chip.appendChild(note);
-      } else if (entry.isCustom && !entry.fromPool) {
+      // Kullanıcının kendi yazdığı (isCustom) dersler, o gün için eklenmiş
+      // olsun ya da olmasın, sağda her zaman bir çarpı ile gösterilir;
+      // basılınca ders komple (her yerden) silinmeden önce onay istenir.
+      // Hazır TYT/AYT branşlarında bu buton hiç gösterilmez.
+      if (entry.isCustom) {
         const del = document.createElement('button');
         del.type = 'button';
         del.className = 'delete-btn page9-add-chip-delete';
         del.textContent = '×';
-        del.setAttribute('aria-label', `"${entry.name}" dersini listeden çıkar`);
+        del.setAttribute('aria-label', `"${entry.name}" dersini kalıcı olarak sil`);
         del.addEventListener('click', (e) => {
           e.stopPropagation();
-          page9AddEntries.splice(idx, 1);
-          page9RenderAddGrid();
-          page9UpdateAddConfirmState();
+          openPage8Confirm(entry.name, () => {
+            page9DeleteSubjectCompletely(entry.name);
+            page9BuildAddEntries();
+            page9RenderAddGrid();
+            page9UpdateAddConfirmState();
+          });
         });
         chip.appendChild(del);
       }
 
-      if (!entry.disabled) {
-        chip.addEventListener('click', () => {
+      chip.addEventListener('click', () => {
+        if (entry.disabled) {
+          openPage9RemoveConfirm(entry.name);
+        } else {
           entry.selected = !entry.selected;
           page9RenderAddGrid();
           page9UpdateAddConfirmState();
-        });
-      }
+        }
+      });
 
       page9AddGrid.appendChild(chip);
     });
@@ -11598,19 +11719,65 @@
     page9UpdateAddConfirmState();
   });
 
-  // Kendi ders adını yazıp "+" ile listeye ekler (otomatik seçili gelir).
-  // Aynı isim zaten listede varsa (devre dışı değilse) tekrar eklemek
-  // yerine sadece onu seçili hale getirir.
+  // Verilen isimdeki dersi kalıcı olarak (ana listeye + o günün listesine +
+  // gerekirse kalıcı havuza) ekler. Hem "+" ile tekil ekleme, hem de
+  // "Seçilenleri Ekle" ile toplu ekleme bu ortak fonksiyonu kullanır.
+  const page9CommitSubjectByName = (rawName) => {
+    const name = rawName.trim();
+    if (!name) return null;
+    const lower = name.toLowerCase();
+    const dateKey = page9DateKey(page9SelectedDate);
+    const dayList = page9GetDayList(dateKey, page9Track);
+    const masterList = page9State.subjects[page9Track];
+
+    let subject = masterList.find((s) => s.name.trim().toLowerCase() === lower);
+    if (!subject) {
+      subject = { id: page9GenId(), name, color: page9NextColor(page9Track), pinned: false };
+      masterList.push(subject);
+    }
+    if (!subject.pinned && !dayList.includes(subject.id)) dayList.push(subject.id);
+
+    // Hazır listede olmayan bir ders ise, bir daha "Ders Ekle" pop-up'ını
+    // açtığında da seçenek olarak çıkması için kalıcı havuza kaydediyoruz.
+    const isPreset = (PAGE9_PRESET_SUBJECTS[page9Track] || []).some(
+      (n) => n.trim().toLowerCase() === lower
+    );
+    if (!isPreset) {
+      const pool = page9State.customSubjectPool[page9Track];
+      if (!pool.some((n) => n.trim().toLowerCase() === lower)) pool.push(subject.name);
+    }
+
+    savePage9State();
+    renderPage9SubjectList();
+    return subject;
+  };
+
+  // Kendi ders adını yazıp "+" ile listeye ekler. "+" butonuna dokunulduğu
+  // an ders artık kalıcı olarak eklenmiştir (o günün listesine + ana
+  // listeye işlenir); pop-up'ta seçili olsun ya da olmasın, "Seçilenleri
+  // Ekle"ye basılmadan kapatılsa bile bir daha silinmez. Çip bundan sonra
+  // diğer eklenmiş dersler gibi "Eklendi" notuyla devre dışı görünür.
   const page9AddCustomEntry = () => {
     const raw = page9AddCustomInput.value.trim();
     if (!raw) return;
     const lower = raw.toLowerCase();
     const existing = page9AddEntries.find((e) => e.name.trim().toLowerCase() === lower);
-    if (existing) {
-      if (!existing.disabled) existing.selected = true;
-    } else {
-      page9AddEntries.push({ name: raw, isCustom: true, fromPool: false, disabled: false, selected: true });
+    if (existing && existing.disabled) {
+      // Zaten eklenmiş, tekrar eklemeye gerek yok.
+      page9AddCustomInput.value = '';
+      page9AddCustomInput.focus();
+      return;
     }
+
+    page9CommitSubjectByName(raw);
+
+    if (existing) {
+      existing.disabled = true;
+      existing.selected = false;
+    } else {
+      page9AddEntries.push({ name: raw, isCustom: true, fromPool: false, disabled: true, selected: false });
+    }
+
     page9AddCustomInput.value = '';
     page9RenderAddGrid();
     page9UpdateAddConfirmState();
@@ -11621,40 +11788,19 @@
     if (e.key === 'Enter') { e.preventDefault(); page9AddCustomEntry(); }
   });
 
-  // Pop-up'ta seçili (işaretli) dersleri o günün listesine kalıcı olarak
-  // ekler. Hem "Seçilenleri Ekle" butonuna basıldığında hem de pop-up
-  // kapatılırken (X, dış tıklama veya Escape) çağrılır: böylece bir
+  // Pop-up'ta seçili (işaretli) hazır branşları o günün listesine kalıcı
+  // olarak ekler. Hem "Seçilenleri Ekle" butonuna basıldığında hem de
+  // pop-up kapatılırken (X, dış tıklama veya Escape) çağrılır: böylece bir
   // branşı seçip pop-up'ı "Seçilenleri Ekle"ye basmadan kapatmak seçimi
   // sessizce silmez, kullanıcının seçtiği ders her durumda kaydedilir.
+  // ("+" ile eklenen kendi dersleri zaten page9AddCustomEntry içinde anında
+  // kaydedildiği için burada tekrar işlenmelerine gerek yok.)
   const page9CommitSelectedSubjects = () => {
     const selected = page9AddEntries.filter((e) => e.selected && !e.disabled);
     if (!selected.length) return;
-    const dateKey = page9DateKey(page9SelectedDate);
-    const dayList = page9GetDayList(dateKey, page9Track);
-    const masterList = page9State.subjects[page9Track];
 
-    selected.forEach(({ name }) => {
-      const lower = name.trim().toLowerCase();
-      let subject = masterList.find((s) => s.name.trim().toLowerCase() === lower);
-      if (!subject) {
-        subject = { id: page9GenId(), name: name.trim(), color: page9NextColor(page9Track), pinned: false };
-        masterList.push(subject);
-      }
-      if (!subject.pinned && !dayList.includes(subject.id)) dayList.push(subject.id);
+    selected.forEach(({ name }) => page9CommitSubjectByName(name));
 
-      // Hazır listede olmayan bir ders ise, bir daha "Ders Ekle" pop-up'ını
-      // açtığında da seçenek olarak çıkması için kalıcı havuza kaydediyoruz.
-      const isPreset = (PAGE9_PRESET_SUBJECTS[page9Track] || []).some(
-        (n) => n.trim().toLowerCase() === lower
-      );
-      if (!isPreset) {
-        const pool = page9State.customSubjectPool[page9Track];
-        if (!pool.some((n) => n.trim().toLowerCase() === lower)) pool.push(subject.name);
-      }
-    });
-
-    savePage9State();
-    renderPage9SubjectList();
     // Kaydedilenler artık "Eklendi" notuyla devre dışı görünsün ve tekrar
     // kaydedilmesin diye pop-up içi seçim listesini tazeliyoruz.
     page9BuildAddEntries();
@@ -14971,6 +15117,43 @@
       if (file) await importBackupFromFile(file);
     });
   }
+
+  // ---- Klavye açıkken odaklanılan giriş alanını görünür tutma ----
+  // Uzun sayfalarda (ör. Gündelik) bir metin kutusuna dokunulduğunda
+  // sanal klavye ekranın alt kısmını kapatıyor ve yazdığımız input
+  // klavyenin arkasında kalıp görünmez oluyordu. Klavye açıldığında
+  // (visualViewport küçüldüğünde) ve/veya bir input/textarea'ya her
+  // odaklanıldığında, o alanı ekranın görünür kısmına kaydırıyoruz.
+  (function () {
+    const scrollFocusedIntoView = () => {
+      const el = document.activeElement;
+      if (!el) return;
+      const tag = el.tagName;
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA') return;
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    };
+
+    if (window.visualViewport) {
+      let lastHeight = window.visualViewport.height;
+      window.visualViewport.addEventListener('resize', () => {
+        const vv = window.visualViewport;
+        // Yükseklik belirgin şekilde küçüldüyse klavye açılmış demektir.
+        if (vv.height < lastHeight - 80) {
+          setTimeout(scrollFocusedIntoView, 60);
+        }
+        lastHeight = vv.height;
+      });
+    }
+
+    // visualViewport olayı bazı tarayıcılarda gecikebildiği ya da hiç
+    // tetiklenmeyebildiği için, klavye animasyonu bittikten kısa süre
+    // sonra odaklanma anında da ayrıca bir deneme yapalım.
+    document.addEventListener('focusin', (e) => {
+      const tag = e.target && e.target.tagName;
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA') return;
+      setTimeout(scrollFocusedIntoView, 320);
+    });
+  })();
 </script>
 
 </body>
