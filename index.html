@@ -113,6 +113,50 @@
     opacity: 0;
   }
 
+  /* ---------- Açılış senkron perdesi ---------- */
+  .app-sync-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2b2f4a;
+    opacity: 1;
+    transition: opacity 0.25s ease;
+  }
+
+  .app-sync-gate.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .app-sync-gate-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .app-sync-gate-spinner {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.25);
+    border-top-color: #fff;
+    animation: app-sync-gate-spin 0.8s linear infinite;
+  }
+
+  @keyframes app-sync-gate-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .app-sync-gate-text {
+    color: #f2f2f7;
+    font-size: 14px;
+    opacity: 0.85;
+  }
+
   /* ---------- Sayfalar ---------- */
 
   .app {
@@ -6908,6 +6952,19 @@
 <div class="theme-layer" id="themeLayerB"></div>
 <div class="pattern-layer" id="patternLayer"></div>
 
+<!-- Açılış senkron perdesi: cihazda daha önce giriş yapılmış bir oturum
+     varsa, uygulama arayüzü çizilmeden önce buluttaki en güncel veri
+     çekilip yerelle birleştirilene kadar bu ekran gösterilir. Böylece
+     kullanıcı hiçbir zaman eski/yerel veriyi görmez; ya güncel bulut
+     verisiyle açılır ya da (oturum yoksa/bağlantı hatasında) hızlıca
+     normal yerel akışa geçilir. -->
+<div class="app-sync-gate" id="appSyncGate">
+  <div class="app-sync-gate-box">
+    <div class="app-sync-gate-spinner"></div>
+    <span class="app-sync-gate-text">Verileriniz senkronize ediliyor…</span>
+  </div>
+</div>
+
 <div class="app">
 
   <section class="page is-active" id="page-1">
@@ -7300,8 +7357,8 @@
   <div class="settings-confirm-backdrop" id="cloudAuthBackdrop">
     <div class="page8-name-card" id="cloudAuthCard">
       <span class="page8-name-title" id="cloudAuthTitle">Giriş Yap</span>
-      <input type="email" class="page8-name-field-input" id="cloudAuthEmail" placeholder="E-posta" autocomplete="email" autocapitalize="off">
-      <input type="password" class="page8-name-field-input" id="cloudAuthPassword" placeholder="Şifre (en az 6 karakter)" autocomplete="current-password">
+      <input type="email" class="page8-name-field-input" id="cloudAuthEmail" name="calendarim-cloud-email-field" placeholder="E-posta" autocomplete="off" autocapitalize="off" readonly onfocus="this.removeAttribute('readonly')">
+      <input type="password" class="page8-name-field-input" id="cloudAuthPassword" name="calendarim-cloud-password-field" placeholder="Şifre (en az 6 karakter)" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')">
       <span class="settings-cloud-error" id="cloudAuthError"></span>
       <div class="settings-confirm-actions">
         <button type="button" class="settings-confirm-cancel" id="cloudAuthCancel">Vazgeç</button>
@@ -14813,7 +14870,7 @@
   // şekilde yeniden çizilmesini garanti etmek için uygulamayı bir kez
   // yeniden yükler (mevcut normal açılış akışı zaten APP_STATE'ten doğru
   // şekilde render ediyor). Değişiklik yoksa sessizce devam eder.
-  const pullAndMerge = async ({ reloadOnChange = true } = {}) => {
+  const pullAndMerge = async ({ reloadOnChange = true, silent = false } = {}) => {
     if (!sb || !currentUser) return;
     try {
       setSyncStatus('Sunucudan alınıyor…', '#f5a623');
@@ -14833,11 +14890,14 @@
       if (before !== after) {
         setSyncStatus('Güncellemeler alındı', '#3fbf60');
         markLastSyncNow();
-        if (reloadOnChange && typeof showPage8Toast === 'function') {
+        if (reloadOnChange && !silent && typeof showPage8Toast === 'function') {
           showPage8Toast('Diğer cihazdan veriler alındı, yenileniyor…');
         }
         if (reloadOnChange) {
-          setTimeout(() => { try { location.reload(); } catch (err) { /* yok say */ } }, 1200);
+          // Perde kapalıyken (silent) kullanıcı hiçbir şey görmediği için
+          // beklemeden hemen yenile; perde açıkken (ör. gerçek zamanlı
+          // güncelleme) kısa bir gecikmeyle, toast okunsun diye.
+          setTimeout(() => { try { location.reload(); } catch (err) { /* yok say */ } }, silent ? 0 : 1200);
         }
       } else {
         // Yereldeki değişiklikleri de gönder ki iki taraf da eşit kalsın.
@@ -14881,6 +14941,24 @@
     if (currentUser) queuePush();
   };
 
+  // ---- Açılış senkron perdesi ----
+  // Oturum açık bir kullanıcı varsa, arayüz kullanıcıya gösterilmeden önce
+  // buluttaki en güncel veri çekilip yerelle birleştirilir; böylece hiçbir
+  // zaman eski/yerel veri "yanıp sönerek" görünmez. Bağlantı yoksa veya
+  // sunucudan makul bir sürede yanıt gelmezse (ör. 6 sn), kullanıcıyı
+  // sonsuza dek bekletmemek için mevcut yerel veriyle devam edilir.
+  const appSyncGate = document.getElementById('appSyncGate');
+  let syncGateClosed = false;
+  const closeSyncGate = () => {
+    if (syncGateClosed) return;
+    syncGateClosed = true;
+    if (appSyncGate) appSyncGate.classList.add('is-hidden');
+  };
+  // Supabase yapılandırılmamışsa (sb yok) veya bir şeyler ters giderse
+  // perdeyi açık bırakıp kullanıcıyı kilitlememek için güvenlik ağı.
+  setTimeout(closeSyncGate, 6000);
+  if (!sb) closeSyncGate();
+
   // ---- Kimlik doğrulama akışı ----
   const initAuthState = async () => {
     if (!sb) return;
@@ -14890,12 +14968,20 @@
         currentUser = data.session.user;
         showLoggedInUI(currentUser);
         subscribeRealtime();
-        pullAndMerge({ reloadOnChange: false });
+        // Perde hâlâ kapalı (kullanıcı hiçbir şey görmüyor), o yüzden
+        // burada "reloadOnChange: true" ile çağırıyoruz: bulut verisi
+        // yerelden farklıysa sayfa sessizce bir kez yenilenir ve
+        // kullanıcı doğrudan güncel veriyle karşılaşır. Perdeyi ancak
+        // bu işlem tamamlandıktan sonra kapatıyoruz ki reload olacaksa
+        // kullanıcı flash görmesin.
+        await pullAndMerge({ reloadOnChange: true, silent: true });
       } else {
         showLoggedOutUI();
       }
     } catch (err) {
       console.warn('Oturum bilgisi alınamadı:', err);
+    } finally {
+      closeSyncGate();
     }
 
     sb.auth.onAuthStateChange((event, session) => {
