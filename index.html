@@ -21,6 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
   * {
     margin: 0;
@@ -6805,6 +6806,342 @@
 </head>
 <body oncopy="return false" oncut="return false" onselectstart="return false" ondragstart="return false">
 
+<!-- ================= Supabase: Auth Overlay ================= -->
+<style>
+  .auth-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #2b2f4a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px calc(24px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left));
+    opacity: 1;
+    transition: opacity 0.25s ease;
+  }
+  .auth-overlay.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .auth-card {
+    width: 100%;
+    max-width: 340px;
+    background: #fff;
+    border: 2px solid #121212;
+    border-radius: 24px;
+    box-shadow: 6px 6px #121212;
+    padding: 28px 24px 24px;
+  }
+  .auth-title {
+    font-family: "Archivo Expanded", -apple-system, sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: #121212;
+    margin-bottom: 4px;
+  }
+  .auth-subtitle {
+    font-size: 13px;
+    color: #6b6f80;
+    margin-bottom: 20px;
+  }
+  .auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .auth-field label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #121212;
+  }
+  .auth-field input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #121212;
+    border-radius: 14px;
+    font-size: 15px;
+    background: #f5f5f7;
+    color: #121212;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  .auth-field input:focus {
+    background: #fff;
+  }
+  .auth-error {
+    display: none;
+    font-size: 12.5px;
+    color: #d92d20;
+    font-weight: 600;
+    margin: -4px 0 12px;
+    line-height: 1.4;
+  }
+  .auth-error.is-visible { display: block; }
+  .auth-submit-btn {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #121212;
+    border-radius: 16px;
+    background: #121212;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: 4px 4px #121212;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: transform 0.08s ease;
+  }
+  .auth-submit-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px #121212;
+  }
+  .auth-submit-btn[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .auth-switch {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #6b6f80;
+  }
+  .auth-switch button {
+    background: none;
+    border: none;
+    color: #121212;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font-size: 13px;
+  }
+  .auth-view { display: none; }
+  .auth-view.is-active { display: block; }
+</style>
+
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-card">
+    <!-- Giriş formu -->
+    <div class="auth-view is-active" id="authLoginView">
+      <div class="auth-title">Tekrar hoş geldin</div>
+      <div class="auth-subtitle">Devam etmek için giriş yap</div>
+      <form id="authLoginForm" autocomplete="on">
+        <div class="auth-field">
+          <label for="authLoginEmail">E-posta</label>
+          <input type="email" id="authLoginEmail" autocomplete="email" required>
+        </div>
+        <div class="auth-field">
+          <label for="authLoginPassword">Şifre</label>
+          <input type="password" id="authLoginPassword" autocomplete="current-password" required>
+        </div>
+        <div class="auth-error" id="authLoginError"></div>
+        <button type="submit" class="auth-submit-btn" id="authLoginSubmit">Giriş Yap</button>
+      </form>
+      <div class="auth-switch">
+        Hesabın yok mu? <button type="button" id="authGoToSignup">Kayıt ol</button>
+      </div>
+    </div>
+
+    <!-- Kayıt formu -->
+    <div class="auth-view" id="authSignupView">
+      <div class="auth-title">Hesap oluştur</div>
+      <div class="auth-subtitle">Verilerin cihazlar arasında senkronize olsun</div>
+      <form id="authSignupForm" autocomplete="on">
+        <div class="auth-field">
+          <label for="authSignupEmail">E-posta</label>
+          <input type="email" id="authSignupEmail" autocomplete="email" required>
+        </div>
+        <div class="auth-field">
+          <label for="authSignupPassword">Şifre</label>
+          <input type="password" id="authSignupPassword" autocomplete="new-password" minlength="6" required>
+        </div>
+        <div class="auth-error" id="authSignupError"></div>
+        <button type="submit" class="auth-submit-btn" id="authSignupSubmit">Kayıt Ol</button>
+      </form>
+      <div class="auth-switch">
+        Zaten hesabın var mı? <button type="button" id="authGoToLogin">Giriş yap</button>
+      </div>
+    </div>
+
+    <!-- E-posta doğrulama bekleniyor -->
+    <div class="auth-view" id="authConfirmView">
+      <div class="auth-title">E-postanı kontrol et</div>
+      <div class="auth-subtitle" id="authConfirmText">Onay bağlantısını gönderdik. Onayladıktan sonra giriş yapabilirsin.</div>
+      <button type="button" class="auth-submit-btn" id="authBackToLogin">Girişe dön</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ================= Supabase: İstemci ve Oturum Yönetimi =================
+  const SUPABASE_URL = 'https://cmykvjmnyhihvzqcjnws.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNteWt2am1ueWhpaHZ6cWNqbndzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MjQxODUsImV4cCI6MjEwNDUwMDE4NX0.6O3AGx75ziTByhNb7TEtJR3vsYXaJnFz2fY0S8mp_to';
+
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true }
+  });
+
+  // Diğer script'lerin (senkronizasyon, görsel yükleme) erişebilmesi için
+  // geçerli kullanıcı kimliğini global bir değişkende tutuyoruz.
+  window.currentUserId = null;
+
+  const authOverlayEl = document.getElementById('authOverlay');
+  const authViews = {
+    login: document.getElementById('authLoginView'),
+    signup: document.getElementById('authSignupView'),
+    confirm: document.getElementById('authConfirmView'),
+  };
+  const showAuthView = (name) => {
+    Object.values(authViews).forEach((v) => v.classList.remove('is-active'));
+    authViews[name].classList.add('is-active');
+  };
+
+  const showAuthOverlay = () => authOverlayEl.classList.remove('is-hidden');
+  const hideAuthOverlay = () => authOverlayEl.classList.add('is-hidden');
+
+  const setAuthError = (elId, message) => {
+    const el = document.getElementById(elId);
+    if (!message) {
+      el.textContent = '';
+      el.classList.remove('is-visible');
+      return;
+    }
+    el.textContent = message;
+    el.classList.add('is-visible');
+  };
+
+  // Supabase hata mesajlarını kullanıcı dostu Türkçe metne çevirir.
+  const translateAuthError = (msg) => {
+    const m = (msg || '').toLowerCase();
+    if (m.includes('invalid login credentials')) return 'E-posta veya şifre hatalı.';
+    if (m.includes('already registered') || m.includes('already exists')) return 'Bu e-posta zaten kayıtlı. Giriş yapmayı dene.';
+    if (m.includes('password') && m.includes('6')) return 'Şifre en az 6 karakter olmalı.';
+    if (m.includes('email') && m.includes('invalid')) return 'Geçerli bir e-posta adresi gir.';
+    if (m.includes('network') || m.includes('fetch')) return 'Bağlantı hatası. İnternetini kontrol et.';
+    return 'Bir şeyler ters gitti. Lütfen tekrar dene.';
+  };
+
+  document.getElementById('authGoToSignup').addEventListener('click', () => {
+    setAuthError('authLoginError', '');
+    showAuthView('signup');
+  });
+  document.getElementById('authGoToLogin').addEventListener('click', () => {
+    setAuthError('authSignupError', '');
+    showAuthView('login');
+  });
+  document.getElementById('authBackToLogin').addEventListener('click', () => showAuthView('login'));
+
+  // Bulut verisini (varsa) çekip yerel APP_STATE ile değiştirir ve
+  // uygulamanın tüm modüllerinin güncel veriyle başlaması için sayfayı
+  // bir kez yeniden yükler. Bu, tüm ekranların ayrı ayrı yeniden
+  // render edilmesini gerektiren karmaşık bir canlı-birleştirme mantığı
+  // yazmaktan kaçınmak için tercih edilen basit ve güvenilir yöntemdir.
+  const pullCloudStateAndReload = async (userId) => {
+    try {
+      const { data, error } = await supabaseClient
+        .from('app_state')
+        .select('data')
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (!error && data && data.data) {
+        // Not: APP_STORAGE_KEY sabiti bu script bloğundan sonra tanımlanıyor;
+        // olası bir çalıştırma sırası sorununu önlemek için anahtarı burada
+        // sabit metin olarak (uygulamanın geri kalanıyla aynı değerde) kullanıyoruz.
+        localStorage.setItem('takvimim_app_state_v1', JSON.stringify(data.data));
+      }
+    } catch (err) {
+      console.warn('Bulut verisi çekilemedi, yerel veriyle devam ediliyor:', err);
+    }
+    sessionStorage.setItem('cloudSyncedThisSession', '1');
+    location.reload();
+  };
+
+  const handleAuthedSession = async (session) => {
+    window.currentUserId = session.user.id;
+    window.currentUserEmail = session.user.email;
+    hideAuthOverlay();
+    if (!sessionStorage.getItem('cloudSyncedThisSession')) {
+      await pullCloudStateAndReload(session.user.id);
+    }
+  };
+
+  // ---- Giriş formu ----
+  document.getElementById('authLoginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setAuthError('authLoginError', '');
+    const btn = document.getElementById('authLoginSubmit');
+    btn.disabled = true;
+    btn.textContent = 'Giriş yapılıyor...';
+    const email = document.getElementById('authLoginEmail').value.trim();
+    const password = document.getElementById('authLoginPassword').value;
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    btn.disabled = false;
+    btn.textContent = 'Giriş Yap';
+    if (error) {
+      setAuthError('authLoginError', translateAuthError(error.message));
+      return;
+    }
+    if (data && data.session) await handleAuthedSession(data.session);
+  });
+
+  // ---- Kayıt formu ----
+  document.getElementById('authSignupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setAuthError('authSignupError', '');
+    const btn = document.getElementById('authSignupSubmit');
+    btn.disabled = true;
+    btn.textContent = 'Kayıt olunuyor...';
+    const email = document.getElementById('authSignupEmail').value.trim();
+    const password = document.getElementById('authSignupPassword').value;
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    btn.disabled = false;
+    btn.textContent = 'Kayıt Ol';
+    if (error) {
+      setAuthError('authSignupError', translateAuthError(error.message));
+      return;
+    }
+    if (data && data.session) {
+      // E-posta doğrulaması kapalıysa oturum hemen açılır.
+      await handleAuthedSession(data.session);
+    } else {
+      // E-posta doğrulaması açıksa oturum hemen gelmez, kullanıcıyı bilgilendir.
+      document.getElementById('authConfirmText').textContent =
+        `${email} adresine bir onay bağlantısı gönderdik. Onayladıktan sonra giriş yapabilirsin.`;
+      showAuthView('confirm');
+    }
+  });
+
+  // ---- Çıkış yap (Ayarlar sayfasındaki butona bağlanacak) ----
+  window.handleLogout = async () => {
+    await supabaseClient.auth.signOut();
+    sessionStorage.removeItem('cloudSyncedThisSession');
+    window.currentUserId = null;
+    location.reload();
+  };
+
+  // ---- Sayfa açılışında oturum kontrolü ----
+  (async () => {
+    const { data } = await supabaseClient.auth.getSession();
+    if (data && data.session) {
+      await handleAuthedSession(data.session);
+    } else {
+      showAuthOverlay();
+    }
+  })();
+
+  // Token yenilenmesi/oturum kapanması gibi durumları da yakala.
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT') {
+      window.currentUserId = null;
+      showAuthOverlay();
+      showAuthView('login');
+    }
+  });
+</script>
+<!-- ================= /Supabase: Auth Overlay ================= -->
+
 <div class="theme-layer is-visible" id="themeLayerA"></div>
 <div class="theme-layer" id="themeLayerB"></div>
 <div class="pattern-layer" id="patternLayer"></div>
@@ -7031,6 +7368,24 @@
           </svg>
         </span>
         <h1 class="settings-title">Ayarlar</h1>
+      </div>
+
+      <div class="settings-section">
+        <span class="settings-section-label">Hesap</span>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div class="settings-row-text">
+              <span class="settings-row-title">Giriş yapıldı</span>
+              <span class="settings-row-desc" id="settingsAccountEmail">—</span>
+            </div>
+          </div>
+          <div class="settings-divider"></div>
+          <button type="button" class="settings-row settings-row-link" id="settingsLogoutBtn">
+            <div class="settings-row-text">
+              <span class="settings-row-title" style="color:#d92d20;">Çıkış Yap</span>
+            </div>
+          </button>
+        </div>
       </div>
 
       <div class="settings-section">
@@ -8138,7 +8493,42 @@
     } catch (err) {
       console.warn('Uygulama verisi kaydedilemedi:', err);
     }
+    if (typeof scheduleCloudSync === 'function') scheduleCloudSync();
   };
+
+  // ---- Bulut senkronizasyonu (Supabase) ----
+  // Her tekil değişiklikte anında ağ isteği atmamak için kısa bir
+  // bekleme (debounce) uygulanır: art arda hızlı yapılan birden fazla
+  // değişiklik tek bir yükleme (upsert) isteğinde birleştirilir.
+  let cloudSyncTimer = null;
+  let cloudSyncInFlight = false;
+  let cloudSyncPending = false;
+
+  const pushAppStateToCloud = async () => {
+    if (!window.currentUserId || typeof supabaseClient === 'undefined') return;
+    if (cloudSyncInFlight) { cloudSyncPending = true; return; }
+    cloudSyncInFlight = true;
+    try {
+      await supabaseClient.from('app_state').upsert({
+        user_id: window.currentUserId,
+        data: APP_STATE,
+        updated_at: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.warn('Bulut senkronizasyonu başarısız:', err);
+    } finally {
+      cloudSyncInFlight = false;
+      if (cloudSyncPending) {
+        cloudSyncPending = false;
+        pushAppStateToCloud();
+      }
+    }
+  };
+
+  function scheduleCloudSync() {
+    if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
+    cloudSyncTimer = setTimeout(pushAppStateToCloud, 1500);
+  }
 </script>
 
 <script>
@@ -8147,6 +8537,17 @@
   // üzerinden CSS tetiklenir). Anahtarın durumu (açık/kapalı) APP_STATE
   // üzerinden localStorage'a kaydedilir; böylece en son açık bırakıldıysa
   // bir sonraki girişte de anahtar açık olarak yüklenir.
+  const settingsLogoutBtn = document.getElementById('settingsLogoutBtn');
+  const settingsAccountEmail = document.getElementById('settingsAccountEmail');
+  if (settingsAccountEmail && window.currentUserEmail) {
+    settingsAccountEmail.textContent = window.currentUserEmail;
+  }
+  if (settingsLogoutBtn) {
+    settingsLogoutBtn.addEventListener('click', () => {
+      if (typeof window.handleLogout === 'function') window.handleLogout();
+    });
+  }
+
   const darkModeToggle = document.getElementById('settingsDarkToggle');
   if (darkModeToggle) {
     // Sayfa açılırken daha önce kaydedilmiş bir durum varsa uygula.
@@ -14210,12 +14611,13 @@
     return idbPromise;
   };
 
-  // Bir Blob'u IndexedDB'ye rastgele bir kimlikle yazar ve "idb://<id>"
-  // referansını döndürür. IndexedDB kullanılamıyorsa null döner.
-  const idbPutImageBlob = async (blob) => {
+  // Bir Blob'u IndexedDB'ye verilen (veya rastgele üretilen) bir kimlikle
+  // yazar ve "idb://<id>" referansını döndürür. IndexedDB kullanılamıyorsa
+  // null döner.
+  const idbPutImageBlob = async (blob, forcedId) => {
     const db = await openImageDB();
     if (!db) return null;
-    const id = randomFileId();
+    const id = forcedId || randomFileId();
     try {
       await new Promise((resolve, reject) => {
         const tx = db.transaction(IDB_STORE, 'readwrite');
@@ -14226,6 +14628,47 @@
       return `idb://${id}`;
     } catch (err) {
       return null;
+    }
+  };
+
+  // ---- Supabase Storage: görsel yedekleme ----
+  // Her görsel, kullanıcının kendi klasörü altında ("<user_id>/<id>")
+  // saklanır; bu sayede Storage RLS kuralları kullanıcıları birbirinin
+  // görsellerinden izole edebilir. Yükleme ve indirme en iyi çaba
+  // (best-effort) ile yapılır: başarısız olursa uygulama yerel veriyle
+  // çalışmaya devam eder, kullanıcı deneyimini bloklamaz.
+  const IMAGES_BUCKET = 'images';
+
+  const uploadImageBlobToCloud = async (id, blob) => {
+    if (!window.currentUserId || typeof supabaseClient === 'undefined') return;
+    try {
+      await supabaseClient.storage
+        .from(IMAGES_BUCKET)
+        .upload(`${window.currentUserId}/${id}`, blob, { upsert: true, contentType: blob.type || 'image/jpeg' });
+    } catch (err) {
+      console.warn('Görsel buluta yüklenemedi:', err);
+    }
+  };
+
+  const downloadImageBlobFromCloud = async (id) => {
+    if (!window.currentUserId || typeof supabaseClient === 'undefined') return null;
+    try {
+      const { data, error } = await supabaseClient.storage
+        .from(IMAGES_BUCKET)
+        .download(`${window.currentUserId}/${id}`);
+      if (error) return null;
+      return data;
+    } catch (err) {
+      return null;
+    }
+  };
+
+  const deleteImageBlobFromCloud = async (id) => {
+    if (!window.currentUserId || typeof supabaseClient === 'undefined') return;
+    try {
+      await supabaseClient.storage.from(IMAGES_BUCKET).remove([`${window.currentUserId}/${id}`]);
+    } catch (err) {
+      console.warn('Görsel buluttan silinemedi:', err);
     }
   };
 
@@ -14268,6 +14711,10 @@
     try {
       const blob = await dataUrlToBlob(dataUrl);
       const ref = await idbPutImageBlob(blob);
+      if (ref) {
+        // Bulut yüklemesi arka planda yapılır, UI'ı bloklamaz.
+        uploadImageBlobToCloud(ref.slice('idb://'.length), blob);
+      }
       return ref || dataUrl;
     } catch (err) {
       return dataUrl;
@@ -14285,7 +14732,14 @@
     if (typeof ref !== 'string' || !ref.startsWith('idb://')) return ref || '';
     if (resolvedImageUrlCache.has(ref)) return resolvedImageUrlCache.get(ref);
     const id = ref.slice('idb://'.length);
-    const blob = await idbGetImageBlob(id);
+    let blob = await idbGetImageBlob(id);
+    if (!blob) {
+      // Yerelde yoksa (ör. yeni cihaz, bulut verisi az önce çekildi)
+      // Supabase Storage'dan indirip yerel önbelleğe (IndexedDB) de
+      // yazarak bir sonraki erişimde tekrar ağa gitmeyi önle.
+      blob = await downloadImageBlobFromCloud(id);
+      if (blob) await idbPutImageBlob(blob, id);
+    }
     if (!blob) return '';
     const url = URL.createObjectURL(blob);
     resolvedImageUrlCache.set(ref, url);
@@ -14302,7 +14756,9 @@
       try { URL.revokeObjectURL(resolvedImageUrlCache.get(ref)); } catch (err) { /* yok say */ }
       resolvedImageUrlCache.delete(ref);
     }
-    await idbDeleteImage(ref.slice('idb://'.length));
+    const id = ref.slice('idb://'.length);
+    await idbDeleteImage(id);
+    deleteImageBlobFromCloud(id);
   };
 
 </script>
