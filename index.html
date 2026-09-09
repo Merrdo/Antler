@@ -2297,6 +2297,9 @@
     text-decoration-thickness: 2px;
     text-decoration-color: transparent;
     transition: opacity 0.2s ease, text-decoration-color 0.2s ease;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .page8-item-row.is-done .page8-item-text {
@@ -2328,7 +2331,7 @@
 
   .page8-add-item-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     padding-top: 0.05rem;
   }
 
@@ -2342,7 +2345,12 @@
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
     font-size: 0.92rem;
+    line-height: 1.35;
     color: #121212;
+    resize: none;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 
   .page8-item-input::placeholder {
@@ -3145,7 +3153,9 @@
   }
 
   .qhavuz-card-book {
-    display: block;
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
     padding: 0 0.6rem 0.6rem;
     margin-top: -0.3rem;
     font-family: "Space Grotesk", sans-serif;
@@ -3153,9 +3163,21 @@
     font-size: 0.68rem;
     color: #121212;
     opacity: 0.55;
-    white-space: nowrap;
+  }
+
+  /* Kitap adı uzunsa sadece bu kısım üç nokta ile kısalır; sayfa
+     sayısı (varsa) her zaman tam görünür kalır, aşağıda görüldüğü gibi
+     kesilip kaybolmaz. */
+  .qhavuz-card-book-name {
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .qhavuz-card-book-page {
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .qhavuz-card-delete {
@@ -10686,7 +10708,10 @@
       requestAnimationFrame(autoGrow);
 
       input.focus();
-      input.select();
+      // Metnin tamamını seçili bırakmak yerine imleci sona koyuyoruz;
+      // böylece düzenleme açıldığında yanlışlıkla tüm metni silme riski
+      // olmuyor, kullanıcı ne değiştirmek istiyorsa kendi seçiyor.
+      input.setSelectionRange(input.value.length, input.value.length);
 
       const commit = () => {
         const value = input.value.trim();
@@ -10726,13 +10751,22 @@
     const addItemRow = () => {
       const row = document.createElement('div');
       row.className = 'page8-add-item-row';
-      const input = document.createElement('input');
-      input.type = 'text';
+      const input = document.createElement('textarea');
       input.className = 'page8-item-input';
       input.placeholder = 'Yeni ekle...';
+      input.rows = 1;
       row.appendChild(input);
       itemList.appendChild(row);
       input.focus();
+
+      // Eklerken de tıpkı düzenlemede olduğu gibi metin uzayınca aşağı
+      // satıra geçtiğini anlık görebilelim; kutunun boyu yazdıkça büyür.
+      const autoGrow = () => {
+        input.style.height = 'auto';
+        input.style.height = input.scrollHeight + 'px';
+      };
+      input.addEventListener('input', autoGrow);
+      requestAnimationFrame(autoGrow);
 
       const commit = () => {
         const value = input.value.trim();
@@ -10745,7 +10779,7 @@
       };
 
       input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); input.blur(); }
         else if (e.key === 'Escape') { input.value = ''; input.blur(); }
       });
       input.addEventListener('blur', commit, { once: true });
@@ -10986,6 +11020,11 @@
     // O gün "+ Ders Ekle" ile eklenmiş (henüz sabitlenmemiş) derslerin
     // kimlikleri; sadece o günün sayfasında görünmelerini sağlar.
     dayLists: {},
+    // customSubjectPool: kullanıcının "Kendi dersini yaz…" ile eklediği
+    // branş adlarının kalıcı havuzu. Hazır TYT/AYT branşları gibi artık
+    // "Ders Ekle" pop-up'ında her zaman seçenek olarak listelenir; ilgili
+    // ders tamamen silinirse buradan da çıkarılır (hiç eklenmemiş gibi olur).
+    customSubjectPool: { tyt: [], ayt: [] },
     logs: [] // { id, date:'YYYY-MM-DD', track:'tyt'|'ayt', subjectId, count, ts }
   });
 
@@ -11225,6 +11264,12 @@
             entry[page9Track] = entry[page9Track].filter((id) => id !== subject.id);
           }
         });
+        // Kalıcı branş havuzundan da çıkar: bu ders tamamen silindiğinde
+        // "Ders Ekle" pop-up'ında da bir daha hiç eklenmemiş gibi görünmeli.
+        const lower = subject.name.trim().toLowerCase();
+        page9State.customSubjectPool[page9Track] = page9State.customSubjectPool[page9Track].filter(
+          (n) => n.trim().toLowerCase() !== lower
+        );
         savePage9State();
         renderPage9SubjectList();
         renderPage9Summary();
@@ -11402,6 +11447,28 @@
     ayt: ['Matematik', 'Fizik', 'Kimya', 'Biyoloji']
   };
 
+  // Geriye dönük uyumluluk: eski kayıtlarda "customSubjectPool" henüz
+  // yoktu. Alanı oluşturuyoruz ve daha önce "Kendi dersini yaz…" ile
+  // eklenmiş (hazır listede olmayan) dersleri geriye dönük olarak havuza
+  // dahil ediyoruz ki bu güncellemeden önce eklenmiş branşlar da artık
+  // kalıcı sayılsın.
+  if (!page9State.customSubjectPool || typeof page9State.customSubjectPool !== 'object') {
+    page9State.customSubjectPool = { tyt: [], ayt: [] };
+  }
+  ['tyt', 'ayt'].forEach((track) => {
+    if (!Array.isArray(page9State.customSubjectPool[track])) page9State.customSubjectPool[track] = [];
+    const presetNames = new Set((PAGE9_PRESET_SUBJECTS[track] || []).map((n) => n.trim().toLowerCase()));
+    const poolNames = new Set(page9State.customSubjectPool[track].map((n) => n.trim().toLowerCase()));
+    page9State.subjects[track].forEach((s) => {
+      const lower = s.name.trim().toLowerCase();
+      if (!presetNames.has(lower) && !poolNames.has(lower)) {
+        page9State.customSubjectPool[track].push(s.name);
+        poolNames.add(lower);
+      }
+    });
+  });
+  savePage9State();
+
   const page9AddBackdrop = document.getElementById('page9AddBackdrop');
   const page9AddSubtitle = document.getElementById('page9AddSubtitle');
   const page9AddClose = document.getElementById('page9AddClose');
@@ -11411,19 +11478,37 @@
   const page9AddCustomBtn = document.getElementById('page9AddCustomBtn');
   const page9AddConfirm = document.getElementById('page9AddConfirm');
 
-  // Pop-up açıkken kullanılan geçici liste: { name, isCustom, disabled, selected }.
+  // Pop-up açıkken kullanılan geçici liste: { name, isCustom, fromPool, disabled, selected }.
   // disabled = o gün için zaten görünen (eklenmiş ya da sabitlenmiş) bir ders.
+  // fromPool = kalıcı branş havuzundan (daha önce "Kendi dersini yaz…" ile
+  // eklenip kaydedilmiş) gelen bir ders; bunlar hazır branşlar gibi her
+  // pop-up açılışında otomatik listelenir ve pop-up içinden tek seferlik
+  // silinemez (kalıcı silme, ana ders listesindeki "×" ile yapılır).
   let page9AddEntries = [];
 
   const page9BuildAddEntries = () => {
     const visibleNames = new Set(page9VisibleSubjects().map((s) => s.name.trim().toLowerCase()));
     const presets = PAGE9_PRESET_SUBJECTS[page9Track] || [];
-    page9AddEntries = presets.map((name) => ({
-      name,
-      isCustom: false,
-      disabled: visibleNames.has(name.trim().toLowerCase()),
-      selected: false
-    }));
+    const presetNames = new Set(presets.map((n) => n.trim().toLowerCase()));
+    const pool = (page9State.customSubjectPool[page9Track] || []).filter(
+      (name) => !presetNames.has(name.trim().toLowerCase())
+    );
+    page9AddEntries = [
+      ...presets.map((name) => ({
+        name,
+        isCustom: false,
+        fromPool: false,
+        disabled: visibleNames.has(name.trim().toLowerCase()),
+        selected: false
+      })),
+      ...pool.map((name) => ({
+        name,
+        isCustom: true,
+        fromPool: true,
+        disabled: visibleNames.has(name.trim().toLowerCase()),
+        selected: false
+      }))
+    ];
   };
 
   const page9UpdateAddConfirmState = () => {
@@ -11464,7 +11549,7 @@
         note.className = 'page9-add-chip-note';
         note.textContent = 'Eklendi';
         chip.appendChild(note);
-      } else if (entry.isCustom) {
+      } else if (entry.isCustom && !entry.fromPool) {
         const del = document.createElement('button');
         del.type = 'button';
         del.className = 'delete-btn page9-add-chip-delete';
@@ -11511,7 +11596,7 @@
     if (existing) {
       if (!existing.disabled) existing.selected = true;
     } else {
-      page9AddEntries.push({ name: raw, isCustom: true, disabled: false, selected: true });
+      page9AddEntries.push({ name: raw, isCustom: true, fromPool: false, disabled: false, selected: true });
     }
     page9AddCustomInput.value = '';
     page9RenderAddGrid();
@@ -11562,6 +11647,16 @@
         masterList.push(subject);
       }
       if (!subject.pinned && !dayList.includes(subject.id)) dayList.push(subject.id);
+
+      // Hazır listede olmayan bir ders ise, bir daha "Ders Ekle" pop-up'ını
+      // açtığında da seçenek olarak çıkması için kalıcı havuza kaydediyoruz.
+      const isPreset = (PAGE9_PRESET_SUBJECTS[page9Track] || []).some(
+        (n) => n.trim().toLowerCase() === lower
+      );
+      if (!isPreset) {
+        const pool = page9State.customSubjectPool[page9Track];
+        if (!pool.some((n) => n.trim().toLowerCase() === lower)) pool.push(subject.name);
+      }
     });
 
     savePage9State();
@@ -13906,11 +14001,20 @@
       if (item.book || item.page) {
         const bookLine = document.createElement('span');
         bookLine.className = 'qhavuz-card-book';
-        bookLine.textContent = item.book && item.page
-          ? `${item.book} · s. ${item.page}`
-          : item.book
-            ? item.book
-            : `s. ${item.page}`;
+
+        if (item.book) {
+          const bookName = document.createElement('span');
+          bookName.className = 'qhavuz-card-book-name';
+          bookName.textContent = item.book;
+          bookLine.appendChild(bookName);
+        }
+        if (item.page) {
+          const bookPage = document.createElement('span');
+          bookPage.className = 'qhavuz-card-book-page';
+          bookPage.textContent = item.book ? `· s. ${item.page}` : `s. ${item.page}`;
+          bookLine.appendChild(bookPage);
+        }
+
         card.appendChild(bookLine);
       }
 
