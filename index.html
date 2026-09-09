@@ -7889,7 +7889,7 @@
     <div class="page9-add-header">
       <div class="page9-add-heading">
         <span class="page9-add-title">Soru Ekle</span>
-        <span class="page9-add-subtitle">Branş ve doğru cevabı işaretle</span>
+        <span class="page9-add-subtitle">Sınav türünü, dersi ve doğru cevabı işaretle</span>
       </div>
       <button type="button" class="delete-btn page9-add-close" id="qhavuzAddClose" aria-label="Kapat">×</button>
     </div>
@@ -7898,7 +7898,10 @@
       <img id="qhavuzAddPreviewImg" alt="Soru görseli">
     </div>
 
-    <span class="qhavuz-add-label">Branş</span>
+    <span class="qhavuz-add-label">Sınav Türü</span>
+    <div class="qhavuz-add-subject-grid" id="qhavuzAddTrackGrid"></div>
+
+    <span class="qhavuz-add-label">Ders</span>
     <div class="qhavuz-add-subject-grid" id="qhavuzAddSubjectGrid"></div>
 
     <span class="qhavuz-add-label">Doğru Cevap</span>
@@ -13602,38 +13605,60 @@
   // ve doğru cevap şıkkı seçtirilir; onaylanınca kart olarak listeye
   // eklenir. Görseller base64 (data URL) olarak, diğer tüm veriler gibi
   // tek bir APP_STATE anahtarı altında localStorage'a yazılır.
-  const QHAVUZ_SUBJECTS = [
-    { name: 'Türkçe', color: '#ff90e8' },
-    { name: 'Matematik', color: '#c9a6ff' },
-    { name: 'Fizik', color: '#ffb46e' },
-    { name: 'Kimya', color: '#9fb8ff' },
-    { name: 'Biyoloji', color: '#8fe3a0' },
-    { name: 'Tarih', color: '#ffd23f' },
-    { name: 'Coğrafya', color: '#6ec6ff' },
-    { name: 'Felsefe', color: '#ff5c5c' },
-    { name: 'Din', color: '#7452a8' }
-  ];
+  // Ders listesi artık tek bir havuz değil, TYT ve AYT için ayrı ayrı
+  // tanımlı: soru eklerken önce sınav türü seçilir, ders etiketleri o
+  // türe göre gösterilir (aşağıdaki qhavuzAllSubjects bkz.).
+  const QHAVUZ_SUBJECTS_BY_TRACK = {
+    tyt: [
+      { name: 'Türkçe', color: '#ff90e8' },
+      { name: 'Matematik', color: '#c9a6ff' },
+      { name: 'Fizik', color: '#ffb46e' },
+      { name: 'Kimya', color: '#9fb8ff' },
+      { name: 'Biyoloji', color: '#8fe3a0' },
+      { name: 'Tarih', color: '#ffd23f' },
+      { name: 'Coğrafya', color: '#6ec6ff' },
+      { name: 'Felsefe', color: '#ff5c5c' },
+      { name: 'Din', color: '#7452a8' }
+    ],
+    ayt: [
+      { name: 'Matematik', color: '#c9a6ff' },
+      { name: 'Fizik', color: '#ffb46e' },
+      { name: 'Kimya', color: '#9fb8ff' },
+      { name: 'Biyoloji', color: '#8fe3a0' }
+    ]
+  };
   const QHAVUZ_ANSWERS = ['A', 'B', 'C', 'D', 'E'];
 
-  // Soru Havuzu'ndaki branş seçimi artık sabit listeyle sınırlı değil:
+  // Soru Havuzu'ndaki ders seçimi artık sabit listeyle sınırlı değil:
   // Soru Takibi (Sayfa 9) sayfasında "Ders Ekle" ile eklediğiniz her
-  // branş (TYT veya AYT fark etmez) burada da otomatik seçenek olarak
-  // çıkar; o dersi Soru Takibi'nden tamamen silerseniz burada da bir
-  // daha görünmez. Renk tutarlılığı için Sayfa 9'daki dersin kendi
-  // rengi kullanılır.
-  const qhavuzAllSubjects = () => {
-    const baseNames = new Set(QHAVUZ_SUBJECTS.map((s) => s.name.trim().toLowerCase()));
+  // ders, ait olduğu sınav türünde (TYT/AYT) burada da otomatik seçenek
+  // olarak çıkar; o dersi Soru Takibi'nden tamamen silerseniz burada da
+  // bir daha görünmez. Renk tutarlılığı için Sayfa 9'daki dersin kendi
+  // rengi kullanılır. Bir "track" verilirse sadece o türün dersleri
+  // döner (Soru Ekle pop-up'ında kullanılır); verilmezse geriye dönük
+  // uyumluluk için TYT+AYT birleşik listesi döner (kart/rozet renk
+  // eşleştirmesi gibi track bilgisi olmayan eski kayıtlar için).
+  const qhavuzAllSubjects = (track) => {
+    const tracks = track ? [track] : ['tyt', 'ayt'];
     const seen = new Set();
-    const extra = [];
-    ['tyt', 'ayt'].forEach((track) => {
-      (page9State.subjects[track] || []).forEach((s) => {
+    const list = [];
+    tracks.forEach((t) => {
+      (QHAVUZ_SUBJECTS_BY_TRACK[t] || []).forEach((s) => {
         const lower = s.name.trim().toLowerCase();
-        if (baseNames.has(lower) || seen.has(lower)) return;
+        if (seen.has(lower)) return;
         seen.add(lower);
-        extra.push({ name: s.name, color: s.color || '#c9a6ff' });
+        list.push(s);
       });
     });
-    return [...QHAVUZ_SUBJECTS, ...extra];
+    tracks.forEach((t) => {
+      (page9State.subjects[t] || []).forEach((s) => {
+        const lower = s.name.trim().toLowerCase();
+        if (seen.has(lower)) return;
+        seen.add(lower);
+        list.push({ name: s.name, color: s.color || '#c9a6ff' });
+      });
+    });
+    return list;
   };
 
   const qhavuzGenId = () => 'soru-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -13655,6 +13680,7 @@
   const qhavuzAddBackdrop = document.getElementById('qhavuzAddBackdrop');
   const qhavuzAddClose = document.getElementById('qhavuzAddClose');
   const qhavuzAddPreviewImg = document.getElementById('qhavuzAddPreviewImg');
+  const qhavuzAddTrackGrid = document.getElementById('qhavuzAddTrackGrid');
   const qhavuzAddSubjectGrid = document.getElementById('qhavuzAddSubjectGrid');
   const qhavuzAddAnswerGrid = document.getElementById('qhavuzAddAnswerGrid');
   const qhavuzAddBookInput = document.getElementById('qhavuzAddBookInput');
@@ -13662,17 +13688,49 @@
   const qhavuzAddConfirm = document.getElementById('qhavuzAddConfirm');
 
   // Pop-up açıkken seçilen değerler; hepsi doluymadan "Kaydet" pasif kalır.
+  // Sınav türü (track) seçilmeden ders listesi boş kalır; track
+  // değiştiğinde önceki ders seçimi sıfırlanır (bir derse iki türde de
+  // aynı ada sahip olsa bile seçim her zaman track'e göre yeniden yapılır).
   let qhavuzPendingImage = null;
+  let qhavuzPendingTrack = null;
   let qhavuzPendingSubject = null;
   let qhavuzPendingAnswer = null;
 
   const qhavuzUpdateConfirmState = () => {
-    qhavuzAddConfirm.disabled = !(qhavuzPendingImage && qhavuzPendingSubject && qhavuzPendingAnswer);
+    qhavuzAddConfirm.disabled = !(qhavuzPendingImage && qhavuzPendingTrack && qhavuzPendingSubject && qhavuzPendingAnswer);
+  };
+
+  const qhavuzBuildTrackGrid = () => {
+    qhavuzAddTrackGrid.innerHTML = '';
+    ['tyt', 'ayt'].forEach((track) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'qhavuz-add-subject-chip';
+      chip.style.setProperty('--qhavuz-chip-color', '#ffd23f');
+      chip.textContent = PAGE9_TRACK_LABELS[track];
+      if (qhavuzPendingTrack === track) chip.classList.add('is-selected');
+      chip.addEventListener('click', () => {
+        if (qhavuzPendingTrack === track) return;
+        qhavuzPendingTrack = track;
+        qhavuzPendingSubject = null;
+        qhavuzBuildTrackGrid();
+        qhavuzBuildSubjectGrid();
+        qhavuzUpdateConfirmState();
+      });
+      qhavuzAddTrackGrid.appendChild(chip);
+    });
   };
 
   const qhavuzBuildSubjectGrid = () => {
     qhavuzAddSubjectGrid.innerHTML = '';
-    qhavuzAllSubjects().forEach((subj) => {
+    if (!qhavuzPendingTrack) {
+      const hint = document.createElement('span');
+      hint.className = 'qhavuz-add-label-optional';
+      hint.textContent = 'Önce sınav türünü seç';
+      qhavuzAddSubjectGrid.appendChild(hint);
+      return;
+    }
+    qhavuzAllSubjects(qhavuzPendingTrack).forEach((subj) => {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'qhavuz-add-subject-chip';
@@ -13708,11 +13766,13 @@
 
   const openQhavuzAddModal = (imageDataUrl) => {
     qhavuzPendingImage = imageDataUrl;
+    qhavuzPendingTrack = null;
     qhavuzPendingSubject = null;
     qhavuzPendingAnswer = null;
     qhavuzAddPreviewImg.src = imageDataUrl;
     qhavuzAddBookInput.value = '';
     qhavuzAddPageInput.value = '';
+    qhavuzBuildTrackGrid();
     qhavuzBuildSubjectGrid();
     qhavuzBuildAnswerGrid();
     qhavuzUpdateConfirmState();
@@ -13722,6 +13782,7 @@
   const closeQhavuzAddModal = () => {
     qhavuzAddBackdrop.classList.remove('is-open');
     qhavuzPendingImage = null;
+    qhavuzPendingTrack = null;
     qhavuzPendingSubject = null;
     qhavuzPendingAnswer = null;
     qhavuzAddBookInput.value = '';
@@ -13753,7 +13814,7 @@
   });
 
   qhavuzAddConfirm.addEventListener('click', async () => {
-    if (!qhavuzPendingImage || !qhavuzPendingSubject || !qhavuzPendingAnswer) return;
+    if (!qhavuzPendingImage || !qhavuzPendingTrack || !qhavuzPendingSubject || !qhavuzPendingAnswer) return;
     const book = qhavuzAddBookInput.value.trim();
     const page = qhavuzAddPageInput.value.trim();
     // Ham base64 yerine görsel IndexedDB'ye Blob olarak yazılır; APP_STATE
@@ -13762,6 +13823,7 @@
     qhavuzState.items.unshift({
       id: qhavuzGenId(),
       image: imageRef,
+      track: qhavuzPendingTrack,
       subject: qhavuzPendingSubject,
       answer: qhavuzPendingAnswer,
       book: book || null,
@@ -13776,6 +13838,14 @@
   const qhavuzSubjectColor = (name) => {
     const match = qhavuzAllSubjects().find((s) => s.name === name);
     return match ? match.color : '#ff90e8';
+  };
+
+  // Kart/rozet üzerinde gösterilecek etiket: track bilgisi varsa
+  // "TYT · Matematik" gibi sınav türüyle birlikte, yoksa (eski kayıtlar)
+  // sadece ders adıyla gösterilir.
+  const qhavuzSubjectLabel = (item) => {
+    const trackLabel = item && item.track ? PAGE9_TRACK_LABELS[item.track] : null;
+    return trackLabel ? `${trackLabel} · ${item.subject}` : item.subject;
   };
 
   // ---- Soru Havuzu: Düzenleme modu ----
@@ -14033,7 +14103,7 @@
       const subjectBadge = document.createElement('span');
       subjectBadge.className = 'qhavuz-card-subject';
       subjectBadge.style.background = qhavuzSubjectColor(item.subject);
-      subjectBadge.textContent = item.subject;
+      subjectBadge.textContent = qhavuzSubjectLabel(item);
 
       const answerBadge = document.createElement('span');
       answerBadge.className = 'qhavuz-card-answer';
@@ -14249,7 +14319,7 @@
     const item = qhavuzTestQuestions[qhavuzTestIndex];
     qhavuzTestAnswered = false;
     qhavuzTestProgress.textContent = `${qhavuzTestIndex + 1}/${qhavuzTestQuestions.length}`;
-    qhavuzTestSubjectBadge.textContent = item.subject;
+    qhavuzTestSubjectBadge.textContent = qhavuzSubjectLabel(item);
     qhavuzTestSubjectBadge.style.background = qhavuzSubjectColor(item.subject);
     qhavuzTestImgZoom.reset();
     qhavuzTestImg.src = '';
