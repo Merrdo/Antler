@@ -21,6 +21,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@700;800&display=swap" rel="stylesheet">
+
+<!-- Bulut eşitleme (Supabase) için istemci kütüphanesi -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   * {
     margin: 0;
@@ -111,50 +114,6 @@
 
   .pattern-layer.is-swapping {
     opacity: 0;
-  }
-
-  /* ---------- Açılış senkron perdesi ---------- */
-  .app-sync-gate {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #2b2f4a;
-    opacity: 1;
-    transition: opacity 0.25s ease;
-  }
-
-  .app-sync-gate.is-hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .app-sync-gate-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .app-sync-gate-spinner {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: 3px solid rgba(255, 255, 255, 0.25);
-    border-top-color: #fff;
-    animation: app-sync-gate-spin 0.8s linear infinite;
-  }
-
-  @keyframes app-sync-gate-spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .app-sync-gate-text {
-    color: #f2f2f7;
-    font-size: 14px;
-    opacity: 0.85;
   }
 
   /* ---------- Sayfalar ---------- */
@@ -6414,6 +6373,17 @@
     line-height: 1.35;
   }
 
+  /* Son yedekleme tarihi/saati satırı: içi boşken (henüz hiç
+     eşitlenmemişse ya da giriş yapılmamışsa) tamamen kaybolur. */
+  .settings-last-backup {
+    font-weight: 600;
+    opacity: 0.75;
+  }
+
+  .settings-last-backup:empty {
+    display: none;
+  }
+
   /* Karanlık mod anahtarı: uygulamanın genel .brutal-toggle görünümünü
      (.track / .thumb sınıfları) kullanır, sadece hizalama için ufak bir
      ek sınıf. */
@@ -6665,105 +6635,6 @@
     background-color: #ff5c5c;
   }
 
-  /* ---------- Bulut Yedekleme (Supabase) ---------- */
-  .settings-cloud-primary-btn {
-    align-self: flex-start;
-    padding: 0.6rem 1rem;
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 800;
-    font-size: 0.88rem;
-    color: #fff;
-    background-color: #121212;
-    border: 3px solid #000;
-    border-radius: 0.8rem;
-    box-shadow: 3px 3px 0px 0px #000;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-
-  .settings-cloud-primary-btn:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px 0px #000;
-  }
-
-  .settings-cloud-primary-btn:active {
-    transform: translate(1px, 1px);
-    box-shadow: 1px 1px 0px 0px #000;
-  }
-
-  .settings-cloud-secondary-btn {
-    flex-shrink: 0;
-    padding: 0.55rem 0.9rem;
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 800;
-    font-size: 0.85rem;
-    color: #121212;
-    background-color: #fff;
-    border: 3px solid #000;
-    border-radius: 0.8rem;
-    box-shadow: 3px 3px 0px 0px #000;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-
-  .settings-cloud-secondary-btn:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px 0px #000;
-  }
-
-  .settings-cloud-secondary-btn:active {
-    transform: translate(1px, 1px);
-    box-shadow: 1px 1px 0px 0px #000;
-  }
-
-  .settings-cloud-secondary-btn:disabled,
-  .settings-cloud-primary-btn:disabled {
-    opacity: 0.55;
-    cursor: default;
-    pointer-events: none;
-  }
-
-  .settings-cloud-dot {
-    width: 0.7rem;
-    height: 0.7rem;
-    border-radius: 50%;
-    background: #999;
-    border: 2px solid #000;
-    flex-shrink: 0;
-    transition: background-color 0.2s ease;
-  }
-
-  .settings-cloud-error {
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 600;
-    font-size: 0.78rem;
-    color: #d23f3f;
-    line-height: 1.35;
-    min-height: 1em;
-  }
-
-  .settings-cloud-switch-btn {
-    border: none;
-    background: none;
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 700;
-    font-size: 0.8rem;
-    color: rgba(18, 18, 18, 0.6);
-    text-decoration: underline;
-    cursor: pointer;
-    padding: 0;
-    align-self: center;
-  }
-
-  body.is-anthracite .settings-cloud-secondary-btn {
-    background-color: var(--dark-card-color, #3b3e42);
-    color: #f2f2f4;
-  }
-
-  body.is-anthracite .settings-cloud-switch-btn {
-    color: rgba(242, 242, 244, 0.65);
-  }
-
   .settings-footer {
     text-align: center;
     padding: 0.4rem 0 0.2rem;
@@ -6944,6 +6815,443 @@
     background: var(--dark-card-color, #3b3e42);
     color: #f2f2f4;
   }
+
+  /* ================= Kayıt / Giriş Ekranı (Auth Gate) ================= */
+  /* Uygulamaya ilk kez girildiğinde her şeyin üzerinde duran, tam ekran
+     kapı. Oturum bulunursa ya da kullanıcı "Şimdilik geç" derse JS
+     tarafından .is-hidden eklenerek kapatılır. */
+  .auth-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+    background: #2b2f4a;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s linear 0s;
+  }
+
+  .auth-gate.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+  }
+
+  /* KRİTİK: .auth-gate-form.is-active kendi üzerinde "pointer-events: auto"
+     ve "visibility: visible" tanımlıyor (aktif sekmenin geçiş animasyonu
+     için). Bu doğrudan tanımlanmış bir değer olduğundan, üst elemandaki
+     (.auth-gate.is-hidden) pointer-events:none / visibility:hidden
+     mirası ona ulaşamıyor ve ezip geçiyor. Sonuç: kapı gözle görünmez
+     hale gelse de aktif formun input'ları hâlâ dokunma/tıklama alıyordu.
+     Bu kural daha yüksek özgüllüğe (specificity) sahip olduğu için
+     kapı kapalıyken formu da kesin biçimde etkileşimsiz kılar. */
+  .auth-gate.is-hidden .auth-gate-form.is-active {
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .auth-gate-card {
+    transition: transform 0.3s cubic-bezier(0.34, 1.15, 0.64, 1);
+  }
+
+  .auth-gate.is-hidden .auth-gate-card {
+    transform: scale(0.96) translateY(6px);
+  }
+
+  .auth-gate-card {
+    width: 100%;
+    max-width: 360px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.3em;
+    box-shadow: 7px 7px 0px 0px #000;
+    padding: 1.5rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .auth-gate-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .auth-gate-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ff90e8;
+    border: 3px solid #000;
+    border-radius: 50%;
+    box-shadow: 3px 3px 0px 0px #000;
+    color: #121212;
+  }
+
+  .auth-gate-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: #121212;
+  }
+
+  .auth-gate-sub {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: rgba(18, 18, 18, 0.6);
+    line-height: 1.35;
+  }
+
+  .auth-gate-tabs {
+    position: relative;
+    display: flex;
+    gap: 0.5rem;
+    background: #f2f2f2;
+    border: 3px solid #000;
+    border-radius: 0.9rem;
+    padding: 4px;
+  }
+
+  /* Sekmenin altında kayarak ilerleyen siyah gösterge; nav bar'daki
+     .nav-slider ile aynı mantık: konum yerine transform ile taşınır. */
+  .auth-gate-tab-slider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc((100% - 8px - 0.5rem) / 2);
+    height: calc(100% - 8px);
+    background: #121212;
+    border-radius: 0.65rem;
+    transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+    z-index: 0;
+  }
+
+  .auth-gate-tabs[data-active="register"] .auth-gate-tab-slider {
+    transform: translateX(calc(100% + 0.5rem));
+  }
+
+  .auth-gate-tab {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    padding: 0.55rem 0.4rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #121212;
+    background: transparent;
+    border: none;
+    border-radius: 0.65rem;
+    cursor: pointer;
+    transition: color 0.25s ease;
+  }
+
+  .auth-gate-tab.is-active {
+    color: #fff;
+  }
+
+  /* Giriş/Kayıt formları arasında yumuşak, kayan bir geçiş: her iki form
+     da aynı grid hücresini paylaşır (üst üste biner), aktif olan
+     opaklaşıp yerine otururken diğeri solup kenara kayar. Böylece panel
+     değişimi "display: none" ile anide kesilmek yerine animasyonlu olur. */
+  .auth-gate-panels {
+    position: relative;
+    display: grid;
+  }
+
+  .auth-gate-form {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    opacity: 0;
+    transform: translateX(16px);
+    transition: opacity 0.28s ease, transform 0.32s cubic-bezier(0.34, 1.15, 0.64, 1), visibility 0s linear 0.32s;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .auth-gate-form.is-active {
+    opacity: 1;
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.3s ease 0.05s, transform 0.38s cubic-bezier(0.34, 1.15, 0.64, 1) 0.05s;
+  }
+
+  .auth-gate-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: rgba(18, 18, 18, 0.65);
+  }
+
+  .auth-gate-input {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #121212;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.7rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .auth-gate-error {
+    display: none;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: #d61f4a;
+    line-height: 1.35;
+  }
+
+  .auth-gate-error.is-visible {
+    display: block;
+  }
+
+  .auth-gate-info {
+    display: none;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: #1c8a4c;
+    line-height: 1.35;
+  }
+
+  .auth-gate-info.is-visible {
+    display: block;
+  }
+
+  .auth-gate-submit {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #fff;
+    background-color: #121212;
+    border: 3px solid #000;
+    border-radius: 0.9rem;
+    box-shadow: 3px 3px 0px 0px #000;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .auth-gate-submit:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000;
+  }
+
+  .auth-gate-submit:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+
+  .auth-gate-skip {
+    align-self: center;
+    background: transparent;
+    border: none;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: rgba(18, 18, 18, 0.5);
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0.2rem;
+  }
+
+  /* ================= Ayarlar: Hesap ve Eşitleme ================= */
+  .settings-sync-btn {
+    background-color: #121212;
+    color: #fff;
+    flex: 1;
+  }
+
+  .settings-sync-btn:hover {
+    background-color: #121212;
+    opacity: 0.9;
+  }
+
+  .settings-sync-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+    transform: none !important;
+    box-shadow: 3px 3px 0px 0px #000 !important;
+  }
+
+  .settings-row-account {
+    gap: 0.7rem;
+  }
+
+  .settings-sync-dot {
+    flex-shrink: 0;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: #9a9a9a;
+    border: 2px solid #000;
+  }
+
+  .settings-sync-dot.is-ok {
+    background: #38c172;
+  }
+
+  .settings-sync-dot.is-error {
+    background: #ff5c5c;
+  }
+
+  .settings-sync-dot.is-syncing {
+    background: #ffcf44;
+    animation: settingsSyncPulse 0.9s ease-in-out infinite;
+  }
+
+  @keyframes settingsSyncPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  .settings-sync-actions {
+    gap: 0.6rem;
+  }
+
+  body.is-anthracite .auth-gate-card {
+    background-color: var(--dark-card-color, #3b3e42);
+  }
+
+  body.is-anthracite .auth-gate-title,
+  body.is-anthracite .auth-gate-tab {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .auth-gate-sub {
+    color: rgba(242, 242, 244, 0.6);
+  }
+
+  body.is-anthracite .auth-gate-tabs {
+    background: #2a2c2f;
+  }
+
+  body.is-anthracite .auth-gate-input {
+    background-color: #2a2c2f;
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .auth-gate-label {
+    color: rgba(242, 242, 244, 0.6);
+  }
+
+  /* ================= Yedekleme / Eşitleme Bildirimi ================= */
+  /* Giriş/kayıt sonrası veriler buluta gönderilirken ya da buluttan
+     indirilirken kısa süreliğine ekranın üzerinde beliren, kullanıcıyı
+     bilgilendiren küçük kart. */
+  .sync-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+    background: rgba(20, 20, 26, 0.45);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+  }
+
+  .sync-overlay.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.25s ease, visibility 0s linear 0s;
+  }
+
+  .sync-overlay-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.3em;
+    box-shadow: 7px 7px 0px 0px #000;
+    padding: 1.7rem 1.9rem;
+    max-width: 300px;
+    text-align: center;
+    transform: scale(0.96) translateY(6px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.15, 0.64, 1);
+  }
+
+  .sync-overlay.is-visible .sync-overlay-card {
+    transform: scale(1) translateY(0);
+  }
+
+  .sync-overlay-spinner {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 4px solid rgba(0, 0, 0, 0.12);
+    border-top-color: #000;
+    animation: syncOverlaySpin 0.8s linear infinite;
+  }
+
+  @keyframes syncOverlaySpin {
+    to { transform: rotate(360deg); }
+  }
+
+  .sync-overlay-text {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #111;
+    line-height: 1.3;
+  }
+
+  .sync-overlay-sub {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+    font-size: 0.82rem;
+    color: rgba(0, 0, 0, 0.55);
+  }
+
+  body.is-anthracite .sync-overlay-card {
+    background-color: var(--dark-card-color, #3b3e42);
+    border-color: #000;
+  }
+
+  body.is-anthracite .sync-overlay-text {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .sync-overlay-sub {
+    color: rgba(242, 242, 244, 0.6);
+  }
+
+  body.is-anthracite .sync-overlay-spinner {
+    border-color: rgba(242, 242, 244, 0.18);
+    border-top-color: #f2f2f4;
+  }
 </style>
 </head>
 <body oncopy="return false" oncut="return false" onselectstart="return false" ondragstart="return false">
@@ -6952,18 +7260,75 @@
 <div class="theme-layer" id="themeLayerB"></div>
 <div class="pattern-layer" id="patternLayer"></div>
 
-<!-- Açılış senkron perdesi: cihazda daha önce giriş yapılmış bir oturum
-     varsa, uygulama arayüzü çizilmeden önce buluttaki en güncel veri
-     çekilip yerelle birleştirilene kadar bu ekran gösterilir. Böylece
-     kullanıcı hiçbir zaman eski/yerel veriyi görmez; ya güncel bulut
-     verisiyle açılır ya da (oturum yoksa/bağlantı hatasında) hızlıca
-     normal yerel akışa geçilir. -->
-<div class="app-sync-gate" id="appSyncGate">
-  <div class="app-sync-gate-box">
-    <div class="app-sync-gate-spinner"></div>
-    <span class="app-sync-gate-text">Verileriniz senkronize ediliyor…</span>
+<!-- Kayıt / Giriş ekranı: uygulamaya ilk giren biri için, verileri
+     Supabase üzerinden eşitleyebilmesi amacıyla önce bu ekran gösterilir.
+     İçerik BİLEREK boş bırakıldı: <template> içindeki asıl form (parola
+     alanları dahil) yalnızca ekran gerçekten gösterilmesi gerektiğinde
+     JS ile buraya klonlanır. Aksi halde parola input'ları oturum açıkken
+     ya da "Şimdilik geç" denip ekran hiç görünmese bile en baştan DOM'da
+     hazır bulunuyordu; bu da cihazın/tarayıcının, kullanıcı hiç görmese
+     bile açılışta "parolayı doldur" bildirimi/önerisi göstermesine yol
+     açıyordu. -->
+<div class="auth-gate is-hidden" id="authGate"></div>
+
+<!-- Yedekleme/eşitleme bildirimi: giriş ya da kayıt sonrasında veriler
+     buluta gönderilirken/buluttan indirilirken kısaca gösterilir. -->
+<div class="sync-overlay" id="syncOverlay">
+  <div class="sync-overlay-card">
+    <div class="sync-overlay-spinner" aria-hidden="true"></div>
+    <div class="sync-overlay-text">Verileriniz yedekleniyor</div>
+    <div class="sync-overlay-sub">Lütfen bekleyin…</div>
   </div>
 </div>
+
+<template id="authGateTemplate">
+  <div class="auth-gate-card">
+    <div class="auth-gate-header">
+      <span class="auth-gate-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.24-8 5v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1c0-2.76-3.6-5-8-5Z"/></svg>
+      </span>
+      <h1 class="auth-gate-title">Takvimim'e Hoş Geldin</h1>
+      <p class="auth-gate-sub">Verilerini cihazlar arasında eşitlemek için hesap oluştur ya da giriş yap.</p>
+    </div>
+
+    <div class="auth-gate-tabs" id="authGateTabs" data-active="login">
+      <div class="auth-gate-tab-slider" aria-hidden="true"></div>
+      <button type="button" class="auth-gate-tab is-active" data-panel="login">Giriş Yap</button>
+      <button type="button" class="auth-gate-tab" data-panel="register">Kayıt Ol</button>
+    </div>
+
+    <div class="auth-gate-panels" id="authGatePanels">
+      <form class="auth-gate-form is-active" id="authLoginForm" data-panel="login">
+        <label class="auth-gate-label">E-posta
+          <input type="email" class="auth-gate-input" id="authLoginEmail" autocomplete="email" required>
+        </label>
+        <label class="auth-gate-label">Şifre
+          <input type="password" class="auth-gate-input" id="authLoginPassword" autocomplete="current-password" required>
+        </label>
+        <span class="auth-gate-error" id="authLoginError"></span>
+        <button type="submit" class="auth-gate-submit" id="authLoginSubmit">Giriş Yap</button>
+      </form>
+
+      <form class="auth-gate-form" id="authRegisterForm" data-panel="register">
+        <label class="auth-gate-label">E-posta
+          <input type="email" class="auth-gate-input" id="authRegisterEmail" autocomplete="email" required>
+        </label>
+        <label class="auth-gate-label">Şifre
+          <input type="password" class="auth-gate-input" id="authRegisterPassword" autocomplete="new-password" minlength="6" required>
+        </label>
+        <label class="auth-gate-label">Şifre (Tekrar)
+          <input type="password" class="auth-gate-input" id="authRegisterPassword2" autocomplete="new-password" minlength="6" required>
+        </label>
+        <span class="auth-gate-error" id="authRegisterError"></span>
+        <span class="auth-gate-info" id="authRegisterInfo"></span>
+        <button type="submit" class="auth-gate-submit" id="authRegisterSubmit">Kayıt Ol</button>
+      </form>
+    </div>
+
+    <button type="button" class="auth-gate-skip" id="authGateSkipBtn">Şimdilik geç</button>
+  </div>
+</template>
+
 
 <div class="app">
 
@@ -7190,6 +7555,25 @@
       </div>
 
       <div class="settings-section">
+        <span class="settings-section-label">Hesap ve Eşitleme</span>
+        <div class="settings-card">
+          <div class="settings-row settings-row-account">
+            <div class="settings-row-text">
+              <span class="settings-row-title" id="settingsAccountEmail">Giriş yapılmadı</span>
+              <span class="settings-row-desc" id="settingsSyncStatusText">Verilerini eşitlemek için giriş yap</span>
+              <span class="settings-row-desc settings-last-backup" id="settingsLastBackupText"></span>
+            </div>
+            <span class="settings-sync-dot" id="settingsSyncDot" aria-hidden="true"></span>
+          </div>
+          <div class="settings-divider"></div>
+          <div class="settings-row settings-sync-actions">
+            <button type="button" class="settings-danger-btn settings-sync-btn" id="settingsSyncBtn">Verileri Şimdi Eşitle</button>
+            <button type="button" class="settings-danger-btn" id="settingsAuthActionBtn">Giriş Yap</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
         <span class="settings-section-label">Görünüm</span>
         <div class="settings-card">
           <div class="settings-row">
@@ -7278,51 +7662,6 @@
       </div>
 
       <div class="settings-section">
-        <span class="settings-section-label">Bulut Yedekleme</span>
-        <div class="settings-card">
-          <div id="cloudLoggedOutView">
-            <div class="settings-row settings-row-column">
-              <div class="settings-row-text">
-                <span class="settings-row-title">Cihazlar arası senkronizasyon</span>
-                <span class="settings-row-desc">Giriş yap; verilerin buluta yedeklensin ve tüm cihazlarında aynı kalsın.</span>
-              </div>
-              <button type="button" class="settings-cloud-primary-btn" id="cloudOpenLoginBtn">Giriş Yap / Kayıt Ol</button>
-            </div>
-          </div>
-
-          <div id="cloudLoggedInView" style="display:none;">
-            <div class="settings-row">
-              <div class="settings-row-text">
-                <span class="settings-row-title" id="cloudAccountEmail">—</span>
-                <span class="settings-row-desc" id="cloudSyncStatusText">Bağlanıyor…</span>
-              </div>
-              <span class="settings-cloud-dot" id="cloudSyncDot"></span>
-            </div>
-
-            <div class="settings-divider"></div>
-
-            <div class="settings-row">
-              <div class="settings-row-text">
-                <span class="settings-row-title">Şimdi senkronize et</span>
-                <span class="settings-row-desc" id="cloudLastSyncText">Henüz senkronize edilmedi</span>
-              </div>
-              <button type="button" class="settings-cloud-secondary-btn" id="cloudSyncNowBtn">Senkronize Et</button>
-            </div>
-
-            <div class="settings-divider"></div>
-
-            <div class="settings-row">
-              <div class="settings-row-text">
-                <span class="settings-row-title">Çıkış yap</span>
-                <span class="settings-row-desc">Bu cihazda oturum kapanır, veriler cihazda kalır</span>
-              </div>
-              <button type="button" class="settings-danger-btn" id="cloudLogoutBtn">Çıkış</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="settings-section">
         <span class="settings-section-label">Veri</span>
         <div class="settings-card">
           <div class="settings-row">
@@ -7350,21 +7689,6 @@
         <button type="button" class="settings-confirm-cancel" id="settingsConfirmCancel">Vazgeç</button>
         <button type="button" class="settings-confirm-confirm" id="settingsConfirmConfirm">Evet, sıfırla</button>
       </div>
-    </div>
-  </div>
-
-  <!-- Bulut Yedekleme: giriş / kayıt pop-up'ı -->
-  <div class="settings-confirm-backdrop" id="cloudAuthBackdrop">
-    <div class="page8-name-card" id="cloudAuthCard">
-      <span class="page8-name-title" id="cloudAuthTitle">Giriş Yap</span>
-      <input type="email" class="page8-name-field-input" id="cloudAuthEmail" name="calendarim-cloud-email-field" placeholder="E-posta" autocomplete="off" autocapitalize="off" readonly onfocus="this.removeAttribute('readonly')">
-      <input type="password" class="page8-name-field-input" id="cloudAuthPassword" name="calendarim-cloud-password-field" placeholder="Şifre (en az 6 karakter)" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')">
-      <span class="settings-cloud-error" id="cloudAuthError"></span>
-      <div class="settings-confirm-actions">
-        <button type="button" class="settings-confirm-cancel" id="cloudAuthCancel">Vazgeç</button>
-        <button type="button" class="page11-modal-confirm" id="cloudAuthSubmit">Giriş Yap</button>
-      </div>
-      <button type="button" class="settings-cloud-switch-btn" id="cloudAuthSwitchMode">Hesabın yok mu? Kayıt ol</button>
     </div>
   </div>
 
@@ -8332,6 +8656,32 @@
   // kaybolmaz. Bu script, ona ihtiyaç duyan diğer script'lerden (tema,
   // anahtar vb.) önce çalışması için burada, dosyanın başında tanımlanır.
   const APP_STORAGE_KEY = 'takvimim_app_state_v1';
+  // Yerelde yapılıp henüz buluta başarıyla gönderilememiş bir değişiklik
+  // olup olmadığını işaretler. saveAppState her çağrıldığında '1' yapılır,
+  // pushLocalState başarıyla tamamlandığında silinir. Amaç: bir önceki
+  // oturumda gönderim tamamlanmadan uygulama kapatılmışsa, bir sonraki
+  // açılışta buluttaki (eski) veri yereldeki (yeni) veriyi asla ezmesin.
+  const PENDING_SYNC_KEY = 'takvimim_pending_sync_v1';
+
+  // KRİTİK VERİ KAYBI DÜZELTMESİ: Sayfa her açıldığında (kullanıcı henüz
+  // hiçbir şey yapmadan, hatta giriş yapmadan bile ÖNCE) bazı sayfalar
+  // (ör. Rutinler/Takip sayfaları) kendi varsayılan/hesaplanan alanlarını
+  // (ör. "bugünün tarihi") doldurmak için saveAppState'i otomatik olarak
+  // bir kez çağırıyor. Bu, saveAppState'in PENDING_SYNC_KEY'i her sayfa
+  // açılışında '1' yapmasına sebep oluyordu — sanki kullanıcı az önce
+  // gerçek bir değişiklik yapmış gibi. Sonucunda girişte çalışan
+  // pullRemoteState, "yerelde gönderilmemiş değişiklik var" sanıp
+  // buluttan İNDİRMEK yerine yereldekini (silinip yeniden yüklenmişse
+  // boş/varsayılan durumu) buluta GÖNDERİP gerçek yedeği eziyordu.
+  //
+  // Çözüm: Sayfa ilk açılırken (kimlik doğrulama/indirme kararı verilene
+  // kadar) yapılan otomatik/varsayılan saveAppState çağrıları bu bayrağı
+  // KİRLETMESİN. Bayrak, initAuthGate() çağrılmadan hemen önce (yani tüm
+  // sayfaların kendi açılış-zamanı ilk kurulumları bitmiş olarak) true
+  // yapılır. Önceki bir oturumdan kalma GERÇEK bekleyen değişiklik varsa
+  // (PENDING_SYNC_KEY zaten localStorage'da '1' olarak duruyorsa) bu
+  // bayraktan etkilenmez ve korunmaya devam eder.
+  let appReadyForSync = false;
 
   const loadAppState = () => {
     try {
@@ -8347,32 +8697,34 @@
   const APP_STATE = loadAppState();
 
   // Verilen alanları mevcut duruma ekleyip tamamını localStorage'a yazar.
-  //
-  // Bulut senkronizasyonu (aşağıda, dosyanın sonundaki Supabase script'i)
-  // çakışmaları alan bazında ("son yazan kazanır") çözebilmek için her
-  // patch'te değişen üst-seviye anahtarların ne zaman değiştiğini
-  // APP_STATE.__meta.fieldUpdatedAt içinde saklıyoruz. Bu sayede iki cihaz
-  // aynı anda farklı alanları (biri temayı, diğeri görevleri) değiştirmişse
-  // ikisi de korunur; aynı alan iki cihazda da değiştiyse en son
-  // kaydedilen kazanır. __meta alanı uygulamanın geri kalanı tarafından
-  // kullanılmaz, sadece senkron mantığı için bir "muhasebe" katmanıdır.
+  // Ayrıca her üst-seviye anahtarın EN SON NE ZAMAN değiştiğini
+  // APP_STATE.__ts içinde ayrı ayrı işaretler. Bu, çoklu cihaz eşitlemesinde
+  // "hangi bölüm daha yeni?" sorusunu tüm belgeyi tek parça karşılaştırmak
+  // yerine bölüm bölüm (anahtar anahtar) cevaplamayı sağlar; böylece bir
+  // cihazdaki bir değişiklik, başka bir cihazdaki alakasız bir değişiklik
+  // yüzünden asla ezilmez (bkz. mergeAppStates).
   const saveAppState = (patch) => {
     try {
-      const now = Date.now();
-      if (!APP_STATE.__meta || typeof APP_STATE.__meta !== 'object') APP_STATE.__meta = {};
-      if (!APP_STATE.__meta.fieldUpdatedAt || typeof APP_STATE.__meta.fieldUpdatedAt !== 'object') {
-        APP_STATE.__meta.fieldUpdatedAt = {};
-      }
       Object.assign(APP_STATE, patch);
-      Object.keys(patch).forEach((key) => {
-        APP_STATE.__meta.fieldUpdatedAt[key] = now;
-      });
+      if (appReadyForSync) {
+        if (!APP_STATE.__ts || typeof APP_STATE.__ts !== 'object') APP_STATE.__ts = {};
+        const now = Date.now();
+        Object.keys(patch).forEach((k) => { APP_STATE.__ts[k] = now; });
+      }
       localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
-      // Bulut senkron script'i sayfa yüklendikten sonra bu kancayı
-      // tanımlar; henüz tanımlanmadıysa (ör. ilk birkaç milisaniyede) veya
-      // Supabase yapılandırılmadıysa sessizce yok sayılır.
-      if (typeof window.__onLocalStateChanged === 'function') {
-        window.__onLocalStateChanged(Object.keys(patch));
+      // Bu değişiklik henüz buluta ulaşmadı; bir sonraki açılışta buluttan
+      // gelecek (muhtemelen daha eski) veri bu değişikliği ezmesin diye
+      // işaretleniyor. Gönderim başarılı olduğunda pushLocalState bu
+      // işareti temizler. NOT: appReadyForSync henüz false ise (yani hâlâ
+      // sayfanın açılış-zamanı ilk kurulumu sürüyorsa) bu, kullanıcının
+      // gerçek bir eylemi değildir; bayrağı kirletmemek için atlanır.
+      if (appReadyForSync) {
+        try { localStorage.setItem(PENDING_SYNC_KEY, '1'); } catch (err) { /* yok say */ }
+        // Giriş yapılmışsa, her değişiklikten sonra arka planda (gecikmeli)
+        // bulut eşitlemesi tetiklenir. scheduleAutoSync bu script'ten daha
+        // sonra tanımlansa da, gerçek çağrı her zaman sayfa tam yüklendikten
+        // ve kullanıcı bir şey değiştirdikten sonra olur; bu yüzden güvenlidir.
+        if (typeof scheduleAutoSync === 'function') scheduleAutoSync();
       }
     } catch (err) {
       console.warn('Uygulama verisi kaydedilemedi:', err);
@@ -14365,10 +14717,78 @@
 </script>
 
 <script>
-  // ================= Yerel Yedekleme (localStorage + IndexedDB) =================
-  // Bu bölüm; görsellerin kaliteyi bozmadan sıkıştırılmasını ve
-  // görsellerin IndexedDB'de saklanmasını yönetir. Tüm veriler yalnızca
-  // bu cihazda (localStorage ve IndexedDB) tutulur.
+  // ================= Bulut Eşitleme (Supabase) =================
+  // Bu bölüm; e-posta/şifre ile kayıt/giriş akışını, görsellerin kaliteyi
+  // bozmadan sıkıştırılmasını ve APP_STATE içindeki TÜM verilerin
+  // (görevler, soru havuzu, sınav soruları, görseller vb.) Supabase
+  // üzerinden hesaba bağlı olarak eşitlenmesini yönetir.
+  //
+  // ---- KURULUM (zorunlu) ----
+  // 1) https://supabase.com üzerinde bir proje oluşturun.
+  // 2) Project Settings > API bölümünden "Project URL" ve "anon public"
+  //    anahtarını aşağıdaki SUPABASE_URL / SUPABASE_ANON_KEY alanlarına yapıştırın.
+  // 3) SQL Editor'de gerekli tabloyu ve güvenlik kurallarını oluşturun,
+  //    Storage'da "question-images" adında bir bucket açın.
+  //    (Tam SQL ve adımlar ayrı olarak paylaşıldı.)
+  // Bu alanlar doldurulmadan uygulama normal şekilde, eşitleme olmadan
+  // çalışmaya devam eder; kayıt/giriş ekranı otomatik olarak devre dışı kalır.
+  const SUPABASE_URL = 'https://ilkmdfxdwaxfjzytlsgu.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_unJT_r3N_7Z9YfUmSKMnjA_g8_kqJKb';
+  const SYNC_TABLE = 'app_states';
+  const IMAGE_BUCKET = 'question-images';
+  const LAST_SYNC_KEY = 'takvimim_last_sync_v1';
+  const AUTH_SKIP_KEY = 'takvimim_auth_skipped_v1';
+
+  const supabaseConfigured = !SUPABASE_URL.includes('YOUR-PROJECT-REF') && !SUPABASE_ANON_KEY.includes('YOUR-ANON-PUBLIC-KEY');
+  const supabaseClient = (supabaseConfigured && window.supabase)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+  let currentUser = null;
+  let isSyncing = false;
+  let autoSyncTimer = null;
+
+  // ---- VERİ KAYBINI ÖNLEYEN BİRLEŞTİRME (MERGE) ----
+  // İki APP_STATE'i (yerel ve bulut) tek parça olarak KARŞILAŞTIRMAZ;
+  // her üst-seviye bölümü (theme, page9, questionPool, stopwatchLogs vb.)
+  // kendi __ts damgasına göre AYRI AYRI birleştirir. Böylece:
+  //  - Senaryo 1 (yedekten geri yükleme): Uygulama silinip tekrar
+  //    kurulduğunda yerelde hiçbir __ts yoktur; bulutun tüm bölümleri
+  //    (daha yeni oldukları için) olduğu gibi geri gelir.
+  //  - Senaryo 2 (iki cihaz da yeni işlem yapmış): Cihaz A'da değişen
+  //    bölümler cihaz A'nın damgasıyla, cihaz B'de değişen bölümler
+  //    cihaz B'nin damgasıyla korunur; hangi cihaz sonra senkronize
+  //    olursa olsun diğerinin işi kaybolmaz. Yalnızca AYNI bölüm iki
+  //    cihazda da değiştirilmişse en son damgalı olan kazanır (kaçınılmaz
+  //    tek durum budur).
+  const mergeAppStates = (localState, remoteState) => {
+    const local = (localState && typeof localState === 'object') ? localState : {};
+    const remote = (remoteState && typeof remoteState === 'object') ? remoteState : {};
+    const localTs = (local.__ts && typeof local.__ts === 'object') ? local.__ts : {};
+    const remoteTs = (remote.__ts && typeof remote.__ts === 'object') ? remote.__ts : {};
+    const keys = new Set([...Object.keys(local), ...Object.keys(remote)]);
+    keys.delete('__ts');
+    const merged = {};
+    const mergedTs = {};
+    keys.forEach((key) => {
+      const lt = localTs[key] || 0;
+      const rt = remoteTs[key] || 0;
+      const localHas = Object.prototype.hasOwnProperty.call(local, key);
+      const remoteHas = Object.prototype.hasOwnProperty.call(remote, key);
+      if (remoteHas && (rt > lt || !localHas)) {
+        merged[key] = remote[key];
+        mergedTs[key] = rt || lt;
+      } else if (localHas) {
+        merged[key] = local[key];
+        mergedTs[key] = lt || rt;
+      } else {
+        merged[key] = remote[key];
+        mergedTs[key] = rt;
+      }
+    });
+    merged.__ts = mergedTs;
+    return merged;
+  };
 
   // ---- Görsel sıkıştırma ----
   // Uzun kenarı 1600px'i geçen görseller orantılı küçültülür ve JPEG
@@ -14423,9 +14843,10 @@
   // (genelde ~5-10MB) hızla dolar hem de her okuma/yazmada tüm JSON'un
   // string'e çevrilmesi gerekir. Bunun yerine her görsel bir Blob olarak
   // IndexedDB'de saklanır; APP_STATE içinde sadece "idb://<id>" biçiminde
-  // küçük bir referans tutulur. Eski kayıtlarda hâlâ duran ham
-  // "data:image" değerleri de geriye dönük uyumluluk için olduğu gibi
-  // çalışmaya devam eder.
+  // küçük bir referans tutulur. Buluta (Supabase) yüklenip herkese açık
+  // bir URL alan görseller için referans doğrudan o URL olur; eski
+  // kayıtlarda hâlâ duran ham "data:image" değerleri de geriye dönük
+  // uyumluluk için olduğu gibi çalışmaya devam eder.
   const IDB_NAME = 'takvimim_images_v1';
   const IDB_STORE = 'images';
   let idbPromise = null;
@@ -14451,15 +14872,10 @@
 
   // Bir Blob'u IndexedDB'ye rastgele bir kimlikle yazar ve "idb://<id>"
   // referansını döndürür. IndexedDB kullanılamıyorsa null döner.
-  // İkinci parametre (explicitId) verilirse rastgele üretmek yerine o
-  // kimlik kullanılır. Bu, bulut senkronundan inen bir görseli, diğer
-  // cihazdaki referansla (idb://<id>) birebir aynı kimlikle yerel olarak
-  // saklayabilmek için gereklidir; aksi halde APP_STATE içindeki
-  // "idb://<id>" referansları cihazlar arasında birbirini tutmazdı.
-  const idbPutImageBlob = async (blob, explicitId) => {
+  const idbPutImageBlob = async (blob) => {
     const db = await openImageDB();
     if (!db) return null;
-    const id = explicitId || randomFileId();
+    const id = randomFileId();
     try {
       await new Promise((resolve, reject) => {
         const tx = db.transaction(IDB_STORE, 'readwrite');
@@ -14524,7 +14940,7 @@
 
   // "idb://<id>" referansını <img src> için kullanılabilir geçici bir
   // object URL'ye çevirir. Zaten normal bir URL veya ham data:image ise
-  // (eski kayıtlar) olduğu gibi döner.
+  // (eski kayıtlar, Supabase'e yüklenmiş görseller) olduğu gibi döner.
   const resolveImageSrc = async (ref) => {
     if (typeof ref !== 'string' || !ref.startsWith('idb://')) return ref || '';
     if (resolvedImageUrlCache.has(ref)) return resolvedImageUrlCache.get(ref);
@@ -14549,591 +14965,575 @@
     await idbDeleteImage(ref.slice('idb://'.length));
   };
 
-</script>
-
-<!-- Supabase JS SDK (bulut yedekleme için) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
-<script>
-  // ================= Bulut Yedekleme / Çoklu Cihaz Senkronu (Supabase) =================
-  //
-  // NASIL ÇALIŞIR (özet):
-  // - Kullanıcı e-posta/şifre ile giriş yapar. Her kullanıcının Supabase'te
-  //   TEK bir satırı vardır (public.app_backups), içinde tüm APP_STATE
-  //   JSON olarak durur.
-  // - Her saveAppState() çağrısında değişen üst-seviye alanın zaman damgası
-  //   APP_STATE.__meta.fieldUpdatedAt[alan] içine yazılır (bkz. yukarıdaki
-  //   saveAppState tanımı). Buluta yazarken/okurken iki taraf da bu
-  //   zaman damgalarına göre ALAN BAZINDA birleştirilir (mergeStates):
-  //   iki cihaz aynı anda FARKLI alanları değiştirmişse ikisi de korunur;
-  //   AYNI alan iki cihazda da değiştiyse en son kaydedilen kazanır.
-  // - Sunucudaki satırda bir "rev" (revizyon) sayacı vardır. Yazarken
-  //   "WHERE rev = bildiğim_son_rev" şartıyla update yapılır (optimistic
-  //   concurrency / CAS). Başka bir cihaz araya girip rev'i artırmışsa
-  //   update 0 satır etkiler; bu durumda sunucudaki son hâl çekilir,
-  //   yerelle birleştirilir ve otomatik olarak yeniden denenir. Böylece
-  //   veri kaybı yaşanmadan çakışmalar sessizce çözülür.
-  // - Görseller (kamera/galeri) IndexedDB'de "idb://<id>" referanslarıyla
-  //   tutulur; bunlar JSON'a gömülmez, ayrıca Supabase Storage'a
-  //   yüklenir/indirilir; state JSON'unda sadece küçük referans string'i
-  //   kalır.
-  // - Supabase Realtime ile, başka bir cihaz veri değiştirdiğinde açık
-  //   duran uygulama haberdar olur ve verileri günceller.
-  // - Ağ yoksa: her şey zaten localStorage/IndexedDB'ye anında yazıldığı
-  //   için hiçbir şey kaybolmaz; bağlantı gelince otomatik senkronize olur.
-
-  // --- 1) BURAYA kendi Supabase proje bilgilerinizi yapıştırın ---
-  // Supabase panelinde: Project Settings -> API
-  const SUPABASE_URL = 'https://iqodohucawbnrjcgfdrx.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlxb2RvaHVjYXdibnJqY2dmZHJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MDkwNjMsImV4cCI6MjEwNDQ4NTA2M30.cjEVFNZHfWlC4JCY3G8qvAs7iK8fNZMhA3v1GKFKcHA';
-  const IMAGES_BUCKET = 'app-images';
-
-  const cloudConfigured = typeof SUPABASE_URL === 'string'
-    && SUPABASE_URL.startsWith('http')
-    && typeof SUPABASE_ANON_KEY === 'string'
-    && SUPABASE_ANON_KEY.length > 20;
-
-  const sb = (cloudConfigured && window.supabase && window.supabase.createClient)
-    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
-      })
-    : null;
-
-  if (!cloudConfigured) {
-    console.warn('Bulut yedekleme yapılandırılmadı: SUPABASE_URL / SUPABASE_ANON_KEY girilmemiş.');
-  }
-
-  // ---- Yardımcı: hata mesajlarını Türkçeleştir ----
-  const translateAuthError = (msg) => {
-    const m = (msg || '').toLowerCase();
-    if (m.includes('invalid login credentials')) return 'E-posta veya şifre hatalı.';
-    if (m.includes('user already registered')) return 'Bu e-posta ile zaten bir hesap var, giriş yapmayı dene.';
-    if (m.includes('password should be at least')) return 'Şifre en az 6 karakter olmalı.';
-    if (m.includes('email not confirmed')) return 'E-postana gelen bağlantıyla hesabını onaylaman gerekiyor.';
-    if (m.includes('unable to validate email') || m.includes('invalid email')) return 'Geçerli bir e-posta adresi gir.';
-    if (m.includes('failed to fetch') || m.includes('networkerror')) return 'Bağlantı kurulamadı, internetini kontrol et.';
-    return msg || 'Bir hata oluştu, tekrar dene.';
-  };
-
-  // ---- Görsel referanslarını (idb://<id>) derinlemesine tarama ----
-  const collectImageIds = (node, out) => {
+  // APP_STATE ağacını gezip, hâlâ base64 (data:image) olarak duran her
+  // görseli Supabase Storage'a yükler ve yerine herkese açık URL'sini
+  // yazar. Böylece hem localStorage hem de eşitlenen JSON küçük kalır,
+  // görseller ise ayrı olarak (sıkıştırılmış haliyle) saklanır.
+  const uploadPendingImages = async (node, seen) => {
     if (!node || typeof node !== 'object') return;
-    if (Array.isArray(node)) {
-      node.forEach((item) => {
-        if (typeof item === 'string' && item.startsWith('idb://')) out.add(item.slice('idb://'.length));
-        else if (item && typeof item === 'object') collectImageIds(item, out);
-      });
-      return;
-    }
-    Object.keys(node).forEach((key) => {
+    seen = seen || new WeakSet();
+    if (seen.has(node)) return;
+    seen.add(node);
+    const keys = Object.keys(node);
+    for (let i = 0; i < keys.length; i += 1) {
+      const key = keys[i];
       const val = node[key];
-      if (typeof val === 'string' && val.startsWith('idb://')) out.add(val.slice('idb://'.length));
-      else if (val && typeof val === 'object') collectImageIds(val, out);
-    });
-  };
-
-  const SYNCED_IMAGES_KEY = 'takvimim_cloud_synced_images_v1';
-  const getSyncedImageIds = () => {
-    try { return new Set(JSON.parse(localStorage.getItem(SYNCED_IMAGES_KEY) || '[]')); }
-    catch (err) { return new Set(); }
-  };
-  const saveSyncedImageIds = (set) => {
-    try { localStorage.setItem(SYNCED_IMAGES_KEY, JSON.stringify(Array.from(set))); } catch (err) { /* yok say */ }
-  };
-
-  // Yerelde olup henüz buluta yüklenmemiş görselleri Supabase Storage'a
-  // yükler. Aynı görsel tekrar tekrar yüklenmesin diye "yüklendi" kimlik
-  // seti localStorage'da tutulur.
-  const uploadPendingImages = async (userId) => {
-    if (!sb) return;
-    const ids = new Set();
-    collectImageIds(APP_STATE, ids);
-    const synced = getSyncedImageIds();
-    const toUpload = Array.from(ids).filter((id) => !synced.has(id));
-    for (const id of toUpload) {
-      try {
-        const blob = await idbGetImageBlob(id);
-        if (!blob) { synced.add(id); continue; } // yerelde de yoksa atla
-        const path = `${userId}/${id}.jpg`;
-        const { error } = await sb.storage.from(IMAGES_BUCKET).upload(path, blob, {
-          contentType: blob.type || 'image/jpeg',
-          upsert: true
-        });
-        if (!error) synced.add(id);
-        else console.warn('Görsel yüklenemedi:', id, error);
-      } catch (err) {
-        console.warn('Görsel yüklenirken hata:', id, err);
-      }
-    }
-    saveSyncedImageIds(synced);
-  };
-
-  // Verilen state içindeki görsel referanslarından yerelde eksik olanları
-  // Supabase Storage'dan indirip AYNI kimlikle IndexedDB'ye yazar; böylece
-  // "idb://<id>" referansları tüm cihazlarda aynı görseli gösterir.
-  const downloadMissingImages = async (userId, state) => {
-    if (!sb) return;
-    const ids = new Set();
-    collectImageIds(state, ids);
-    const synced = getSyncedImageIds();
-    for (const id of ids) {
-      try {
-        const existing = await idbGetImageBlob(id);
-        if (existing) { synced.add(id); continue; }
-        const path = `${userId}/${id}.jpg`;
-        const { data, error } = await sb.storage.from(IMAGES_BUCKET).download(path);
-        if (!error && data) {
-          await idbPutImageBlob(data, id);
-          synced.add(id);
+      if (typeof val === 'string' && (val.startsWith('data:image') || val.startsWith('idb://'))) {
+        try {
+          // Görsel artık IndexedDB'de bir Blob olarak duruyorsa (yeni
+          // akış) doğrudan oradan okunur; eski kayıtlarda hâlâ ham
+          // base64 kalmışsa (geriye dönük uyumluluk) data URL'den
+          // Blob'a çevrilir.
+          const blob = val.startsWith('idb://')
+            ? await idbGetImageBlob(val.slice('idb://'.length))
+            : await dataUrlToBlob(val);
+          if (!blob) continue;
+          const path = `${currentUser.id}/${randomFileId()}.jpg`;
+          const { error: upErr } = await supabaseClient
+            .storage.from(IMAGE_BUCKET)
+            .upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+          if (!upErr) {
+            const { data: pub } = supabaseClient.storage.from(IMAGE_BUCKET).getPublicUrl(path);
+            if (pub && pub.publicUrl) {
+              // Buluta başarıyla yüklendiği için artık yerel IndexedDB
+              // kopyasına gerek kalmaz; referansı herkese açık URL ile
+              // değiştirip yerel Blob'u temizliyoruz.
+              if (val.startsWith('idb://')) await deleteImageRef(val);
+              node[key] = pub.publicUrl;
+            }
+          } else {
+            console.warn('Görsel yüklenemedi:', upErr);
+          }
+        } catch (err) {
+          console.warn('Görsel yüklenemedi:', err);
         }
-      } catch (err) {
-        console.warn('Görsel indirilirken hata:', id, err);
+      } else if (val && typeof val === 'object') {
+        await uploadPendingImages(val, seen);
       }
     }
-    saveSyncedImageIds(synced);
   };
 
-  // ---- Alan bazlı ("son yazan kazanır") birleştirme ----
-  const mergeStates = (local, remote) => {
-    const merged = {};
-    const localMeta = (local && local.__meta && local.__meta.fieldUpdatedAt) || {};
-    const remoteMeta = (remote && remote.__meta && remote.__meta.fieldUpdatedAt) || {};
-    const keys = new Set([
-      ...Object.keys(local || {}),
-      ...Object.keys(remote || {})
-    ]);
-    keys.delete('__meta');
-    const mergedMeta = {};
-    keys.forEach((key) => {
-      const lt = localMeta[key] || 0;
-      const rt = remoteMeta[key] || 0;
-      if (lt >= rt) {
-        merged[key] = (local || {})[key];
-        mergedMeta[key] = lt;
-      } else {
-        merged[key] = (remote || {})[key];
-        mergedMeta[key] = rt;
-      }
-    });
-    merged.__meta = { fieldUpdatedAt: mergedMeta };
-    return merged;
+  // ---- Ayarlar sayfasındaki eşitleme durumu arayüzü ----
+  const settingsAccountEmail = document.getElementById('settingsAccountEmail');
+  const settingsSyncStatusText = document.getElementById('settingsSyncStatusText');
+  const settingsLastBackupText = document.getElementById('settingsLastBackupText');
+  const settingsSyncDot = document.getElementById('settingsSyncDot');
+  const settingsSyncBtn = document.getElementById('settingsSyncBtn');
+  const settingsAuthActionBtn = document.getElementById('settingsAuthActionBtn');
+
+  const formatRelativeSyncTime = (ts) => {
+    if (!ts) return 'Hiç eşitlenmedi';
+    const diffSec = Math.max(0, Math.floor((Date.now() - Number(ts)) / 1000));
+    if (diffSec < 10) return 'az önce eşitlendi';
+    if (diffSec < 60) return `${diffSec} saniye önce eşitlendi`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin} dakika önce eşitlendi`;
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return `${diffHour} saat önce eşitlendi`;
+    const diffDay = Math.floor(diffHour / 24);
+    return `${diffDay} gün önce eşitlendi`;
   };
 
-  // ---- Revizyon takibi (yerelde bilinen son sunucu revizyonu) ----
-  const CLOUD_REV_KEY = 'takvimim_cloud_rev_v1';
-  const getLocalRev = () => Number(localStorage.getItem(CLOUD_REV_KEY) || '0');
-  const setLocalRev = (rev) => { try { localStorage.setItem(CLOUD_REV_KEY, String(rev)); } catch (err) { /* yok say */ } };
-
-  // ---- UI yardımcıları ----
-  const cloudDotEl = () => document.getElementById('cloudSyncDot');
-  const cloudStatusEl = () => document.getElementById('cloudSyncStatusText');
-  const cloudLastSyncEl = () => document.getElementById('cloudLastSyncText');
-
-  const setSyncStatus = (text, color) => {
-    const dot = cloudDotEl();
-    const label = cloudStatusEl();
-    if (label) label.textContent = text;
-    if (dot) dot.style.backgroundColor = color;
+  // Son başarılı yedeklemenin tam tarih ve saatini ("8 Eyl 2026, 14:32"
+  // gibi) okunaklı biçimde döndürür; hiç yedekleme yoksa boş string
+  // döner ki .settings-last-backup:empty kuralı satırı tamamen gizlesin.
+  const formatAbsoluteSyncTime = (ts) => {
+    if (!ts) return '';
+    try {
+      const date = new Date(Number(ts));
+      if (Number.isNaN(date.getTime())) return '';
+      const formatted = new Intl.DateTimeFormat('tr-TR', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+      return `Son yedekleme: ${formatted}`;
+    } catch (err) {
+      return '';
+    }
   };
 
-  const LAST_SYNC_KEY = 'takvimim_cloud_last_sync_v1';
-  const updateLastSyncText = () => {
-    const el = cloudLastSyncEl();
-    if (!el) return;
-    const t = localStorage.getItem(LAST_SYNC_KEY);
-    if (!t) { el.textContent = 'Henüz senkronize edilmedi'; return; }
-    const d = new Date(Number(t));
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    el.textContent = `Son senkronizasyon: ${hh}:${mm}`;
-  };
-  const markLastSyncNow = () => {
-    try { localStorage.setItem(LAST_SYNC_KEY, String(Date.now())); } catch (err) { /* yok say */ }
-    updateLastSyncText();
-  };
+  const updateSyncStatusUI = (mode) => {
+    if (!settingsAccountEmail) return;
 
-  const showLoggedInUI = (user) => {
-    const out = document.getElementById('cloudLoggedOutView');
-    const inn = document.getElementById('cloudLoggedInView');
-    if (out) out.style.display = 'none';
-    if (inn) inn.style.display = '';
-    const emailEl = document.getElementById('cloudAccountEmail');
-    if (emailEl) emailEl.textContent = (user && user.email) || 'Hesabım';
-    updateLastSyncText();
-  };
-  const showLoggedOutUI = () => {
-    const out = document.getElementById('cloudLoggedOutView');
-    const inn = document.getElementById('cloudLoggedInView');
-    if (out) out.style.display = '';
-    if (inn) inn.style.display = 'none';
-  };
-
-  // ---- Senkron durumu ----
-  let currentUser = null;
-  let syncInFlight = false;
-  let syncQueued = false;
-  let stateDirty = false;
-  let pushDebounceTimer = null;
-  let realtimeChannel = null;
-
-  const pushStateToCloud = async (attempt = 0) => {
-    if (!sb || !currentUser) return;
-    if (syncInFlight) { syncQueued = true; return; }
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-      setSyncStatus('Çevrimdışı — bağlanınca senkronize edilecek', '#f5a623');
+    if (!supabaseConfigured) {
+      settingsAccountEmail.textContent = 'Bulut eşitleme yapılandırılmadı';
+      settingsSyncStatusText.textContent = 'Bu özellik henüz etkin değil';
+      if (settingsLastBackupText) settingsLastBackupText.textContent = '';
+      if (settingsSyncDot) settingsSyncDot.className = 'settings-sync-dot';
+      if (settingsSyncBtn) settingsSyncBtn.disabled = true;
+      if (settingsAuthActionBtn) settingsAuthActionBtn.style.display = 'none';
       return;
     }
-    syncInFlight = true;
-    setSyncStatus('Senkronize ediliyor…', '#f5a623');
-    try {
-      await uploadPendingImages(currentUser.id);
 
-      const localRev = getLocalRev();
-      const payload = JSON.parse(JSON.stringify(APP_STATE));
-      let data = null;
-      let error = null;
-
-      if (localRev === 0) {
-        // Bu cihazda hiç senkron yapılmamış: satır zaten var mı bak
-        // (başka bir cihazda daha önce oluşturulmuş olabilir).
-        const existingRes = await sb.from('app_backups').select('*').eq('user_id', currentUser.id).maybeSingle();
-        if (existingRes.error) throw existingRes.error;
-        if (existingRes.data) {
-          const merged = mergeStates(APP_STATE, existingRes.data.state);
-          Object.assign(APP_STATE, merged);
-          localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
-          await downloadMissingImages(currentUser.id, merged);
-          const upd = await sb.from('app_backups')
-            .update({ state: merged, rev: existingRes.data.rev + 1, updated_at: new Date().toISOString() })
-            .eq('user_id', currentUser.id)
-            .eq('rev', existingRes.data.rev)
-            .select()
-            .maybeSingle();
-          data = upd.data; error = upd.error;
-        } else {
-          const ins = await sb.from('app_backups')
-            .insert({ user_id: currentUser.id, state: payload, rev: 1 })
-            .select()
-            .maybeSingle();
-          data = ins.data; error = ins.error;
-        }
-      } else {
-        const upd = await sb.from('app_backups')
-          .update({ state: payload, rev: localRev + 1, updated_at: new Date().toISOString() })
-          .eq('user_id', currentUser.id)
-          .eq('rev', localRev)
-          .select()
-          .maybeSingle();
-        data = upd.data; error = upd.error;
+    if (!currentUser) {
+      settingsAccountEmail.textContent = 'Giriş yapılmadı';
+      settingsSyncStatusText.textContent = 'Verilerini eşitlemek için giriş yap';
+      if (settingsLastBackupText) settingsLastBackupText.textContent = '';
+      if (settingsSyncDot) settingsSyncDot.className = 'settings-sync-dot';
+      if (settingsSyncBtn) settingsSyncBtn.disabled = true;
+      if (settingsAuthActionBtn) {
+        settingsAuthActionBtn.style.display = '';
+        settingsAuthActionBtn.textContent = 'Giriş Yap';
       }
+      return;
+    }
 
+    settingsAccountEmail.textContent = currentUser.email || 'Hesabım';
+    if (settingsSyncBtn) settingsSyncBtn.disabled = isSyncing;
+    if (settingsAuthActionBtn) {
+      settingsAuthActionBtn.style.display = '';
+      settingsAuthActionBtn.textContent = 'Çıkış Yap';
+    }
+
+    const dotClass = { syncing: 'is-syncing', success: 'is-ok', error: 'is-error' }[mode] || '';
+    if (settingsSyncDot) settingsSyncDot.className = `settings-sync-dot ${dotClass}`.trim();
+
+    // Son yedekleme tarihi/saati; şu anki durum (eşitleniyor/hata/boşta)
+    // ne olursa olsun her zaman ayrı bir satırda gösterilir.
+    if (settingsLastBackupText) {
+      const lastSync = localStorage.getItem(LAST_SYNC_KEY);
+      settingsLastBackupText.textContent = formatAbsoluteSyncTime(lastSync);
+    }
+
+    if (mode === 'syncing') {
+      settingsSyncStatusText.textContent = 'Eşitleniyor…';
+    } else if (mode === 'error') {
+      settingsSyncStatusText.textContent = 'Eşitleme başarısız, tekrar deneyin';
+    } else {
+      const lastSync = localStorage.getItem(LAST_SYNC_KEY);
+      settingsSyncStatusText.textContent = formatRelativeSyncTime(lastSync);
+    }
+  };
+
+  // ---- Eşitleme: yerelden buluta gönder ----
+  // Körlemesine üzerine yazmaz: önce buluttaki son hali okur, yerelle
+  // ANAHTAR BAZLI birleştirir (mergeAppStates), sonucu hem yerele hem
+  // buluta yazar. Böylece push sırasında başka bir cihazın az önce attığı
+  // (bu cihazın henüz görmediği) değişiklikler asla kaybolmaz.
+  const pushLocalState = async ({ silent } = {}) => {
+    if (!supabaseClient || !currentUser || isSyncing) return { ok: false };
+    isSyncing = true;
+    updateSyncStatusUI('syncing');
+    try {
+      const { data: existing, error: fetchErr } = await supabaseClient
+        .from(SYNC_TABLE)
+        .select('state, updated_at')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+      if (fetchErr) throw fetchErr;
+
+      const merged = mergeAppStates(APP_STATE, existing && existing.state);
+      Object.keys(APP_STATE).forEach((k) => delete APP_STATE[k]);
+      Object.assign(APP_STATE, merged);
+
+      await uploadPendingImages(APP_STATE);
+      localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
+      const { error } = await supabaseClient
+        .from(SYNC_TABLE)
+        .upsert({ user_id: currentUser.id, state: APP_STATE, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+      if (error) throw error;
+      localStorage.setItem(LAST_SYNC_KEY, String(Date.now()));
+      try { localStorage.removeItem(PENDING_SYNC_KEY); } catch (err) { /* yok say */ }
+      isSyncing = false;
+      updateSyncStatusUI('success');
+      return { ok: true };
+    } catch (err) {
+      console.warn('Eşitleme (gönderme) başarısız:', err);
+      isSyncing = false;
+      updateSyncStatusUI('error');
+      return { ok: false, error: err };
+    }
+  };
+
+  // ---- Eşitleme: buluttan yerele indir (girişte kullanılır) ----
+  // Buluttaki veriyi asla körlemesine yerelin üzerine yazmaz ve yereldeki
+  // veriyi de asla körlemesine buluta yazmaz: iki taraf ANAHTAR BAZLI
+  // (mergeAppStates ile) birleştirilir, sonuç hem yerele hem buluta
+  // kaydedilir. Bu; "yedeği geri yükle" (yerelde hiçbir __ts yok, bulut
+  // aynen gelir) ve "başka cihazda yeni işlem yaptım" (her cihazın kendi
+  // değiştirdiği bölüm korunur) senaryolarının ikisini de kapsar.
+  const pullRemoteState = async ({ reloadOnData } = {}) => {
+    if (!supabaseClient || !currentUser || isSyncing) return { ok: false };
+
+    isSyncing = true;
+    updateSyncStatusUI('syncing');
+    try {
+      const { data, error } = await supabaseClient
+        .from(SYNC_TABLE)
+        .select('state, updated_at')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
       if (error) throw error;
 
-      if (!data) {
-        // rev uyuşmadı: aradan başka bir cihaz yazmış. Sunucudaki son
-        // hâli çekip yerelle birleştir, sonra otomatik yeniden dene.
-        if (attempt >= 4) throw new Error('Senkronizasyon çakışması çözülemedi, daha sonra tekrar denenecek.');
-        const fresh = await sb.from('app_backups').select('*').eq('user_id', currentUser.id).maybeSingle();
-        if (fresh.error || !fresh.data) throw (fresh.error || new Error('Sunucu verisi okunamadı.'));
-        const merged = mergeStates(APP_STATE, fresh.data.state);
+      if (data && data.state && Object.keys(data.state).length) {
+        const merged = mergeAppStates(APP_STATE, data.state);
+        Object.keys(APP_STATE).forEach((k) => delete APP_STATE[k]);
         Object.assign(APP_STATE, merged);
         localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
-        setLocalRev(fresh.data.rev);
-        await downloadMissingImages(currentUser.id, merged);
-        syncInFlight = false;
-        return pushStateToCloud(attempt + 1);
-      }
+        localStorage.setItem(LAST_SYNC_KEY, String(Date.now()));
+        try { localStorage.removeItem(PENDING_SYNC_KEY); } catch (err) { /* yok say */ }
 
-      setLocalRev(data.rev);
-      stateDirty = false;
-      markLastSyncNow();
-      setSyncStatus('Senkronize edildi', '#3fbf60');
-    } catch (err) {
-      console.warn('Buluta yedekleme başarısız:', err);
-      setSyncStatus('Senkronizasyon hatası — otomatik tekrar denenecek', '#ff5c5c');
-    } finally {
-      syncInFlight = false;
-      if (syncQueued) {
-        syncQueued = false;
-        pushStateToCloud();
-      }
-    }
-  };
+        // Birleştirilmiş sonucu buluta da geri yaz ki, bu cihazda var olup
+        // buluta henüz ulaşmamış bölümler kaybolmasın (ör. bulutta hiç
+        // olmayan yerel bir bölüm, bu adımdan sonra da buluta işlenir).
+        isSyncing = false;
+        await pushLocalState({ silent: true });
 
-  const queuePush = () => {
-    clearTimeout(pushDebounceTimer);
-    pushDebounceTimer = setTimeout(() => pushStateToCloud(), 1200);
-  };
-
-  // Sunucudaki son durumu çekip yerelle birleştirir. Gerçek bir değişiklik
-  // varsa (başka cihazdan gelen veri), tüm sayfaların yeni veriyle doğru
-  // şekilde yeniden çizilmesini garanti etmek için uygulamayı bir kez
-  // yeniden yükler (mevcut normal açılış akışı zaten APP_STATE'ten doğru
-  // şekilde render ediyor). Değişiklik yoksa sessizce devam eder.
-  const pullAndMerge = async ({ reloadOnChange = true, silent = false } = {}) => {
-    if (!sb || !currentUser) return;
-    try {
-      setSyncStatus('Sunucudan alınıyor…', '#f5a623');
-      const res = await sb.from('app_backups').select('*').eq('user_id', currentUser.id).maybeSingle();
-      if (res.error) throw res.error;
-      if (!res.data) { await pushStateToCloud(); return; }
-
-      const before = JSON.stringify(APP_STATE);
-      const merged = mergeStates(APP_STATE, res.data.state);
-      const after = JSON.stringify(merged);
-
-      Object.assign(APP_STATE, merged);
-      localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(APP_STATE));
-      setLocalRev(res.data.rev);
-      await downloadMissingImages(currentUser.id, merged);
-
-      if (before !== after) {
-        setSyncStatus('Güncellemeler alındı', '#3fbf60');
-        markLastSyncNow();
-        if (reloadOnChange && !silent && typeof showPage8Toast === 'function') {
-          showPage8Toast('Diğer cihazdan veriler alındı, yenileniyor…');
-        }
-        if (reloadOnChange) {
-          // Perde kapalıyken (silent) kullanıcı hiçbir şey görmediği için
-          // beklemeden hemen yenile; perde açıkken (ör. gerçek zamanlı
-          // güncelleme) kısa bir gecikmeyle, toast okunsun diye.
-          setTimeout(() => { try { location.reload(); } catch (err) { /* yok say */ } }, silent ? 0 : 1200);
-        }
+        updateSyncStatusUI('success');
+        // Uygulamanın pek çok bölümü kendi durumunu APP_STATE'ten yalnızca
+        // sayfa yüklenirken bir kez okuyor; indirilen veri her yerde anında
+        // yansısın diye sayfa tazelenir.
+        // Yeniden yüklemeden hemen önce kısa bir gecikme: hideAuthGate()'te
+        // tetiklenen odak kaldırma (blur/body.focus) ve klavye kapanma
+        // animasyonunun tarayıcıda gerçekten tamamlanması için bir an
+        // tanınıyor; aksi halde reload bu animasyonun ortasına denk gelip
+        // klavye araç çubuğunun yeni sayfada asılı kalmasına yol açabiliyor.
+        if (reloadOnData) { setTimeout(() => location.reload(), 120); return { ok: true }; }
       } else {
-        // Yereldeki değişiklikleri de gönder ki iki taraf da eşit kalsın.
-        await pushStateToCloud();
+        // Bu hesap için buluta hiç veri yazılmamış: mevcut yerel veriyi
+        // (varsa) olduğu gibi buluta gönder.
+        isSyncing = false;
+        updateSyncStatusUI('success');
+        await pushLocalState({ silent: true });
       }
+      return { ok: true };
     } catch (err) {
-      console.warn('Bulut verisi alınamadı:', err);
-      setSyncStatus('Bağlantı hatası — tekrar denenecek', '#ff5c5c');
+      console.warn('Eşitleme (indirme) başarısız:', err);
+      isSyncing = false;
+      updateSyncStatusUI('error');
+      return { ok: false, error: err };
     }
   };
 
-  const subscribeRealtime = () => {
-    if (!sb || !currentUser || realtimeChannel) return;
-    try {
-      realtimeChannel = sb
-        .channel('app_backups_' + currentUser.id)
-        .on('postgres_changes', {
-          event: 'UPDATE', schema: 'public', table: 'app_backups', filter: `user_id=eq.${currentUser.id}`
-        }, (payload) => {
-          if (payload && payload.new && payload.new.rev > getLocalRev() && !syncInFlight) {
-            pullAndMerge();
+  const scheduleAutoSync = () => {
+    if (!supabaseClient || !currentUser) return;
+    clearTimeout(autoSyncTimer);
+    autoSyncTimer = setTimeout(() => { pushLocalState({ silent: true }); }, 2500);
+  };
+
+  // Güvenlik ağı: kullanıcı bir ayarı değiştirip (ör. arka plan rengi)
+  // 2.5 saniyelik gecikme dolmadan sekmeyi arka plana alır veya uygulamayı
+  // kapatırsa, bekleyen bulut eşitlemesi hiç gönderilmeden kaybolabilir.
+  // Bu yüzden sayfa gizlenirken/kapanırken bekleyen zamanlayıcı varsa iptal
+  // edilip eşitleme hemen (beklemeden) tetiklenir.
+  const flushPendingAutoSync = () => {
+    if (!supabaseClient || !currentUser || !autoSyncTimer) return;
+    clearTimeout(autoSyncTimer);
+    autoSyncTimer = null;
+    pushLocalState({ silent: true });
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushPendingAutoSync();
+  });
+  window.addEventListener('pagehide', flushPendingAutoSync);
+
+  if (settingsSyncBtn) {
+    settingsSyncBtn.addEventListener('click', () => pushLocalState());
+  }
+
+  // ================= Kayıt / Giriş ekranı (Auth Gate) =================
+  // Not: Parola alanlarının, ekran gerçekten gösterilmeden cihaz/tarayıcı
+  // tarafından "otomatik doldur" bildirimini tetiklememesi için asıl form
+  // <template id="authGateTemplate"> içinde tutulur ve #authGate boş
+  // kapsayıcısına yalnızca showAuthGate() ilk kez çağrıldığında (yani
+  // ekran fiilen gösterilecekse) klonlanır.
+  const syncOverlay = document.getElementById('syncOverlay');
+  const showSyncOverlay = () => {
+    if (syncOverlay) syncOverlay.classList.add('is-visible');
+  };
+  const hideSyncOverlay = () => {
+    if (syncOverlay) syncOverlay.classList.remove('is-visible');
+  };
+
+  const authGate = document.getElementById('authGate');
+  const authGateTemplate = document.getElementById('authGateTemplate');
+
+  let authGateTabs = null;
+  let authLoginForm = null;
+  let authRegisterForm = null;
+  let authGateSkipBtn = null;
+  let authLoginError = null;
+  let authRegisterError = null;
+  let authRegisterInfo = null;
+  let authLoginSubmit = null;
+  let authRegisterSubmit = null;
+  let authGateReady = false;
+
+  const authErrorMessage = (err) => {
+    const msg = (err && err.message) || '';
+    if (/invalid login credentials/i.test(msg)) return 'E-posta veya şifre hatalı.';
+    if (/already registered/i.test(msg)) return 'Bu e-posta ile zaten bir hesap var.';
+    if (/password/i.test(msg) && /6/.test(msg)) return 'Şifre en az 6 karakter olmalı.';
+    return msg || 'Bir şeyler ters gitti, tekrar dene.';
+  };
+
+  const setAuthPanel = (panel) => {
+    if (!authGateTabs) return;
+    const prevPanel = authGateTabs.dataset.active || 'login';
+    authGateTabs.dataset.active = panel;
+    authGateTabs.querySelectorAll('.auth-gate-tab').forEach((tab) => {
+      tab.classList.toggle('is-active', tab.dataset.panel === panel);
+    });
+
+    // Giriş <-> Kayıt formları arasında yönlü (soldan/sağdan) kayan
+    // geçiş: hangi yöne gidildiğine göre çıkan form ters yöne kayıp
+    // solarken, giren form karşı yönden gelip yerine oturur.
+    if (authLoginForm && authRegisterForm && panel !== prevPanel) {
+      const dir = panel === 'register' ? 1 : -1; // 1: sağa doğru ilerleme, -1: geri dönüş
+      const outgoing = prevPanel === 'login' ? authLoginForm : authRegisterForm;
+      const incoming = panel === 'login' ? authLoginForm : authRegisterForm;
+
+      outgoing.classList.remove('is-active');
+      outgoing.style.transform = `translateX(${-dir * 16}px)`;
+
+      incoming.style.transition = 'none';
+      incoming.style.transform = `translateX(${dir * 16}px)`;
+      // Yeni konumu boyamadan (reflow) önce uygula ki geçiş oradan başlasın.
+      void incoming.offsetWidth;
+      incoming.style.transition = '';
+      incoming.classList.add('is-active');
+      incoming.style.transform = '';
+    } else {
+      if (authLoginForm) authLoginForm.classList.toggle('is-active', panel === 'login');
+      if (authRegisterForm) authRegisterForm.classList.toggle('is-active', panel === 'register');
+    }
+
+    if (authLoginError) authLoginError.classList.remove('is-visible');
+    if (authRegisterError) authRegisterError.classList.remove('is-visible');
+    if (authRegisterInfo) authRegisterInfo.classList.remove('is-visible');
+  };
+
+  // Template içeriğini gerçek DOM'a klonlar ve olay dinleyicilerini bağlar.
+  // Yalnızca ekran fiilen gösterilmesi gerektiğinde bir kez çalışır.
+  const ensureAuthGateContent = () => {
+    if (authGateReady || !authGate || !authGateTemplate) return;
+    authGate.appendChild(authGateTemplate.content.cloneNode(true));
+    authGateReady = true;
+
+    authGateTabs = document.getElementById('authGateTabs');
+    authLoginForm = document.getElementById('authLoginForm');
+    authRegisterForm = document.getElementById('authRegisterForm');
+    authGateSkipBtn = document.getElementById('authGateSkipBtn');
+    authLoginError = document.getElementById('authLoginError');
+    authRegisterError = document.getElementById('authRegisterError');
+    authRegisterInfo = document.getElementById('authRegisterInfo');
+    authLoginSubmit = document.getElementById('authLoginSubmit');
+    authRegisterSubmit = document.getElementById('authRegisterSubmit');
+
+    if (authGateTabs) {
+      authGateTabs.querySelectorAll('.auth-gate-tab').forEach((tab) => {
+        tab.addEventListener('click', () => setAuthPanel(tab.dataset.panel));
+      });
+    }
+
+    if (authGateSkipBtn) {
+      authGateSkipBtn.addEventListener('click', () => {
+        try { localStorage.setItem(AUTH_SKIP_KEY, '1'); } catch (err) { /* yok say */ }
+        hideAuthGate();
+      });
+    }
+
+    if (authLoginForm) {
+      authLoginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!supabaseClient) return;
+        const email = document.getElementById('authLoginEmail').value.trim();
+        const password = document.getElementById('authLoginPassword').value;
+        if (authLoginError) authLoginError.classList.remove('is-visible');
+        authLoginSubmit.disabled = true;
+        authLoginSubmit.textContent = 'Giriş yapılıyor…';
+        try {
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          currentUser = data.user;
+          try { localStorage.removeItem(AUTH_SKIP_KEY); } catch (err) { /* yok say */ }
+          hideAuthGate();
+          updateSyncStatusUI();
+          showSyncOverlay();
+          await pullRemoteState({ reloadOnData: true });
+          hideSyncOverlay();
+        } catch (err) {
+          hideSyncOverlay();
+          if (authLoginError) {
+            authLoginError.textContent = authErrorMessage(err);
+            authLoginError.classList.add('is-visible');
           }
-        })
-        .subscribe();
-    } catch (err) {
-      console.warn('Realtime aboneliği başlatılamadı:', err);
+        } finally {
+          authLoginSubmit.disabled = false;
+          authLoginSubmit.textContent = 'Giriş Yap';
+        }
+      });
+    }
+
+    if (authRegisterForm) {
+      authRegisterForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!supabaseClient) return;
+        const email = document.getElementById('authRegisterEmail').value.trim();
+        const password = document.getElementById('authRegisterPassword').value;
+        const password2 = document.getElementById('authRegisterPassword2').value;
+        if (authRegisterError) authRegisterError.classList.remove('is-visible');
+        if (authRegisterInfo) authRegisterInfo.classList.remove('is-visible');
+
+        if (password !== password2) {
+          authRegisterError.textContent = 'Şifreler eşleşmiyor.';
+          authRegisterError.classList.add('is-visible');
+          return;
+        }
+        if (password.length < 6) {
+          authRegisterError.textContent = 'Şifre en az 6 karakter olmalı.';
+          authRegisterError.classList.add('is-visible');
+          return;
+        }
+
+        authRegisterSubmit.disabled = true;
+        authRegisterSubmit.textContent = 'Kayıt olunuyor…';
+        try {
+          const { data, error } = await supabaseClient.auth.signUp({ email, password });
+          if (error) throw error;
+          try { localStorage.removeItem(AUTH_SKIP_KEY); } catch (err) { /* yok say */ }
+          if (data.session) {
+            // E-posta doğrulaması kapalı bir projede oturum hemen açılır.
+            currentUser = data.user;
+            hideAuthGate();
+            updateSyncStatusUI();
+            showSyncOverlay();
+            await pushLocalState();
+            hideSyncOverlay();
+          } else {
+            authRegisterInfo.textContent = 'Kayıt başarılı! Devam etmek için e-postana gelen bağlantıyı onayla, ardından giriş yap.';
+            authRegisterInfo.classList.add('is-visible');
+            setAuthPanel('login');
+          }
+        } catch (err) {
+          hideSyncOverlay();
+          authRegisterError.textContent = authErrorMessage(err);
+          authRegisterError.classList.add('is-visible');
+        } finally {
+          authRegisterSubmit.disabled = false;
+          authRegisterSubmit.textContent = 'Kayıt Ol';
+        }
+      });
     }
   };
-  const unsubscribeRealtime = () => {
-    if (sb && realtimeChannel) {
-      try { sb.removeChannel(realtimeChannel); } catch (err) { /* yok say */ }
+
+  const showAuthGate = () => {
+    if (!authGate) return;
+    ensureAuthGateContent();
+    authGate.classList.remove('is-hidden');
+  };
+  const hideAuthGate = () => {
+    if (!authGate) return;
+    // KRİTİK: Giriş/kayıt formundaki e-posta veya şifre alanı hâlâ odaklıyken
+    // (kullanıcı "Giriş Yap"a bastığında input'tan çıkmamış olabilir) kapıyı
+    // sadece CSS ile (opacity/visibility) gizlemek input'un odağını
+    // kaldırmıyor. Sonuç: input artık görünmez olsa da klavye ve üzerindeki
+    // "◂▾ ... Bitti" araç çubuğu ekranda asılı kalmaya devam ediyor ve
+    // kullanıcı asıl sayfaya dokunduğunda bile bir süre daha görünüyor.
+    // Bu durum girişten sonra sayfa yeniden yüklendiğinde (location.reload)
+    // daha da belirginleşiyor: iOS bazen odaklı input'u "hatırlayıp"
+    // yeniden yüklenen sayfada da klavyeyi/araç çubuğunu göstermeye devam
+    // ediyor. Sadece blur() her zaman yetmediği için, odağı bilinçli olarak
+    // nötr bir öğeye (document.body) taşıyoruz; bu klavyeyi daha kesin
+    // şekilde kapatır.
+    const active = document.activeElement;
+    if (active && authGate.contains(active) && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
+      active.blur();
+      const hadTabIndex = document.body.hasAttribute('tabindex');
+      if (!hadTabIndex) document.body.setAttribute('tabindex', '-1');
+      document.body.focus();
+      if (!hadTabIndex) document.body.removeAttribute('tabindex');
     }
-    realtimeChannel = null;
+    authGate.classList.add('is-hidden');
   };
 
-  // saveAppState() her çağrıldığında (dosyanın başındaki tanım) burası
-  // tetiklenir; oturum açıksa değişiklik kuyruğa alınıp kısa bir
-  // gecikmeyle (debounce) buluta gönderilir.
-  window.__onLocalStateChanged = () => {
-    stateDirty = true;
-    if (currentUser) queuePush();
-  };
+  if (settingsAuthActionBtn) {
+    settingsAuthActionBtn.addEventListener('click', async () => {
+      if (currentUser) {
+        // KRİTİK VERİ KAYBI DÜZELTMESİ: Çıkış yapmadan önce bekleyen (henüz
+        // buluta gönderilmemiş) değişiklikleri MUTLAKA gönder. Eskiden
+        // signOut() çağrılır çağrılmaz currentUser hemen null yapılıyordu;
+        // eğer son 2.5 saniye içinde bir değişiklik yapılmışsa autosync
+        // zamanlayıcısı hâlâ bekliyor olabiliyordu ve zamanlayıcı sonunda
+        // ateşlendiğinde pushLocalState, currentUser artık null olduğu
+        // için sessizce hiçbir şey yapmadan çıkıyordu. Sonuç: o son
+        // değişiklikler asla buluta ulaşmıyordu ve bir sonraki girişte
+        // (özellikle cihaz değiştiyse veya yerel veri temizlendiyse)
+        // kullanıcı buluttaki eski/eksik veriyle karşılaşıyordu.
+        clearTimeout(autoSyncTimer);
+        autoSyncTimer = null;
 
-  // ---- Açılış senkron perdesi ----
-  // Oturum açık bir kullanıcı varsa, arayüz kullanıcıya gösterilmeden önce
-  // buluttaki en güncel veri çekilip yerelle birleştirilir; böylece hiçbir
-  // zaman eski/yerel veri "yanıp sönerek" görünmez. Bağlantı yoksa veya
-  // sunucudan makul bir sürede yanıt gelmezse (ör. 6 sn), kullanıcıyı
-  // sonsuza dek bekletmemek için mevcut yerel veriyle devam edilir.
-  const appSyncGate = document.getElementById('appSyncGate');
-  let syncGateClosed = false;
-  const closeSyncGate = () => {
-    if (syncGateClosed) return;
-    syncGateClosed = true;
-    if (appSyncGate) appSyncGate.classList.add('is-hidden');
-  };
-  // Supabase yapılandırılmamışsa (sb yok) veya bir şeyler ters giderse
-  // perdeyi açık bırakıp kullanıcıyı kilitlememek için güvenlik ağı.
-  setTimeout(closeSyncGate, 6000);
-  if (!sb) closeSyncGate();
+        const originalLabel = settingsAuthActionBtn.textContent;
+        settingsAuthActionBtn.disabled = true;
+        settingsAuthActionBtn.textContent = 'Kaydediliyor…';
 
-  // ---- Kimlik doğrulama akışı ----
-  const initAuthState = async () => {
-    if (!sb) return;
-    try {
-      const { data } = await sb.auth.getSession();
-      if (data && data.session && data.session.user) {
-        currentUser = data.session.user;
-        showLoggedInUI(currentUser);
-        subscribeRealtime();
-        // Perde hâlâ kapalı (kullanıcı hiçbir şey görmüyor), o yüzden
-        // burada "reloadOnChange: true" ile çağırıyoruz: bulut verisi
-        // yerelden farklıysa sayfa sessizce bir kez yenilenir ve
-        // kullanıcı doğrudan güncel veriyle karşılaşır. Perdeyi ancak
-        // bu işlem tamamlandıktan sonra kapatıyoruz ki reload olacaksa
-        // kullanıcı flash görmesin.
-        await pullAndMerge({ reloadOnChange: true, silent: true });
+        const result = await pushLocalState();
+
+        if (!result.ok) {
+          settingsAuthActionBtn.disabled = false;
+          settingsAuthActionBtn.textContent = originalLabel;
+          const proceedAnyway = window.confirm(
+            'Son değişikliklerin buluta gönderilemedi (bağlantı sorunu olabilir).\n\n' +
+            'Yine de çıkış yaparsan bu cihazdaki senkronize olmamış veriler kaybolabilir.\n\n' +
+            'Yine de çıkış yapmak istiyor musun?'
+          );
+          if (!proceedAnyway) return;
+        }
+
+        try { await supabaseClient.auth.signOut(); } catch (err) { /* yok say */ }
+        currentUser = null;
+        settingsAuthActionBtn.disabled = false;
+        updateSyncStatusUI();
       } else {
-        showLoggedOutUI();
+        showAuthGate();
+        setAuthPanel('login');
       }
-    } catch (err) {
-      console.warn('Oturum bilgisi alınamadı:', err);
-    } finally {
-      closeSyncGate();
-    }
+    });
+  }
 
-    sb.auth.onAuthStateChange((event, session) => {
+  // ---- Açılışta oturum kontrolü ----
+  const initAuthGate = async () => {
+    if (!supabaseClient) {
+      updateSyncStatusUI();
+      return;
+    }
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      const session = data && data.session;
       if (session && session.user) {
         currentUser = session.user;
-        showLoggedInUI(currentUser);
-        subscribeRealtime();
-        if (event === 'SIGNED_IN') pullAndMerge();
+        hideAuthGate();
+        updateSyncStatusUI();
+        await pullRemoteState({ reloadOnData: false });
       } else {
-        currentUser = null;
-        unsubscribeRealtime();
-        showLoggedOutUI();
+        let skipped = false;
+        try { skipped = localStorage.getItem(AUTH_SKIP_KEY) === '1'; } catch (err) { /* yok say */ }
+        if (!skipped) showAuthGate();
+        updateSyncStatusUI();
       }
-    });
-  };
-
-  if (sb) initAuthState();
-
-  window.addEventListener('online', () => {
-    if (currentUser) pushStateToCloud();
-  });
-
-  // Bağlı ve bekleyen değişiklik varsa periyodik "güvenlik ağı" senkronu.
-  setInterval(() => {
-    if (currentUser && stateDirty && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
-      pushStateToCloud();
+    } catch (err) {
+      console.warn('Oturum kontrolü başarısız:', err);
+      updateSyncStatusUI();
     }
-  }, 45000);
 
-  // ---- Ayarlar sayfası: giriş/kayıt modalı ----
-  const cloudAuthBackdrop = document.getElementById('cloudAuthBackdrop');
-  const cloudAuthEmail = document.getElementById('cloudAuthEmail');
-  const cloudAuthPassword = document.getElementById('cloudAuthPassword');
-  const cloudAuthError = document.getElementById('cloudAuthError');
-  const cloudAuthTitle = document.getElementById('cloudAuthTitle');
-  const cloudAuthSubmit = document.getElementById('cloudAuthSubmit');
-  const cloudAuthSwitchMode = document.getElementById('cloudAuthSwitchMode');
-  const cloudAuthCancel = document.getElementById('cloudAuthCancel');
-  const cloudOpenLoginBtn = document.getElementById('cloudOpenLoginBtn');
-  const cloudLogoutBtn = document.getElementById('cloudLogoutBtn');
-  const cloudSyncNowBtn = document.getElementById('cloudSyncNowBtn');
-
-  let authMode = 'login';
-
-  const setAuthModeUI = () => {
-    if (!cloudAuthTitle) return;
-    cloudAuthTitle.textContent = authMode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
-    cloudAuthSubmit.textContent = authMode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
-    cloudAuthSwitchMode.textContent = authMode === 'login'
-      ? 'Hesabın yok mu? Kayıt ol'
-      : 'Zaten hesabın var mı? Giriş yap';
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      currentUser = session && session.user ? session.user : null;
+      updateSyncStatusUI();
+    });
   };
 
-  const openAuthModal = () => {
-    authMode = 'login';
-    setAuthModeUI();
-    if (cloudAuthError) cloudAuthError.textContent = '';
-    if (cloudAuthEmail) cloudAuthEmail.value = '';
-    if (cloudAuthPassword) cloudAuthPassword.value = '';
-    if (cloudAuthBackdrop) cloudAuthBackdrop.classList.add('is-open');
-  };
-  const closeAuthModal = () => {
-    if (cloudAuthBackdrop) cloudAuthBackdrop.classList.remove('is-open');
-  };
+  // Bu noktaya kadar tüm sayfaların (Rutinler, Takip, vb.) açılış-zamanı
+  // ilk kurulum çağrıları (varsayılan/hesaplanan alanları dolduran
+  // saveAppState çağrıları dâhil) tamamlanmış olur. Artık bundan sonraki
+  // her saveAppState çağrısı gerçekten kullanıcının bir eylemidir; bu
+  // yüzden PENDING_SYNC_KEY bayrağı bundan sonra normal şekilde
+  // işaretlenebilir.
+  appReadyForSync = true;
 
-  if (cloudOpenLoginBtn) {
-    cloudOpenLoginBtn.addEventListener('click', () => {
-      if (!sb) {
-        if (typeof showPage8Toast === 'function') showPage8Toast('Bulut yedekleme henüz yapılandırılmadı');
-        return;
-      }
-      openAuthModal();
-    });
-  }
-  if (cloudAuthCancel) cloudAuthCancel.addEventListener('click', closeAuthModal);
-  if (cloudAuthBackdrop) {
-    cloudAuthBackdrop.addEventListener('click', (e) => {
-      if (e.target === cloudAuthBackdrop) closeAuthModal();
-    });
-  }
-  if (cloudAuthSwitchMode) {
-    cloudAuthSwitchMode.addEventListener('click', () => {
-      authMode = authMode === 'login' ? 'signup' : 'login';
-      setAuthModeUI();
-      if (cloudAuthError) cloudAuthError.textContent = '';
-    });
-  }
-
-  if (cloudAuthSubmit) {
-    cloudAuthSubmit.addEventListener('click', async () => {
-      if (!sb) return;
-      const email = (cloudAuthEmail && cloudAuthEmail.value || '').trim();
-      const password = (cloudAuthPassword && cloudAuthPassword.value) || '';
-      if (cloudAuthError) cloudAuthError.textContent = '';
-
-      if (!email || !email.includes('@')) {
-        if (cloudAuthError) cloudAuthError.textContent = 'Geçerli bir e-posta adresi gir.';
-        return;
-      }
-      if (!password || password.length < 6) {
-        if (cloudAuthError) cloudAuthError.textContent = 'Şifre en az 6 karakter olmalı.';
-        return;
-      }
-
-      cloudAuthSubmit.disabled = true;
-      try {
-        if (authMode === 'login') {
-          const { error } = await sb.auth.signInWithPassword({ email, password });
-          if (error) throw error;
-          closeAuthModal();
-          if (typeof showPage8Toast === 'function') showPage8Toast('Giriş yapıldı');
-        } else {
-          const { data, error } = await sb.auth.signUp({ email, password });
-          if (error) throw error;
-          if (data && data.session) {
-            closeAuthModal();
-            if (typeof showPage8Toast === 'function') showPage8Toast('Kayıt tamamlandı');
-          } else {
-            if (cloudAuthError) {
-              cloudAuthError.textContent = 'Kayıt oldu! E-postana gelen bağlantıyla onayladıktan sonra giriş yapabilirsin.';
-            }
-          }
-        }
-      } catch (err) {
-        if (cloudAuthError) cloudAuthError.textContent = translateAuthError(err && err.message);
-      } finally {
-        cloudAuthSubmit.disabled = false;
-      }
-    });
-  }
-
-  if (cloudLogoutBtn) {
-    cloudLogoutBtn.addEventListener('click', async () => {
-      if (!sb) return;
-      cloudLogoutBtn.disabled = true;
-      try {
-        await sb.auth.signOut();
-        if (typeof showPage8Toast === 'function') showPage8Toast('Çıkış yapıldı');
-      } catch (err) {
-        console.warn('Çıkış yapılamadı:', err);
-      } finally {
-        cloudLogoutBtn.disabled = false;
-      }
-    });
-  }
-
-  if (cloudSyncNowBtn) {
-    cloudSyncNowBtn.addEventListener('click', () => {
-      if (!currentUser) return;
-      pushStateToCloud();
-    });
-  }
+  initAuthGate();
 </script>
 
 </body>
