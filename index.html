@@ -33,14 +33,6 @@
     width: 100%;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
-    /* Sayfa hiçbir zaman kendi ekseninde taşmasın: Android tarayıcılarında
-       (özellikle Samsung Internet) içerik 1px bile taşsa kenarda beliren
-       kaydırma çubuğu/gölgesi böylece hiç ortaya çıkmaz. Uygulama içindeki
-       kaydırılabilir alanlar (listeler, kartlar vb.) kendi overflow-y:auto
-       değerleriyle ayrı ayrı kaydırılabiliyor; bu kural sadece en dıştaki
-       html/body eksenini kilitliyor. */
-    overflow: hidden;
-    overscroll-behavior: none;
   }
 
   /* ---------- Scrollbar'ları gizle (kaydırma işlevi aynen çalışır) ---------- */
@@ -4705,6 +4697,66 @@
     box-shadow: 4px 4px 0px 0px #000;
   }
 
+  /* ---- "Kaynaklar" pop-up'ı: cevap anahtarı dosya/link seçici satırı
+     ve video linki alanı; page11-field/page11-field-input diliyle
+     uyumlu, sade ek kurallar. ---- */
+  .exam-resources-file-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .exam-resources-file-row.is-hidden {
+    display: none;
+  }
+
+  .exam-resources-file-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    box-sizing: border-box;
+    padding: 0.55rem 0.7rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #121212;
+    background-color: #f2f2f2;
+    border: 2.5px dashed #000;
+    border-radius: 0.7rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.18s ease, border-style 0.15s ease;
+  }
+
+  .exam-resources-file-btn span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .exam-resources-file-btn svg {
+    flex-shrink: 0;
+  }
+
+  .exam-resources-file-btn:active {
+    transform: translate(1px, 1px);
+  }
+
+  .exam-resources-file-btn.has-file {
+    border-style: solid;
+    background-color: #fff;
+  }
+
+  .exam-resources-file-remove {
+    flex-shrink: 0;
+  }
+
+  .exam-resources-file-remove.is-hidden {
+    display: none;
+  }
+
   /* ---- Kaynaklar pop-up'ı: başlık altı açıklama, bölüm ikonları ve
      iki alanı (cevap anahtarı / video linki) ayıran çizgi. Amaç,
      pop-up'ı tek bakışta "ne işe yarıyor" ve "hangi alan ne bekliyor"
@@ -4723,123 +4775,141 @@
     color: rgba(18, 18, 18, 0.6);
   }
 
-  /* ---- Kaynaklar pop-up'ı: üst satırda başlık/alt başlık ve kapat (×)
-     butonu; altında "Görsel" ve "Dosya" bölümleri ince bir üst çizgiyle
-     birbirinden ayrılır. Her bölümün kendi ikon rozeti, kısa açıklaması
-     ve sağda küçük bir "Ekle" butonu (chip) vardır; içerik (görsel
-     ızgarası/dosya listesi) boşsa hiç yer kaplamaz. ---- */
-  .exam-resources-card {
-    max-width: 380px;
-    gap: 1.05rem;
-  }
-
-  .exam-resources-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.7rem;
-  }
-
-  .exam-resources-close {
-    flex-shrink: 0;
-  }
-
-  .page11-modal-heading {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .page11-modal-subtitle {
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 500;
-    font-size: 0.76rem;
-    line-height: 1.35;
-    color: rgba(18, 18, 18, 0.6);
-  }
-
   .exam-resources-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
-    padding-top: 1.05rem;
-    border-top: 2px solid rgba(18, 18, 18, 0.1);
+    gap: 0.5rem;
   }
 
-  .exam-resources-card > .exam-resources-section:first-of-type {
-    padding-top: 0;
-    border-top: none;
-  }
-
-  .exam-resources-section-top {
+  .exam-resources-section-label {
     display: flex;
     align-items: center;
-    gap: 0.55rem;
+    gap: 0.35rem;
   }
 
-  .exam-resources-section-icon {
+  .exam-resources-section-label svg {
     flex-shrink: 0;
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #121212;
-    background: #f2f2f2;
-    border: 2px solid #000;
-    border-radius: 0.6rem;
   }
 
-  .exam-resources-section-text {
-    flex: 1 1 auto;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-  }
-
-  .exam-resources-section-title {
-    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
-    font-weight: 800;
-    font-size: 0.85rem;
-    color: #121212;
+  .exam-resources-optional-tag {
+    margin-left: 0.4rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.62rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: rgba(18, 18, 18, 0.4);
   }
 
   .exam-resources-section-hint {
     font-family: "Space Grotesk", sans-serif;
     font-weight: 500;
-    font-size: 0.68rem;
-    line-height: 1.25;
-    color: rgba(18, 18, 18, 0.5);
+    font-size: 0.72rem;
+    line-height: 1.3;
+    color: rgba(18, 18, 18, 0.45);
   }
 
-  .exam-resources-add-chip {
-    flex-shrink: 0;
-    display: inline-flex;
+  /* ---- Cevap Anahtarı sekmesi: artık Dosya/Link arasında geçiş yapan
+     bir anahtar yok; ikisi de alt alta, kendi küçük etiketleriyle
+     birlikte her zaman görünür. Aralarında ince bir "veya" ayracı
+     hangi alanın alternatif olduğunu gösterir. ---- */
+  .exam-resources-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.32rem;
+  }
+
+  .exam-resources-field-label {
+    display: flex;
     align-items: center;
-    gap: 0.28rem;
-    padding: 0.38rem 0.7rem;
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 800;
-    font-size: 0.74rem;
-    color: #fff;
-    background: #121212;
-    border: 2.5px solid #000;
-    border-radius: 0.75rem;
-    box-shadow: 3px 3px 0px 0px #000;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.64rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: rgba(18, 18, 18, 0.45);
   }
 
-  .exam-resources-add-chip svg {
+  .exam-resources-or-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(18, 18, 18, 0.3);
+  }
+
+  .exam-resources-or-divider::before,
+  .exam-resources-or-divider::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1.5px;
+    background-color: rgba(18, 18, 18, 0.14);
+  }
+
+  /* ---- Kaynaklar pop-up'ı üst sekmeleri: "Cevap Anahtarı" ve
+     "Video Çözümü" ayrı iki alan olarak sunulur, o an seçili olmayanın
+     alanı tamamen gizlenir; böylece pop-up her zaman tek bir işe
+     odaklı ve daha az kalabalık görünür. ---- */
+  .exam-resources-card {
+    max-width: 400px;
+  }
+
+  .exam-resources-tabs {
+    height: 52px;
+  }
+
+  .exam-resources-tab-btn {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.18rem;
+    padding: 0 0.2rem;
+  }
+
+  .exam-resources-tab-icon {
     flex-shrink: 0;
   }
 
-  .exam-resources-add-chip:active {
-    transform: translate(1.5px, 1.5px);
-    box-shadow: 1.5px 1.5px 0px 0px #000;
-    background: var(--accent-color, #ff90e8);
-    color: #121212;
+  .exam-resources-tab-label {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.66rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .exam-resources-tab-dot {
+    display: none;
+    position: absolute;
+    top: 0.3rem;
+    right: 0.45rem;
+    width: 0.4rem;
+    height: 0.4rem;
+    background-color: var(--accent-color, #ff90e8);
+    border: 1.5px solid #000;
+    border-radius: 50%;
+  }
+
+  .exam-resources-tab-btn.has-content .exam-resources-tab-dot {
+    display: block;
+  }
+
+  .exam-resources-panel {
+    display: none;
+    flex-direction: column;
+    gap: 0.55rem;
+    /* Sekme değişse de kartın boyu sabit kalsın diye her iki panel de
+       en dolu (Cevap Anahtarı) panelin ihtiyaç duyduğu yüksekliği
+       ayırır; Video Çözümü sekmesi bu alanın üstünde konumlanır. */
+    min-height: 200px;
+  }
+
+  .exam-resources-panel.is-active {
+    display: flex;
   }
 
   body.is-anthracite .page11-modal-subtitle,
@@ -4847,284 +4917,31 @@
     color: rgba(242, 242, 244, 0.55);
   }
 
-  body.is-anthracite .exam-resources-section {
-    border-top-color: rgba(242, 242, 244, 0.16);
-  }
-
-  body.is-anthracite .exam-resources-section-icon {
-    background: #2a2c2f;
-    color: rgba(242, 242, 244, 0.72);
-    border-color: rgba(242, 242, 244, 0.32);
-  }
-
-  body.is-anthracite .exam-resources-section-title {
-    color: #f2f2f4;
-  }
-
-  /* ---- Kaynaklar pop-up'ı: cevap anahtarı görsel ızgarası. Soru
-     Havuzu'ndaki kart diliyle uyumlu ama küçük kare parçalar; boşsa
-     tamamen gizlenir ki eklenecek ilk görselden önce pop-up gereksiz
-     yere boşluk taşımasın. ---- */
-  .exam-resources-image-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.4rem;
-  }
-
-  .exam-resources-image-grid:empty {
-    display: none;
-  }
-
-  .exam-resources-thumb {
-    position: relative;
-    aspect-ratio: 1;
-    background: #f2f2f2;
-    border: 2px solid #000;
-    border-radius: 0.55rem;
-    overflow: hidden;
-    cursor: pointer;
-  }
-
-  .exam-resources-thumb img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .exam-resources-thumb-remove {
-    position: absolute;
-    top: 0.15rem;
-    right: 0.15rem;
-    width: 1.2rem;
-    height: 1.2rem;
-    font-size: 0.62rem;
-    border-width: 2px;
-    box-shadow: 1.5px 1.5px 0px 0px #000;
-    z-index: 2;
-  }
-
-  body.is-anthracite .exam-resources-thumb {
-    background: #2a2c2f;
-  }
-
-  /* ---- Kaynaklar: cevap anahtarı görselleri arasında sağa/sola
-     kaydırarak (veya oklarla) gezinilen galeri lightbox'ı. Kart dili
-     Soru Havuzu'ndaki .qhavuz-lightbox-* ile aynıdır; burada yalnızca
-     çoklu görsel gezintisine özgü ok/sayaç eklenir. ---- */
-  .exam-res-gallery-card {
-    max-width: 420px;
-  }
-
-  .exam-res-gallery-viewport {
-    position: relative;
-    background: #f2f2f2;
-    touch-action: pan-y;
-  }
-
-  .exam-res-gallery-viewport img {
-    display: block;
-    width: 100%;
-    max-height: 74vh;
-    object-fit: contain;
-    background: #f2f2f2;
-  }
-
-  .exam-res-gallery-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 2.1rem;
-    height: 2.1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    color: #121212;
-    background-color: #fff;
-    border: 2.5px solid #000;
-    border-radius: 50%;
-    box-shadow: 2px 2px 0px 0px #000;
-    z-index: 2;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-  }
-
-  .exam-res-gallery-arrow:active {
-    transform: translateY(-50%) translate(1px, 1px);
-    box-shadow: 1px 1px 0px 0px #000;
-  }
-
-  .exam-res-gallery-arrow.is-hidden {
-    display: none;
-  }
-
-  .exam-res-gallery-prev {
-    left: 0.5rem;
-  }
-
-  .exam-res-gallery-next {
-    right: 0.5rem;
-  }
-
-  .exam-res-gallery-counter {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.55rem 1rem;
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 700;
-    font-size: 0.78rem;
-    color: #121212;
-    background: #fff;
-  }
-
-  body.is-anthracite .exam-res-gallery-viewport,
-  body.is-anthracite .exam-res-gallery-viewport img {
-    background: #2a2c2f;
-  }
-
-  body.is-anthracite .exam-res-gallery-counter {
-    background: var(--dark-card-color, #3b3e42);
-    color: #f2f2f4;
-  }
-
-  body.is-anthracite .exam-res-gallery-arrow {
-    background-color: #2a2c2f;
-    color: #f2f2f4;
-    border-color: #000;
-  }
-
-  /* ---- Kaynaklar: "Video Çözüm" alanı. Dosya listesi yerine, tek bir
-     link saklayan sade bir form + kayıtlı linki gösteren bir satır.
-     Üstteki "Ekle" chip'i tıklanınca form açılır (kayıtlı link varsa
-     chip "Düzenle" olur ve form o linkle önceden doldurulur); onay
-     (✓) butonuna basılınca form kapanır ve link satırı görünür olur. ---- */
-  .exam-resources-video-form {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .exam-resources-video-form.is-hidden {
-    display: none;
-  }
-
-  .exam-resources-video-input {
-    flex: 1 1 auto;
-    min-width: 0;
-    box-sizing: border-box;
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 700;
-    font-size: 0.82rem;
-    color: #121212;
-    background-color: #f2f2f2;
-    border: 2.5px solid #000;
-    border-radius: 0.7rem;
-    padding: 0.55rem 0.7rem;
-  }
-
-  .exam-resources-video-input::placeholder {
-    color: rgba(18, 18, 18, 0.4);
-    font-weight: 600;
-  }
-
-  .exam-resources-video-save {
-    flex-shrink: 0;
-    width: 2.1rem;
-    height: 2.1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    color: #fff;
-    background: #121212;
-    border: 2.5px solid #000;
-    border-radius: 0.7rem;
-    box-shadow: 3px 3px 0px 0px #000;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-  }
-
-  .exam-resources-video-save:active {
-    transform: translate(1.5px, 1.5px);
-    box-shadow: 1.5px 1.5px 0px 0px #000;
-    background: var(--accent-color, #ff90e8);
-    color: #121212;
-  }
-
-  .exam-resources-video-link {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-sizing: border-box;
-    padding: 0.5rem 2.1rem 0.5rem 0.6rem;
-    background-color: #f2f2f2;
-    border: 2px solid #000;
-    border-radius: 0.65rem;
-    cursor: pointer;
-    transition: background-color 0.18s ease;
-  }
-
-  .exam-resources-video-link.is-hidden {
-    display: none;
-  }
-
-  .exam-resources-video-link:active {
-    background-color: #e8e8e8;
-  }
-
-  .exam-resources-video-link-icon {
-    flex-shrink: 0;
-    display: flex;
-    color: #121212;
-  }
-
-  .exam-resources-video-link-text {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 700;
-    font-size: 0.78rem;
-    color: #121212;
-  }
-
-  .exam-resources-video-link-remove {
-    position: absolute;
-    top: 50%;
-    right: 0.4rem;
-    transform: translateY(-50%);
-    width: 1.45rem;
-    height: 1.45rem;
-    font-size: 0.7rem;
-    border-width: 2px;
-    box-shadow: 1.5px 1.5px 0px 0px #000;
-  }
-
-  body.is-anthracite .exam-resources-video-input {
-    background-color: #2a2c2f;
-    border-color: #f2f2f4;
-    color: #f2f2f4;
-  }
-
-  body.is-anthracite .exam-resources-video-input::placeholder {
+  body.is-anthracite .exam-resources-optional-tag {
     color: rgba(242, 242, 244, 0.4);
   }
 
-  body.is-anthracite .exam-resources-video-link {
+  body.is-anthracite .exam-resources-field-label {
+    color: rgba(242, 242, 244, 0.5);
+  }
+
+  body.is-anthracite .exam-resources-or-divider {
+    color: rgba(242, 242, 244, 0.35);
+  }
+
+  body.is-anthracite .exam-resources-or-divider::before,
+  body.is-anthracite .exam-resources-or-divider::after {
+    background-color: rgba(242, 242, 244, 0.16);
+  }
+
+  body.is-anthracite .exam-resources-file-btn {
     background-color: #2a2c2f;
+    color: #f2f2f4;
     border-color: #f2f2f4;
   }
 
-  body.is-anthracite .exam-resources-video-link:active {
+  body.is-anthracite .exam-resources-file-btn.has-file {
     background-color: #1c1d1f;
-  }
-
-  body.is-anthracite .exam-resources-video-link-icon,
-  body.is-anthracite .exam-resources-video-link-text {
-    color: #f2f2f4;
   }
 
   /* ---------- Sayfa 8: yeni kategori/rutin grubu isim pop-up'ı
@@ -6338,11 +6155,13 @@
   .stopwatch-fullscreen {
     position: fixed;
     inset: 0;
-    /* Artık iç öğeleri flex ile birlikte ortalamıyoruz: sayı kendi başına
-       ekranın tam merkezine (top/left: 50%) sabitleniyor, ipucu/Tur/turlar
-       bloğu ise ondan bağımsız, sabit bir mesafeyle altına konumlanıyor.
-       Böylece Tur butonu görünse de görünmese de, turlar listesi büyüse de
-       küçülse de sayı HER ZAMAN ekranın tam ortasında kalır. */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
     z-index: 60;
     cursor: pointer;
     opacity: 0;
@@ -6362,12 +6181,6 @@
   }
 
   .stopwatch-fullscreen-time-row {
-    /* Ekranın tam merkezine sabit: altındaki ipucu/Tur/turlar bloğunun
-       boyu değişse bile sayı asla kaymaz. */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     display: flex;
     align-items: baseline;
     font-family: "Space Grotesk", sans-serif;
@@ -6407,8 +6220,11 @@
   /* Sayının hemen üzerine eklenen görünmez katman: buraya dokunmak
      kronometreyi duraklatıp tam ekrandan çıkar. Dokunma alanını
      rakamların görsel sınırlarının biraz dışına taşırıyoruz ki parmakla
-     hedeflemesi kolay olsun. (Konumlandırma bağlamı: yukarıdaki
-     .stopwatch-fullscreen-time-row kuralında zaten position: absolute var.) */
+     hedeflemesi kolay olsun. */
+  .stopwatch-fullscreen-time-row {
+    position: relative;
+  }
+
   .stopwatch-exit-zone {
     position: absolute;
     inset: -1.4rem -1rem;
@@ -6434,15 +6250,12 @@
     pointer-events: auto;
   }
 
-  /* İpucu + Tur butonunu saran blok. Artık sayıdan (stopwatch-fullscreen-
-     time-row) tamamen bağımsız: ekran merkezinin sabit bir miktar altına
-     konumlanır, böylece Tur butonu görünüp kaybolsa da, turlar listesi
-     büyüyüp küçülse de yukarıdaki sayının konumunu hiç etkilemez. */
+  /* Zaman + ipucu + Tur butonunu saran sabit boyutlu blok. Bu blok
+     kronometrenin gerçek dikey referans noktasıdır; boyutu tur sayısına
+     göre DEĞİŞMEZ. Tur listesi buna göre mutlak konumlandığı için,
+     liste büyüdükçe/küçüldükçe saat asla yukarı/aşağı kaymaz. */
   .stopwatch-fullscreen-core {
-    position: absolute;
-    top: calc(50% + 2.6rem);
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -7040,11 +6853,8 @@
     align-items: center;
     justify-content: center;
     gap: 0.9rem;
-    /* Bkz. .stopwatch-fullscreen'deki aynı not: üst/alt güvenli alanları
-       birbirine eşitleyerek sayacın her zaman tam ekran merkezinde
-       kalmasını sağlıyoruz. */
-    padding: max(env(safe-area-inset-top), env(safe-area-inset-bottom))
-      max(env(safe-area-inset-right), env(safe-area-inset-left));
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
     z-index: 60;
     cursor: pointer;
     opacity: 0;
@@ -8325,15 +8135,12 @@
          Sayının üzerindeki görünmez alana dokunmak duraklatıp tam
          ekrandan çıkar; boş bir alana dokununca Tur butonu belirir. -->
     <div class="stopwatch-fullscreen" id="stopwatchFullscreen">
-      <!-- Sayı, ekranın tam ortasına kendi başına sabitlenir; altındaki
-           ipucu/Tur/turlar listesi kutusunun boyu değişse bile sayının
-           konumunu etkilemesin diye kardeş (core'un dışında) tutulur. -->
-      <div class="stopwatch-fullscreen-time-row">
-        <span class="stopwatch-time" id="stopwatchTimeFull">00:00:00</span><span class="stopwatch-centis" id="stopwatchCentisFull">.00</span>
-        <!-- Görünmez çıkış alanı: sayının üzerine eklenir, dokununca kronometre duraklar ve tam ekrandan çıkılır -->
-        <div class="stopwatch-exit-zone" id="stopwatchExitZone" role="button" tabindex="0" aria-label="Kronometreyi duraklat ve tam ekrandan çık"></div>
-      </div>
       <div class="stopwatch-fullscreen-core" id="stopwatchFullscreenCore">
+        <div class="stopwatch-fullscreen-time-row">
+          <span class="stopwatch-time" id="stopwatchTimeFull">00:00:00</span><span class="stopwatch-centis" id="stopwatchCentisFull">.00</span>
+          <!-- Görünmez çıkış alanı: sayının üzerine eklenir, dokununca kronometre duraklar ve tam ekrandan çıkılır -->
+          <div class="stopwatch-exit-zone" id="stopwatchExitZone" role="button" tabindex="0" aria-label="Kronometreyi duraklat ve tam ekrandan çık"></div>
+        </div>
         <span class="stopwatch-fullscreen-hint" id="stopwatchFullscreenHint">Duraklatmak için dokun</span>
 
         <button type="button" class="add-task-btn stopwatch-lap-btn" id="stopwatchLapBtn">Tur</button>
@@ -9107,96 +8914,75 @@
   </div>
 
   <!-- Sayfa 11 Detay: üst çubuktaki "Kaynaklar" butonuyla açılan pop-up.
-       Cevap anahtarını görsel olarak, video çözümünü de link olarak
-       ayrı bir alanda saklar; page11AddBackdrop ile aynı kart dilini
-       kullanır. -->
+       Cevap anahtarını dosya (PDF/görsel) veya link olarak, video çözümü
+       linkini de ayrı bir alanda saklar; page11AddBackdrop ile aynı
+       kart dilini kullanır. -->
   <div class="settings-confirm-backdrop" id="examResourcesBackdrop">
     <div class="page11-modal-card exam-resources-card">
-      <div class="exam-resources-header">
-        <div class="page11-modal-heading">
-          <span class="page11-modal-title">Kaynaklar</span>
-          <span class="page11-modal-subtitle">Cevap anahtarını görsel, video çözümünü link olarak ekle</span>
-        </div>
-        <button type="button" class="delete-btn exam-resources-close" id="examResourcesCancelBtn" aria-label="Kapat">×</button>
+      <div class="page11-modal-heading">
+        <span class="page11-modal-title">Kaynaklar</span>
+        <span class="page11-modal-subtitle">Bu denemenin cevap anahtarını ve video çözümünü ekle</span>
       </div>
 
-      <div class="exam-resources-section">
-        <div class="exam-resources-section-top">
-          <span class="exam-resources-section-icon">
-            <svg viewBox="0 0 24 24" width="15" height="15">
-              <rect x="3.5" y="4.5" width="17" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
-              <circle cx="8.3" cy="9.3" r="1.6" fill="none" stroke="currentColor" stroke-width="1.8"/>
-              <path d="M4.2 16.8l5-5 3 3 3.3-3.3 4.3 4.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-          <div class="exam-resources-section-text">
-            <span class="exam-resources-section-title">Görsel</span>
-            <span class="exam-resources-section-hint">Dokunup galeri gibi sağa/sola kaydırarak gezebilirsin</span>
-          </div>
-          <button type="button" class="exam-resources-add-chip" id="examResourcesAddImageBtn" aria-label="Görsel ekle">
-            <svg viewBox="0 0 24 24" width="11" height="11"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
-            Ekle
-          </button>
-        </div>
-        <div class="exam-resources-image-grid" id="examResourcesImageGrid"></div>
-        <input type="file" accept="image/*" multiple class="qhavuz-file-input" id="examResourcesImageInput">
-      </div>
-
-      <div class="exam-resources-section">
-        <div class="exam-resources-section-top">
-          <span class="exam-resources-section-icon">
-            <svg viewBox="0 0 24 24" width="15" height="15">
-              <circle cx="12" cy="12" r="8.3" fill="none" stroke="currentColor" stroke-width="2"/>
-              <path d="M10.1 8.6l5.3 3.4-5.3 3.4z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-            </svg>
-          </span>
-          <div class="exam-resources-section-text">
-            <span class="exam-resources-section-title">Video Çözüm</span>
-            <span class="exam-resources-section-hint">Bu denemenin video çözüm linkini ekle</span>
-          </div>
-          <button type="button" class="exam-resources-add-chip" id="examResourcesVideoChipBtn" aria-label="Video linki ekle">
-            <svg viewBox="0 0 24 24" width="11" height="11"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
-            <span id="examResourcesVideoChipLabel">Ekle</span>
-          </button>
-        </div>
-
-        <div class="exam-resources-video-form is-hidden" id="examResourcesVideoForm">
-          <input type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" class="exam-resources-video-input" id="examResourcesVideoInput" placeholder="https://youtube.com/...">
-          <button type="button" class="exam-resources-video-save" id="examResourcesVideoSaveBtn" aria-label="Linki kaydet">
-            <svg viewBox="0 0 24 24" width="13" height="13"><path d="M5 13l4 4 10-10" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-
-        <div class="exam-resources-video-link is-hidden" id="examResourcesVideoLinkRow">
-          <span class="exam-resources-video-link-icon">
-            <svg viewBox="0 0 24 24" width="15" height="15">
-              <circle cx="12" cy="12" r="8.3" fill="none" stroke="currentColor" stroke-width="2"/>
-              <path d="M10.1 8.6l5.3 3.4-5.3 3.4z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-            </svg>
-          </span>
-          <span class="exam-resources-video-link-text" id="examResourcesVideoLinkText"></span>
-          <button type="button" class="delete-btn exam-resources-video-link-remove" id="examResourcesVideoRemoveBtn" aria-label="Video linkini kaldır">×</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Kaynaklar: cevap anahtarı görsellerini büyük gösteren, aralarında
-       sağa/sola kaydırılabilen galeri lightbox'ı (Soru Havuzu'ndaki tekli
-       lightbox'tan farklı olarak burada birden çok görsel gezilebilir). -->
-  <div class="qhavuz-lightbox-backdrop exam-res-gallery-backdrop" id="examResGalleryBackdrop">
-    <div class="qhavuz-lightbox-card exam-res-gallery-card">
-      <button type="button" class="delete-btn qhavuz-lightbox-close" id="examResGalleryClose" aria-label="Kapat">×</button>
-      <div class="exam-res-gallery-viewport" id="examResGalleryViewport">
-        <img id="examResGalleryImg" alt="Cevap anahtarı görseli">
-        <button type="button" class="exam-res-gallery-arrow exam-res-gallery-prev" id="examResGalleryPrev" aria-label="Önceki görsel">
-          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="settings-segmented exam-resources-tabs" id="examResourcesTabsSegmented">
+        <div class="settings-segmented-slider" id="examResourcesTabsSlider"></div>
+        <button type="button" class="settings-segmented-option exam-resources-tab-btn is-active" data-tab="answerkey">
+          <svg class="exam-resources-tab-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <circle cx="7.3" cy="16.7" r="3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9.4 14.6L17.4 6.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14.2 9.8l2.1 2.1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16.2 7.8l2.1 2.1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="exam-resources-tab-label">Cevap Anahtarı</span>
+          <span class="exam-resources-tab-dot" id="examResourcesAnswerKeyDot"></span>
         </button>
-        <button type="button" class="exam-res-gallery-arrow exam-res-gallery-next" id="examResGalleryNext" aria-label="Sonraki görsel">
-          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M9 4l8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <button type="button" class="settings-segmented-option exam-resources-tab-btn" data-tab="video">
+          <svg class="exam-resources-tab-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <rect x="3" y="6" width="14" height="12" rx="2.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M17 10.2l4-2.4v9l-4-2.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="exam-resources-tab-label">Video Çözümü</span>
+          <span class="exam-resources-tab-dot" id="examResourcesVideoDot"></span>
         </button>
       </div>
-      <div class="exam-res-gallery-counter" id="examResGalleryCounter"></div>
+
+      <div class="exam-resources-panel is-active" id="examResourcesAnswerKeyPanel">
+        <span class="exam-resources-section-hint">Doğru cevapları PDF/görsel olarak yükle ya da bir link ekle</span>
+
+        <div class="exam-resources-field-group">
+          <span class="exam-resources-field-label">Dosya</span>
+          <div class="exam-resources-file-row" id="examResourcesFileRow">
+            <button type="button" class="exam-resources-file-btn" id="examResourcesFilePickBtn">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                <path d="M8 12.5l5.2-5.2a2.6 2.6 0 0 1 3.7 3.7l-7 7a4.2 4.2 0 0 1-6-6l6.5-6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span id="examResourcesFileName">Dosya seç (PDF/görsel)</span>
+            </button>
+            <button type="button" class="delete-btn exam-resources-file-remove is-hidden" id="examResourcesFileRemoveBtn" aria-label="Dosyayı kaldır">×</button>
+          </div>
+          <input type="file" accept="application/pdf,image/*" id="examResourcesFileInput" class="qhavuz-file-input">
+        </div>
+
+        <div class="exam-resources-or-divider"><span>veya</span></div>
+
+        <div class="exam-resources-field-group">
+          <span class="exam-resources-field-label">Link</span>
+          <input type="url" class="page11-field-input" id="examResourcesAnswerLinkInput" placeholder="https://...">
+        </div>
+      </div>
+
+      <div class="exam-resources-panel" id="examResourcesVideoPanel">
+        <span class="exam-resources-section-hint">Bu denemenin video çözümü linkini ekle (YouTube, Drive vb.)</span>
+        <div class="exam-resources-field-group">
+          <span class="exam-resources-field-label">Link<span class="exam-resources-optional-tag">isteğe bağlı</span></span>
+          <input type="url" class="page11-field-input" id="examResourcesVideoLinkInput" placeholder="https://youtube.com/...">
+        </div>
+      </div>
+
+      <div class="settings-confirm-actions page11-modal-actions">
+        <button type="button" class="settings-confirm-cancel" id="examResourcesCancelBtn">Vazgeç</button>
+        <button type="button" class="page11-modal-confirm" id="examResourcesSaveBtn">Kaydet</button>
+      </div>
     </div>
   </div>
 
@@ -15341,112 +15127,86 @@
     });
   });
 
-  // ---- "Kaynaklar" pop-up'ı: cevap anahtarı görselleri ve video çözüm
+  // ---- "Kaynaklar" pop-up'ı: cevap anahtarı (dosya/link) + video çözümü
   // linki. Deneme nesnesine `resources` alanı olarak kaydedilir:
-  // { answerKeyImages: ["idb://..."], videoLink: "https://..." }
-  // Görseller Soru Havuzu'ndaki gibi IndexedDB'ye Blob olarak yazılır ve
-  // galeri lightbox'ında sağa/sola kaydırılarak gezilir; video linki ise
-  // düz bir metin olarak saklanır ve dokununca yeni sekmede açılır.
+  // { answerKeyFile: {name, dataUrl}|null, answerKeyLink: string, videoUrl: string }
   const examResourcesBackdrop = document.getElementById('examResourcesBackdrop');
+  const examResourcesTabsSegmented = document.getElementById('examResourcesTabsSegmented');
+  const examResourcesTabsSlider = document.getElementById('examResourcesTabsSlider');
+  const examResourcesTabBtns = Array.from(examResourcesTabsSegmented.querySelectorAll('.exam-resources-tab-btn'));
+  const examResourcesAnswerKeyDot = document.getElementById('examResourcesAnswerKeyDot');
+  const examResourcesVideoDot = document.getElementById('examResourcesVideoDot');
+  const examResourcesAnswerKeyPanel = document.getElementById('examResourcesAnswerKeyPanel');
+  const examResourcesVideoPanel = document.getElementById('examResourcesVideoPanel');
+  const examResourcesFileRow = document.getElementById('examResourcesFileRow');
+  const examResourcesFilePickBtn = document.getElementById('examResourcesFilePickBtn');
+  const examResourcesFileName = document.getElementById('examResourcesFileName');
+  const examResourcesFileRemoveBtn = document.getElementById('examResourcesFileRemoveBtn');
+  const examResourcesFileInput = document.getElementById('examResourcesFileInput');
+  const examResourcesAnswerLinkInput = document.getElementById('examResourcesAnswerLinkInput');
+  const examResourcesVideoLinkInput = document.getElementById('examResourcesVideoLinkInput');
   const examResourcesCancelBtn = document.getElementById('examResourcesCancelBtn');
-  const examResourcesImageGrid = document.getElementById('examResourcesImageGrid');
-  const examResourcesAddImageBtn = document.getElementById('examResourcesAddImageBtn');
-  const examResourcesImageInput = document.getElementById('examResourcesImageInput');
-  const examResourcesVideoChipBtn = document.getElementById('examResourcesVideoChipBtn');
-  const examResourcesVideoChipLabel = document.getElementById('examResourcesVideoChipLabel');
-  const examResourcesVideoForm = document.getElementById('examResourcesVideoForm');
-  const examResourcesVideoInput = document.getElementById('examResourcesVideoInput');
-  const examResourcesVideoSaveBtn = document.getElementById('examResourcesVideoSaveBtn');
-  const examResourcesVideoLinkRow = document.getElementById('examResourcesVideoLinkRow');
-  const examResourcesVideoLinkText = document.getElementById('examResourcesVideoLinkText');
-  const examResourcesVideoRemoveBtn = document.getElementById('examResourcesVideoRemoveBtn');
+  const examResourcesSaveBtn = document.getElementById('examResourcesSaveBtn');
 
-  const examResGalleryBackdrop = document.getElementById('examResGalleryBackdrop');
-  const examResGalleryClose = document.getElementById('examResGalleryClose');
-  const examResGalleryViewport = document.getElementById('examResGalleryViewport');
-  const examResGalleryImg = document.getElementById('examResGalleryImg');
-  const examResGalleryPrev = document.getElementById('examResGalleryPrev');
-  const examResGalleryNext = document.getElementById('examResGalleryNext');
-  const examResGalleryCounter = document.getElementById('examResGalleryCounter');
+  const EXAM_RESOURCES_FILE_PLACEHOLDER = 'Dosya seç (PDF/görsel)';
 
-  // Bir denemenin `resources` alanını, eksik alt alanlar için güvenli
-  // varsayılanlarla birlikte döndürür (eski kayıtlarda hiç yoktu).
-  const page11GetResources = (exam) => {
-    if (!exam.resources || typeof exam.resources !== 'object') exam.resources = {};
-    if (!Array.isArray(exam.resources.answerKeyImages)) exam.resources.answerKeyImages = [];
-    if (typeof exam.resources.videoLink !== 'string') exam.resources.videoLink = '';
-    return exam.resources;
-  };
+  let examResourcesPendingFile = null; // { name, dataUrl } | null
+  let examResourcesActiveTab = 'answerkey';
 
   const page11UpdateResourcesIndicator = () => {
     const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
-    if (!exam) { examDetailResourcesBtn.classList.remove('has-resources'); return { hasAnswerKey: false }; }
-    const res = page11GetResources(exam);
-    const hasAnswerKey = res.answerKeyImages.length > 0 || !!res.videoLink;
-    examDetailResourcesBtn.classList.toggle('has-resources', hasAnswerKey);
-    return { hasAnswerKey };
+    const res = exam && exam.resources;
+    const hasAnswerKey = !!(res && (res.answerKeyFile || res.answerKeyLink));
+    const hasVideo = !!(res && res.videoUrl);
+    examDetailResourcesBtn.classList.toggle('has-resources', hasAnswerKey || hasVideo);
+    return { hasAnswerKey, hasVideo };
   };
 
-  // Pop-up her açıldığında ve her ekleme/silmeden sonra görsel ızgarasını
-  // ve video linki alanını o denemenin güncel `resources` durumuna göre
-  // baştan çizer.
-  const renderExamResourcesModal = (exam) => {
-    const res = page11GetResources(exam);
-
-    examResourcesImageGrid.innerHTML = '';
-    res.answerKeyImages.forEach((ref, idx) => {
-      const thumb = document.createElement('div');
-      thumb.className = 'exam-resources-thumb';
-
-      const img = document.createElement('img');
-      img.alt = `Cevap anahtarı görseli ${idx + 1}`;
-      thumb.appendChild(img);
-      resolveImageSrc(ref).then((url) => { if (url) img.src = url; });
-
-      const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.className = 'delete-btn exam-resources-thumb-remove';
-      removeBtn.textContent = '×';
-      removeBtn.setAttribute('aria-label', 'Görseli sil');
-      removeBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        await deleteImageRef(ref);
-        res.answerKeyImages.splice(idx, 1);
-        savePage11State();
-        renderExamResourcesModal(exam);
-        page11UpdateResourcesIndicator();
-      });
-      thumb.appendChild(removeBtn);
-
-      // Silme butonu haricinde görsele dokununca galeri lightbox'ı,
-      // sağa/sola kaydırarak diğer görsellere geçilebilecek şekilde açılır.
-      thumb.addEventListener('click', () => openExamResGallery(res.answerKeyImages, idx));
-
-      examResourcesImageGrid.appendChild(thumb);
-    });
-
-    // Video linki: kayıtlı bir link varsa link satırını göster ve chip'i
-    // "Düzenle"ye çevir; yoksa link satırını gizle ve chip "Ekle" kalsın.
-    // Form her render'da kapatılır (açık kalması gereken tek an, chip'e
-    // az önce basıldığı andır ve o zaten renderExamResourcesModal'ı
-    // tetiklemez).
-    const hasVideo = !!res.videoLink;
-    examResourcesVideoChipLabel.textContent = hasVideo ? 'Düzenle' : 'Ekle';
-    examResourcesVideoLinkRow.classList.toggle('is-hidden', !hasVideo);
-    examResourcesVideoLinkText.textContent = hasVideo ? res.videoLink : '';
-    examResourcesVideoForm.classList.add('is-hidden');
+  const updateExamResourcesFileBtnUI = () => {
+    if (examResourcesPendingFile) {
+      examResourcesFileName.textContent = examResourcesPendingFile.name;
+      examResourcesFilePickBtn.classList.add('has-file');
+      examResourcesFileRemoveBtn.classList.remove('is-hidden');
+    } else {
+      examResourcesFileName.textContent = EXAM_RESOURCES_FILE_PLACEHOLDER;
+      examResourcesFilePickBtn.classList.remove('has-file');
+      examResourcesFileRemoveBtn.classList.add('is-hidden');
+    }
   };
+
+  // "Cevap Anahtarı" ve "Video Çözümü" iki ayrı sekme: her an yalnızca
+  // biri görünür, böylece pop-up her seferinde tek bir işe odaklanır.
+  const setExamResourcesTab = (tab) => {
+    examResourcesActiveTab = tab;
+    examResourcesTabBtns.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.tab === tab));
+    examResourcesTabsSlider.style.transform = tab === 'video' ? 'translateX(100%)' : 'translateX(0)';
+    examResourcesAnswerKeyPanel.classList.toggle('is-active', tab === 'answerkey');
+    examResourcesVideoPanel.classList.toggle('is-active', tab === 'video');
+  };
+
+  examResourcesTabBtns.forEach((btn) => {
+    btn.addEventListener('click', () => setExamResourcesTab(btn.dataset.tab));
+  });
 
   const openExamResourcesModal = () => {
     const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
     if (!exam) return;
-    renderExamResourcesModal(exam);
-    page11UpdateResourcesIndicator();
+    const res = exam.resources || {};
+    examResourcesPendingFile = res.answerKeyFile || null;
+    examResourcesAnswerLinkInput.value = res.answerKeyLink || '';
+    examResourcesVideoLinkInput.value = res.videoUrl || '';
+    updateExamResourcesFileBtnUI();
+    examResourcesFileInput.value = '';
+    const { hasAnswerKey, hasVideo } = page11UpdateResourcesIndicator();
+    examResourcesAnswerKeyDot.parentElement.classList.toggle('has-content', hasAnswerKey);
+    examResourcesVideoDot.parentElement.classList.toggle('has-content', hasVideo);
+    setExamResourcesTab('answerkey');
     examResourcesBackdrop.classList.add('is-open');
   };
 
   const closeExamResourcesModal = () => {
     examResourcesBackdrop.classList.remove('is-open');
+    examResourcesFileInput.value = '';
   };
 
   examDetailResourcesBtn.addEventListener('click', openExamResourcesModal);
@@ -15455,173 +15215,41 @@
     if (e.target === examResourcesBackdrop) closeExamResourcesModal();
   });
 
-  // "+ Görsel Ekle": galeriden/kameradan birden fazla görsel seçilebilir;
-  // her biri (Soru Havuzu'ndaki gibi) sıkıştırılıp IndexedDB'ye Blob
-  // olarak yazılır, o denemenin cevap anahtarı görsel listesine eklenir.
-  examResourcesAddImageBtn.addEventListener('click', () => examResourcesImageInput.click());
+  examResourcesFilePickBtn.addEventListener('click', () => examResourcesFileInput.click());
 
-  examResourcesImageInput.addEventListener('change', async () => {
-    const files = Array.from(examResourcesImageInput.files || []);
-    examResourcesImageInput.value = '';
-    if (!files.length) return;
-    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
-    if (!exam) return;
-    const res = page11GetResources(exam);
-
-    for (const file of files) {
-      const dataUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(file);
-      });
-      const compressed = typeof compressImageDataUrl === 'function'
-        ? await compressImageDataUrl(dataUrl)
-        : dataUrl;
-      const ref = await storeImageAndGetRef(compressed);
-      res.answerKeyImages.push(ref);
-    }
-
-    savePage11State();
-    renderExamResourcesModal(exam);
-    page11UpdateResourcesIndicator();
-  });
-
-  // "Video Çözüm" chip'i: link yoksa/varsa formu açıp kapatır. Form
-  // açılırken kayıtlı link varsa girişe önceden doldurulur (düzenleme),
-  // link satırı geçici olarak gizlenir ve girişe odaklanılır.
-  const toggleExamResourcesVideoForm = (forceOpen) => {
-    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
-    if (!exam) return;
-    const res = page11GetResources(exam);
-    const willOpen = typeof forceOpen === 'boolean'
-      ? forceOpen
-      : examResourcesVideoForm.classList.contains('is-hidden');
-    if (!willOpen) {
-      examResourcesVideoForm.classList.add('is-hidden');
-      examResourcesVideoLinkRow.classList.toggle('is-hidden', !res.videoLink);
-      return;
-    }
-    examResourcesVideoInput.value = res.videoLink || '';
-    examResourcesVideoLinkRow.classList.add('is-hidden');
-    examResourcesVideoForm.classList.remove('is-hidden');
-    setTimeout(() => examResourcesVideoInput.focus(), 30);
-  };
-
-  examResourcesVideoChipBtn.addEventListener('click', () => toggleExamResourcesVideoForm());
-
-  // Linki kaydeder; şemasız yapıştırılan adreslere ("youtu.be/..." gibi)
-  // otomatik olarak "https://" eklenir ki dokununca doğrudan açılabilsin.
-  const saveExamResourcesVideoLink = () => {
-    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
-    if (!exam) return;
-    const res = page11GetResources(exam);
-    let value = examResourcesVideoInput.value.trim();
-    if (value && !/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(value)) value = `https://${value}`;
-    res.videoLink = value;
-    savePage11State();
-    renderExamResourcesModal(exam);
-    page11UpdateResourcesIndicator();
-  };
-
-  examResourcesVideoSaveBtn.addEventListener('click', saveExamResourcesVideoLink);
-  examResourcesVideoInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); saveExamResourcesVideoLink(); }
-  });
-
-  // Video linkini kaldırır (link satırındaki × butonu).
-  examResourcesVideoRemoveBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
-    if (!exam) return;
-    const res = page11GetResources(exam);
-    res.videoLink = '';
-    savePage11State();
-    renderExamResourcesModal(exam);
-    page11UpdateResourcesIndicator();
-  });
-
-  // Silme butonu haricinde link satırına dokununca video, yeni sekmede açılır.
-  examResourcesVideoLinkRow.addEventListener('click', (e) => {
-    if (e.target.closest('.exam-resources-video-link-remove')) return;
-    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
-    if (!exam) return;
-    const res = page11GetResources(exam);
-    if (res.videoLink) window.open(res.videoLink, '_blank', 'noopener');
-  });
-
-  // ---- Cevap anahtarı galerisi: birden fazla görsel arasında sağa/sola
-  // kaydırarak ya da oklarla gezinme (Soru Havuzu'ndaki tekli lightbox'tan
-  // farklı olarak burada tüm görseller tek bir galeri gibi dolaşılır). ----
-  let examResGalleryImages = [];
-  let examResGalleryIndex = 0;
-
-  const renderExamResGallery = () => {
-    const total = examResGalleryImages.length;
-    if (!total) { closeExamResGallery(); return; }
-    if (examResGalleryIndex < 0) examResGalleryIndex = total - 1;
-    if (examResGalleryIndex >= total) examResGalleryIndex = 0;
-    examResGalleryImg.src = '';
-    resolveImageSrc(examResGalleryImages[examResGalleryIndex]).then((url) => {
-      examResGalleryImg.src = url;
-    });
-    examResGalleryCounter.textContent = `${examResGalleryIndex + 1} / ${total}`;
-    const onlyOne = total <= 1;
-    examResGalleryPrev.classList.toggle('is-hidden', onlyOne);
-    examResGalleryNext.classList.toggle('is-hidden', onlyOne);
-  };
-
-  const openExamResGallery = (images, index) => {
-    examResGalleryImages = images;
-    examResGalleryIndex = index;
-    renderExamResGallery();
-    examResGalleryBackdrop.classList.add('is-open');
-  };
-
-  const closeExamResGallery = () => {
-    examResGalleryBackdrop.classList.remove('is-open');
-  };
-
-  examResGalleryPrev.addEventListener('click', () => {
-    examResGalleryIndex -= 1;
-    renderExamResGallery();
-  });
-
-  examResGalleryNext.addEventListener('click', () => {
-    examResGalleryIndex += 1;
-    renderExamResGallery();
-  });
-
-  examResGalleryClose.addEventListener('click', closeExamResGallery);
-  examResGalleryBackdrop.addEventListener('click', (e) => {
-    if (e.target === examResGalleryBackdrop) closeExamResGallery();
-  });
-
-  // Parmakla sağa/sola kaydırarak galeri görselleri arasında geçiş.
-  // Dikey harekette (aşağı/yukarı kaydırma) devreye girmemesi için yatay
-  // mesafe, dikey mesafeden belirgin şekilde büyük olmalı.
-  (() => {
-    let startX = 0, startY = 0, tracking = false;
-    examResGalleryViewport.addEventListener('touchstart', (e) => {
-      if (e.touches.length !== 1) return;
-      tracking = true;
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-    }, { passive: true });
-
-    examResGalleryViewport.addEventListener('touchend', (e) => {
-      if (!tracking) return;
-      tracking = false;
-      const touch = e.changedTouches && e.changedTouches[0];
-      if (!touch) return;
-      const dx = touch.clientX - startX;
-      const dy = touch.clientY - startY;
-      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) {
-        examResGalleryIndex += dx < 0 ? 1 : -1;
-        renderExamResGallery();
+  examResourcesFileInput.addEventListener('change', () => {
+    const file = examResourcesFileInput.files && examResourcesFileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      let dataUrl = reader.result;
+      if (file.type && file.type.startsWith('image/') && typeof compressImageDataUrl === 'function') {
+        dataUrl = await compressImageDataUrl(dataUrl);
       }
-    }, { passive: true });
-  })();
+      examResourcesPendingFile = { name: file.name, dataUrl };
+      updateExamResourcesFileBtnUI();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  examResourcesFileRemoveBtn.addEventListener('click', () => {
+    examResourcesPendingFile = null;
+    examResourcesFileInput.value = '';
+    updateExamResourcesFileBtnUI();
+  });
+
+  examResourcesSaveBtn.addEventListener('click', () => {
+    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
+    if (!exam) return;
+    exam.resources = {
+      answerKeyFile: examResourcesPendingFile,
+      answerKeyLink: examResourcesAnswerLinkInput.value.trim(),
+      videoUrl: examResourcesVideoLinkInput.value.trim()
+    };
+    savePage11State();
+    page11UpdateResourcesIndicator();
+    closeExamResourcesModal();
+  });
 
   // ---- Yanlış/boş bırakılan soruya görsel ekleme pop-up'ı ----
   const page11QuestionBackdrop = document.getElementById('page11QuestionBackdrop');
