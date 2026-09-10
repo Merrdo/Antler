@@ -33,26 +33,6 @@
     width: 100%;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
-    /* Sayfa hiçbir zaman kendi ekseninde taşmasın: Android tarayıcılarında
-       (özellikle Samsung Internet) içerik 1px bile taşsa kenarda beliren
-       kaydırma çubuğu/gölgesi böylece hiç ortaya çıkmaz. Uygulama içindeki
-       kaydırılabilir alanlar (listeler, kartlar vb.) kendi overflow-y:auto
-       değerleriyle ayrı ayrı kaydırılabiliyor; bu kural sadece en dıştaki
-       html/body eksenini kilitliyor. */
-    overflow: hidden;
-    overscroll-behavior: none;
-  }
-
-  /* ---------- Scrollbar'ları gizle (kaydırma işlevi aynen çalışır) ---------- */
-  * {
-    scrollbar-width: none;      /* Firefox */
-    -ms-overflow-style: none;   /* IE / eski Edge */
-  }
-
-  *::-webkit-scrollbar {
-    display: none;              /* Chrome, Safari, yeni Edge */
-    width: 0;
-    height: 0;
   }
 
   * {
@@ -136,7 +116,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 24px calc(96px + env(safe-area-inset-bottom));
+    padding: 24px 24px 96px;
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -170,7 +150,7 @@
     bottom: 0;
     display: flex;
     justify-content: center;
-    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+    padding: 16px 16px 16px;
     pointer-events: none;
   }
 
@@ -1561,7 +1541,7 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding-top: calc(40px + env(safe-area-inset-top));
-    padding-bottom: calc(22px + env(safe-area-inset-bottom));
+    padding-bottom: 22px;
   }
 
   .wheel-page {
@@ -3618,7 +3598,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 28px;
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -5397,7 +5377,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 28px;
     overflow-y: auto;
   }
 
@@ -5410,7 +5390,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 28px;
     overflow-y: auto;
   }
 
@@ -7043,7 +7023,7 @@
     /* Bkz. .stopwatch-fullscreen'deki aynı not: üst/alt güvenli alanları
        birbirine eşitleyerek sayacın her zaman tam ekran merkezinde
        kalmasını sağlıyoruz. */
-    padding: max(env(safe-area-inset-top), env(safe-area-inset-bottom))
+    padding: max(env(safe-area-inset-top), 0px)
       max(env(safe-area-inset-right), env(safe-area-inset-left));
     z-index: 60;
     cursor: pointer;
@@ -7166,7 +7146,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
     overflow-y: auto;
   }
 
@@ -7448,7 +7428,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
     overflow-y: auto;
   }
 
@@ -7459,7 +7439,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
     overflow-y: auto;
   }
 
@@ -7783,7 +7763,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
     overflow-y: auto;
   }
 
@@ -9969,34 +9949,51 @@
     {
       name: 'Orijinal',
       gradient: 'linear-gradient(135deg, #2b2f4a 0%, #2b2f4a 50%, #2b2f4a 100%)',
+      color: '#2b2f4a',
       text: '#f2f2f7'
     },
     {
       name: 'Koyu',
       gradient: 'linear-gradient(135deg, #121212 0%, #121212 50%, #121212 100%)',
+      color: '#121212',
       text: '#f5f5f5'
     },
     {
       name: 'Saf Siyah',
       gradient: 'linear-gradient(135deg, #000000 0%, #000000 50%, #000000 100%)',
+      color: '#000000',
       text: '#f5f5f5'
     },
     {
       name: 'Yeşil',
       gradient: 'linear-gradient(135deg, #dff0d0 0%, #dff0d0 50%, #dff0d0 100%)',
+      color: '#dff0d0',
       text: '#3b5943'
     },
     {
       name: 'Krem',
       gradient: 'linear-gradient(135deg, #f2e8d5 0%, #f2e8d5 50%, #f2e8d5 100%)',
+      color: '#f2e8d5',
       text: '#4a3f2f'
     },
     {
       name: 'Kahve',
       gradient: 'linear-gradient(135deg, #4a3226 0%, #4a3226 50%, #4a3226 100%)',
+      color: '#4a3226',
       text: '#f3e6d8'
     }
   ];
+
+  // Sayfanın en dışındaki gerçek arka plan (html/body) ve tarayıcı/PWA
+  // arayüzünün rengini (theme-color meta) aktif temayla senkron tutar.
+  // Bunlar güncellenmezse, güvenli alan (safe area / kaydırma çubuğu
+  // şeridi) gibi bölgelerde her zaman sabit eski renk görünür kalır.
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  const syncChromeColor = (hex) => {
+    document.documentElement.style.backgroundColor = hex;
+    document.body.style.backgroundColor = hex;
+    if (themeColorMeta) themeColorMeta.setAttribute('content', hex);
+  };
 
   const layerA = document.getElementById('themeLayerA');
   const layerB = document.getElementById('themeLayerB');
@@ -10008,6 +10005,7 @@
 
   layerA.style.background = themes[themeIndex].gradient;
   document.documentElement.style.setProperty('--theme-text', themes[themeIndex].text);
+  syncChromeColor(themes[themeIndex].color);
 
   const applyNextTheme = () => {
     themeIndex = (themeIndex + 1) % themes.length;
@@ -10018,6 +10016,7 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
+    syncChromeColor(theme.color);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
@@ -10048,6 +10047,7 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
+    syncChromeColor(theme.color);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
