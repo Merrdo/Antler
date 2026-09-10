@@ -33,14 +33,6 @@
     width: 100%;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
-    /* Sayfa hiçbir zaman kendi ekseninde taşmasın: Android tarayıcılarında
-       (özellikle Samsung Internet) içerik 1px bile taşsa kenarda beliren
-       kaydırma çubuğu/gölgesi böylece hiç ortaya çıkmaz. Uygulama içindeki
-       kaydırılabilir alanlar (listeler, kartlar vb.) kendi overflow-y:auto
-       değerleriyle ayrı ayrı kaydırılabiliyor; bu kural sadece en dıştaki
-       html/body eksenini kilitliyor. */
-    overflow: hidden;
-    overscroll-behavior: none;
   }
 
   /* ---------- Scrollbar'ları gizle (kaydırma işlevi aynen çalışır) ---------- */
@@ -6163,11 +6155,13 @@
   .stopwatch-fullscreen {
     position: fixed;
     inset: 0;
-    /* Artık iç öğeleri flex ile birlikte ortalamıyoruz: sayı kendi başına
-       ekranın tam merkezine (top/left: 50%) sabitleniyor, ipucu/Tur/turlar
-       bloğu ise ondan bağımsız, sabit bir mesafeyle altına konumlanıyor.
-       Böylece Tur butonu görünse de görünmese de, turlar listesi büyüse de
-       küçülse de sayı HER ZAMAN ekranın tam ortasında kalır. */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
     z-index: 60;
     cursor: pointer;
     opacity: 0;
@@ -6187,12 +6181,6 @@
   }
 
   .stopwatch-fullscreen-time-row {
-    /* Ekranın tam merkezine sabit: altındaki ipucu/Tur/turlar bloğunun
-       boyu değişse bile sayı asla kaymaz. */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     display: flex;
     align-items: baseline;
     font-family: "Space Grotesk", sans-serif;
@@ -6232,8 +6220,11 @@
   /* Sayının hemen üzerine eklenen görünmez katman: buraya dokunmak
      kronometreyi duraklatıp tam ekrandan çıkar. Dokunma alanını
      rakamların görsel sınırlarının biraz dışına taşırıyoruz ki parmakla
-     hedeflemesi kolay olsun. (Konumlandırma bağlamı: yukarıdaki
-     .stopwatch-fullscreen-time-row kuralında zaten position: absolute var.) */
+     hedeflemesi kolay olsun. */
+  .stopwatch-fullscreen-time-row {
+    position: relative;
+  }
+
   .stopwatch-exit-zone {
     position: absolute;
     inset: -1.4rem -1rem;
@@ -6259,15 +6250,12 @@
     pointer-events: auto;
   }
 
-  /* İpucu + Tur butonunu saran blok. Artık sayıdan (stopwatch-fullscreen-
-     time-row) tamamen bağımsız: ekran merkezinin sabit bir miktar altına
-     konumlanır, böylece Tur butonu görünüp kaybolsa da, turlar listesi
-     büyüyüp küçülse de yukarıdaki sayının konumunu hiç etkilemez. */
+  /* Zaman + ipucu + Tur butonunu saran sabit boyutlu blok. Bu blok
+     kronometrenin gerçek dikey referans noktasıdır; boyutu tur sayısına
+     göre DEĞİŞMEZ. Tur listesi buna göre mutlak konumlandığı için,
+     liste büyüdükçe/küçüldükçe saat asla yukarı/aşağı kaymaz. */
   .stopwatch-fullscreen-core {
-    position: absolute;
-    top: calc(50% + 2.6rem);
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -6865,11 +6853,8 @@
     align-items: center;
     justify-content: center;
     gap: 0.9rem;
-    /* Bkz. .stopwatch-fullscreen'deki aynı not: üst/alt güvenli alanları
-       birbirine eşitleyerek sayacın her zaman tam ekran merkezinde
-       kalmasını sağlıyoruz. */
-    padding: max(env(safe-area-inset-top), env(safe-area-inset-bottom))
-      max(env(safe-area-inset-right), env(safe-area-inset-left));
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
     z-index: 60;
     cursor: pointer;
     opacity: 0;
@@ -8150,15 +8135,12 @@
          Sayının üzerindeki görünmez alana dokunmak duraklatıp tam
          ekrandan çıkar; boş bir alana dokununca Tur butonu belirir. -->
     <div class="stopwatch-fullscreen" id="stopwatchFullscreen">
-      <!-- Sayı, ekranın tam ortasına kendi başına sabitlenir; altındaki
-           ipucu/Tur/turlar listesi kutusunun boyu değişse bile sayının
-           konumunu etkilemesin diye kardeş (core'un dışında) tutulur. -->
-      <div class="stopwatch-fullscreen-time-row">
-        <span class="stopwatch-time" id="stopwatchTimeFull">00:00:00</span><span class="stopwatch-centis" id="stopwatchCentisFull">.00</span>
-        <!-- Görünmez çıkış alanı: sayının üzerine eklenir, dokununca kronometre duraklar ve tam ekrandan çıkılır -->
-        <div class="stopwatch-exit-zone" id="stopwatchExitZone" role="button" tabindex="0" aria-label="Kronometreyi duraklat ve tam ekrandan çık"></div>
-      </div>
       <div class="stopwatch-fullscreen-core" id="stopwatchFullscreenCore">
+        <div class="stopwatch-fullscreen-time-row">
+          <span class="stopwatch-time" id="stopwatchTimeFull">00:00:00</span><span class="stopwatch-centis" id="stopwatchCentisFull">.00</span>
+          <!-- Görünmez çıkış alanı: sayının üzerine eklenir, dokununca kronometre duraklar ve tam ekrandan çıkılır -->
+          <div class="stopwatch-exit-zone" id="stopwatchExitZone" role="button" tabindex="0" aria-label="Kronometreyi duraklat ve tam ekrandan çık"></div>
+        </div>
         <span class="stopwatch-fullscreen-hint" id="stopwatchFullscreenHint">Duraklatmak için dokun</span>
 
         <button type="button" class="add-task-btn stopwatch-lap-btn" id="stopwatchLapBtn">Tur</button>
