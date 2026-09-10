@@ -4757,77 +4757,6 @@
     display: none;
   }
 
-  /* ---- Kaydedilmiş dosya/link'i tıklayarak açabilme: dosya satırında
-     ayrı bir "aç" ikonu, link alanlarında input'un sağına gömülü aynı
-     ikon; sadece içerik doluyken görünür. ---- */
-  .exam-resources-file-open {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.1rem;
-    height: 2.1rem;
-    color: #121212;
-    background-color: #f2f2f2;
-    border: 2.5px solid #000;
-    border-radius: 0.6rem;
-    cursor: pointer;
-    transition: transform 0.15s ease, background-color 0.18s ease;
-  }
-
-  .exam-resources-file-open:active {
-    transform: translate(1px, 1px);
-  }
-
-  .exam-resources-file-open.is-hidden {
-    display: none;
-  }
-
-  .exam-resources-link-row {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-
-  .exam-resources-link-row .page11-field-input {
-    flex: 1 1 auto;
-    min-width: 0;
-    padding-right: 2.6rem;
-  }
-
-  .exam-resources-link-open {
-    position: absolute;
-    right: 0.35rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.7rem;
-    height: 1.7rem;
-    color: #121212;
-    background-color: transparent;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-  }
-
-  .exam-resources-link-open:active {
-    transform: translate(1px, 1px);
-  }
-
-  .exam-resources-link-open.is-hidden {
-    display: none;
-  }
-
-  body.is-anthracite .exam-resources-file-open {
-    background-color: #2a2c2f;
-    color: #f2f2f4;
-    border-color: #f2f2f4;
-  }
-
-  body.is-anthracite .exam-resources-link-open {
-    color: #f2f2f4;
-  }
-
   /* ---- Kaynaklar pop-up'ı: başlık altı açıklama, bölüm ikonları ve
      iki alanı (cevap anahtarı / video linki) ayıran çizgi. Amaç,
      pop-up'ı tek bakışta "ne işe yarıyor" ve "hangi alan ne bekliyor"
@@ -4927,24 +4856,11 @@
     max-width: 400px;
   }
 
-  /* Diğer panellerdeki (Sayfa 8/9) segmented control'lerle aynı kalın
-     brütalist dil: 4px kenarlık, daha yuvarlak köşe ve gölge — önceki
-     halinde bunlar eksik olduğundan kutu diğerlerine göre "küçük ve
-     oturmamış" görünüyordu. */
   .exam-resources-tabs {
-    height: 56px;
-    background: #fff;
-    border: 4px solid #000;
-    border-radius: 1.1em;
-    box-shadow: 5px 5px 0px 0px #000;
-  }
-
-  .exam-resources-tabs .settings-segmented-slider {
-    border-radius: 0.85em;
+    height: 52px;
   }
 
   .exam-resources-tab-btn {
-    color: #121212;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -5026,18 +4942,6 @@
 
   body.is-anthracite .exam-resources-file-btn.has-file {
     background-color: #1c1d1f;
-  }
-
-  body.is-anthracite .exam-resources-tabs {
-    background-color: var(--dark-card-color, #3b3e42);
-  }
-
-  body.is-anthracite .exam-resources-tab-btn {
-    color: #f2f2f4;
-  }
-
-  body.is-anthracite .exam-resources-tab-btn.is-active {
-    color: #fff;
   }
 
   /* ---------- Sayfa 8: yeni kategori/rutin grubu isim pop-up'ı
@@ -9054,13 +8958,6 @@
               </svg>
               <span id="examResourcesFileName">Dosya seç (PDF/görsel)</span>
             </button>
-            <button type="button" class="exam-resources-file-open is-hidden" id="examResourcesFileOpenBtn" aria-label="Dosyayı aç">
-              <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
-                <path d="M9 6h9v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M18 6L7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M13 6H6v12h12v-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
             <button type="button" class="delete-btn exam-resources-file-remove is-hidden" id="examResourcesFileRemoveBtn" aria-label="Dosyayı kaldır">×</button>
           </div>
           <input type="file" accept="application/pdf,image/*" id="examResourcesFileInput" class="qhavuz-file-input">
@@ -9070,16 +8967,7 @@
 
         <div class="exam-resources-field-group">
           <span class="exam-resources-field-label">Link</span>
-          <div class="exam-resources-link-row">
-            <input type="url" class="page11-field-input" id="examResourcesAnswerLinkInput" placeholder="https://...">
-            <button type="button" class="exam-resources-link-open is-hidden" id="examResourcesAnswerLinkOpenBtn" aria-label="Linki aç">
-              <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
-                <path d="M9 6h9v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M18 6L7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M13 6H6v12h12v-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-          </div>
+          <input type="url" class="page11-field-input" id="examResourcesAnswerLinkInput" placeholder="https://...">
         </div>
       </div>
 
@@ -9087,16 +8975,7 @@
         <span class="exam-resources-section-hint">Bu denemenin video çözümü linkini ekle (YouTube, Drive vb.)</span>
         <div class="exam-resources-field-group">
           <span class="exam-resources-field-label">Link<span class="exam-resources-optional-tag">isteğe bağlı</span></span>
-          <div class="exam-resources-link-row">
-            <input type="url" class="page11-field-input" id="examResourcesVideoLinkInput" placeholder="https://youtube.com/...">
-            <button type="button" class="exam-resources-link-open is-hidden" id="examResourcesVideoLinkOpenBtn" aria-label="Linki aç">
-              <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
-                <path d="M9 6h9v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M18 6L7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M13 6H6v12h12v-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-          </div>
+          <input type="url" class="page11-field-input" id="examResourcesVideoLinkInput" placeholder="https://youtube.com/...">
         </div>
       </div>
 
@@ -11092,42 +10971,6 @@
   // çalmaya devam eder; dosya bulunamazsa veya tarayıcı otomatik oynatmayı
   // engellerse sessizce geçilir (titreşim zaten var).
   let countdownFinishAudio = null;
-  let countdownAudioUnlocked = false;
-
-  // iOS Safari, bir <audio> yalnızca gerçek bir kullanıcı dokunuşu
-  // *içinde* çalınırsa sesi kabul eder; sayaç süresi dolduğunda çağrılan
-  // playCountdownFinishSound() ise bir dokunuş içinde olmadığından (RAF
-  // döngüsünden tetiklenir) iOS onu sessizce engeller — Android/Samsung
-  // tarayıcıları bu kısıtlamayı uygulamadığı için orada sorun görülmez.
-  // Çözüm: "Başlat" butonuna basıldığı an (gerçek bir dokunuş anı) seçili
-  // sesi bir kere sessizce çalıp hemen durdurarak elementi "kilitten"
-  // çıkarıyoruz; sayaç bittiğinde aynı kilidi açılmış öğeyi kullanmak
-  // yeterli oluyor.
-  const unlockCountdownAudio = () => {
-    if (countdownAudioUnlocked) return;
-    const sound = COUNTDOWN_SOUND_OPTIONS.find((s) => s.id === countdownSelectedSoundId) || COUNTDOWN_SOUND_OPTIONS[0];
-    if (!sound) return;
-    try {
-      const audio = new Audio(sound.file);
-      audio.volume = 0;
-      const playPromise = audio.play();
-      if (playPromise && typeof playPromise.then === 'function') {
-        playPromise
-          .then(() => {
-            audio.pause();
-            audio.currentTime = 0;
-            audio.volume = 1;
-            countdownAudioUnlocked = true;
-          })
-          .catch(() => { /* kilit açılamadı, sessizce geç */ });
-      } else {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.volume = 1;
-        countdownAudioUnlocked = true;
-      }
-    } catch (err) { /* yok say */ }
-  };
 
   const playCountdownFinishSound = () => {
     const sound = COUNTDOWN_SOUND_OPTIONS.find((s) => s.id === countdownSelectedSoundId) || COUNTDOWN_SOUND_OPTIONS[0];
@@ -11266,12 +11109,8 @@
       dismissFinishedCountdown();
       return;
     }
-    if (cdRunning) {
-      pauseCountdown();
-    } else {
-      unlockCountdownAudio();
-      startCountdown();
-    }
+    if (cdRunning) pauseCountdown();
+    else startCountdown();
   };
 
   const resetCountdown = () => {
@@ -11353,7 +11192,6 @@
   bindCountdownHoldRepeat(countdownSecDownBtn, () => countdownAdjustSeconds(-1));
 
   if (countdownStartBtn) countdownStartBtn.addEventListener('click', () => {
-    unlockCountdownAudio();
     cdTotalMs = (cdMinutes * 60 + cdSeconds) * 1000;
     if (cdTotalMs <= 0) return;
     cdRemainingMs = cdTotalMs;
@@ -11618,10 +11456,6 @@
   const selectCountdownSound = (id) => {
     if (countdownSelectedSoundId === id) return;
     countdownSelectedSoundId = id;
-    // Farklı bir ses dosyası seçildi: önceki dosya için alınan iOS
-    // oynatma izni yeni dosyaya otomatik geçmeyebilir, o yüzden kilidi
-    // sıfırlayıp bir sonraki "Başlat"ta yeniden kilit açtırıyoruz.
-    countdownAudioUnlocked = false;
     saveAppState({ countdownSoundId: id });
     renderCountdownSoundsList();
   };
@@ -15307,22 +15141,12 @@
   const examResourcesFileRow = document.getElementById('examResourcesFileRow');
   const examResourcesFilePickBtn = document.getElementById('examResourcesFilePickBtn');
   const examResourcesFileName = document.getElementById('examResourcesFileName');
-  const examResourcesFileOpenBtn = document.getElementById('examResourcesFileOpenBtn');
   const examResourcesFileRemoveBtn = document.getElementById('examResourcesFileRemoveBtn');
   const examResourcesFileInput = document.getElementById('examResourcesFileInput');
   const examResourcesAnswerLinkInput = document.getElementById('examResourcesAnswerLinkInput');
-  const examResourcesAnswerLinkOpenBtn = document.getElementById('examResourcesAnswerLinkOpenBtn');
   const examResourcesVideoLinkInput = document.getElementById('examResourcesVideoLinkInput');
-  const examResourcesVideoLinkOpenBtn = document.getElementById('examResourcesVideoLinkOpenBtn');
   const examResourcesCancelBtn = document.getElementById('examResourcesCancelBtn');
   const examResourcesSaveBtn = document.getElementById('examResourcesSaveBtn');
-
-  // Kaydedilmiş bir dosya (data URL) veya link'i yeni sekmede açar; dosya
-  // data URL'leri tarayıcının kendi görüntüleyicisinde (PDF/görsel) açılır.
-  const openExamResourceUrl = (url) => {
-    if (!url) return;
-    try { window.open(url, '_blank', 'noopener'); } catch (err) { /* yok say */ }
-  };
 
   const EXAM_RESOURCES_FILE_PLACEHOLDER = 'Dosya seç (PDF/görsel)';
 
@@ -15342,20 +15166,12 @@
     if (examResourcesPendingFile) {
       examResourcesFileName.textContent = examResourcesPendingFile.name;
       examResourcesFilePickBtn.classList.add('has-file');
-      examResourcesFileOpenBtn.classList.remove('is-hidden');
       examResourcesFileRemoveBtn.classList.remove('is-hidden');
     } else {
       examResourcesFileName.textContent = EXAM_RESOURCES_FILE_PLACEHOLDER;
       examResourcesFilePickBtn.classList.remove('has-file');
-      examResourcesFileOpenBtn.classList.add('is-hidden');
       examResourcesFileRemoveBtn.classList.add('is-hidden');
     }
-  };
-
-  // Link alanları doldukça/boşaldıkça yanlarındaki "aç" ikonunu göster/gizle.
-  const updateExamResourcesLinkOpenUI = (input, btn) => {
-    if (!input || !btn) return;
-    btn.classList.toggle('is-hidden', !input.value.trim());
   };
 
   // "Cevap Anahtarı" ve "Video Çözümü" iki ayrı sekme: her an yalnızca
@@ -15380,8 +15196,6 @@
     examResourcesAnswerLinkInput.value = res.answerKeyLink || '';
     examResourcesVideoLinkInput.value = res.videoUrl || '';
     updateExamResourcesFileBtnUI();
-    updateExamResourcesLinkOpenUI(examResourcesAnswerLinkInput, examResourcesAnswerLinkOpenBtn);
-    updateExamResourcesLinkOpenUI(examResourcesVideoLinkInput, examResourcesVideoLinkOpenBtn);
     examResourcesFileInput.value = '';
     const { hasAnswerKey, hasVideo } = page11UpdateResourcesIndicator();
     examResourcesAnswerKeyDot.parentElement.classList.toggle('has-content', hasAnswerKey);
@@ -15422,29 +15236,6 @@
     examResourcesPendingFile = null;
     examResourcesFileInput.value = '';
     updateExamResourcesFileBtnUI();
-  });
-
-  examResourcesFileOpenBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (examResourcesPendingFile) openExamResourceUrl(examResourcesPendingFile.dataUrl);
-  });
-
-  examResourcesAnswerLinkInput.addEventListener('input', () => {
-    updateExamResourcesLinkOpenUI(examResourcesAnswerLinkInput, examResourcesAnswerLinkOpenBtn);
-  });
-
-  examResourcesVideoLinkInput.addEventListener('input', () => {
-    updateExamResourcesLinkOpenUI(examResourcesVideoLinkInput, examResourcesVideoLinkOpenBtn);
-  });
-
-  examResourcesAnswerLinkOpenBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openExamResourceUrl(examResourcesAnswerLinkInput.value.trim());
-  });
-
-  examResourcesVideoLinkOpenBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openExamResourceUrl(examResourcesVideoLinkInput.value.trim());
   });
 
   examResourcesSaveBtn.addEventListener('click', () => {
