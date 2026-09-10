@@ -4705,6 +4705,66 @@
     box-shadow: 4px 4px 0px 0px #000;
   }
 
+  /* ---- "Kaynaklar" pop-up'ı: cevap anahtarı dosya/link seçici satırı
+     ve video linki alanı; page11-field/page11-field-input diliyle
+     uyumlu, sade ek kurallar. ---- */
+  .exam-resources-file-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .exam-resources-file-row.is-hidden {
+    display: none;
+  }
+
+  .exam-resources-file-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    box-sizing: border-box;
+    padding: 0.55rem 0.7rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #121212;
+    background-color: #f2f2f2;
+    border: 2.5px dashed #000;
+    border-radius: 0.7rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.18s ease, border-style 0.15s ease;
+  }
+
+  .exam-resources-file-btn span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .exam-resources-file-btn svg {
+    flex-shrink: 0;
+  }
+
+  .exam-resources-file-btn:active {
+    transform: translate(1px, 1px);
+  }
+
+  .exam-resources-file-btn.has-file {
+    border-style: solid;
+    background-color: #fff;
+  }
+
+  .exam-resources-file-remove {
+    flex-shrink: 0;
+  }
+
+  .exam-resources-file-remove.is-hidden {
+    display: none;
+  }
+
   /* ---- Kaynaklar pop-up'ı: başlık altı açıklama, bölüm ikonları ve
      iki alanı (cevap anahtarı / video linki) ayıran çizgi. Amaç,
      pop-up'ı tek bakışta "ne işe yarıyor" ve "hangi alan ne bekliyor"
@@ -4853,8 +4913,8 @@
 
   body.is-anthracite .exam-resources-section-icon {
     background: #2a2c2f;
-    color: rgba(242, 242, 244, 0.72);
-    border-color: rgba(242, 242, 244, 0.32);
+    color: #f2f2f4;
+    border-color: #f2f2f4;
   }
 
   body.is-anthracite .exam-resources-section-title {
@@ -4906,6 +4966,78 @@
 
   body.is-anthracite .exam-resources-thumb {
     background: #2a2c2f;
+  }
+
+  /* ---- Kaynaklar pop-up'ı: cevap anahtarı dosya listesi. Her satır bir
+     dosya adı + türe göre ikon gösterir; dokununca dosya önizleme
+     pop-up'ı açılır, sağ uçtaki × ile silinir. ---- */
+  .exam-resources-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .exam-resources-file-list:empty {
+    display: none;
+  }
+
+  .exam-resources-file-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-sizing: border-box;
+    padding: 0.48rem 2.1rem 0.48rem 0.6rem;
+    background-color: #f2f2f2;
+    border: 2px solid #000;
+    border-radius: 0.65rem;
+    cursor: pointer;
+    transition: background-color 0.18s ease;
+  }
+
+  .exam-resources-file-item:active {
+    background-color: #e8e8e8;
+  }
+
+  .exam-resources-file-item-icon {
+    flex-shrink: 0;
+    display: flex;
+  }
+
+  .exam-resources-file-item-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #121212;
+  }
+
+  .exam-resources-file-item-remove {
+    position: absolute;
+    top: 50%;
+    right: 0.4rem;
+    transform: translateY(-50%);
+    width: 1.45rem;
+    height: 1.45rem;
+    font-size: 0.7rem;
+    border-width: 2px;
+    box-shadow: 1.5px 1.5px 0px 0px #000;
+  }
+
+  body.is-anthracite .exam-resources-file-item {
+    background-color: #2a2c2f;
+    border-color: #f2f2f4;
+  }
+
+  body.is-anthracite .exam-resources-file-item:active {
+    background-color: #1c1d1f;
+  }
+
+  body.is-anthracite .exam-resources-file-item-name {
+    color: #f2f2f4;
   }
 
   /* ---- Kaynaklar: cevap anahtarı görselleri arasında sağa/sola
@@ -4994,137 +5126,90 @@
     border-color: #000;
   }
 
-  /* ---- Kaynaklar: "Video Çözüm" alanı. Dosya listesi yerine, tek bir
-     link saklayan sade bir form + kayıtlı linki gösteren bir satır.
-     Üstteki "Ekle" chip'i tıklanınca form açılır (kayıtlı link varsa
-     chip "Düzenle" olur ve form o linkle önceden doldurulur); onay
-     (✓) butonuna basılınca form kapanır ve link satırı görünür olur. ---- */
-  .exam-resources-video-form {
+  /* ---- Kaynaklar: dosya önizleme pop-up'ı. PDF/resim/metin gibi
+     tarayıcının doğrudan render edebildiği türler iframe içinde açılır;
+     diğer türlerde bunun yerine bir "Dosyayı Aç" bağlantısı gösterilir. ---- */
+  .exam-res-fileview-card {
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .exam-res-fileview-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.7rem 0.8rem;
+    background: #fff;
+    border-bottom: 4px solid #000;
   }
 
-  .exam-resources-video-form.is-hidden {
-    display: none;
-  }
-
-  .exam-resources-video-input {
-    flex: 1 1 auto;
-    min-width: 0;
-    box-sizing: border-box;
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 700;
-    font-size: 0.82rem;
-    color: #121212;
-    background-color: #f2f2f2;
-    border: 2.5px solid #000;
-    border-radius: 0.7rem;
-    padding: 0.55rem 0.7rem;
-  }
-
-  .exam-resources-video-input::placeholder {
-    color: rgba(18, 18, 18, 0.4);
-    font-weight: 600;
-  }
-
-  .exam-resources-video-save {
-    flex-shrink: 0;
-    width: 2.1rem;
-    height: 2.1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    color: #fff;
-    background: #121212;
-    border: 2.5px solid #000;
-    border-radius: 0.7rem;
-    box-shadow: 3px 3px 0px 0px #000;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-  }
-
-  .exam-resources-video-save:active {
-    transform: translate(1.5px, 1.5px);
-    box-shadow: 1.5px 1.5px 0px 0px #000;
-    background: var(--accent-color, #ff90e8);
-    color: #121212;
-  }
-
-  .exam-resources-video-link {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-sizing: border-box;
-    padding: 0.5rem 2.1rem 0.5rem 0.6rem;
-    background-color: #f2f2f2;
-    border: 2px solid #000;
-    border-radius: 0.65rem;
-    cursor: pointer;
-    transition: background-color 0.18s ease;
-  }
-
-  .exam-resources-video-link.is-hidden {
-    display: none;
-  }
-
-  .exam-resources-video-link:active {
-    background-color: #e8e8e8;
-  }
-
-  .exam-resources-video-link-icon {
-    flex-shrink: 0;
-    display: flex;
-    color: #121212;
-  }
-
-  .exam-resources-video-link-text {
+  .exam-res-fileview-title {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-family: "Space Grotesk", sans-serif;
-    font-weight: 700;
-    font-size: 0.78rem;
+    font-weight: 800;
+    font-size: 0.88rem;
     color: #121212;
   }
 
-  .exam-resources-video-link-remove {
-    position: absolute;
-    top: 50%;
-    right: 0.4rem;
-    transform: translateY(-50%);
-    width: 1.45rem;
-    height: 1.45rem;
-    font-size: 0.7rem;
-    border-width: 2px;
-    box-shadow: 1.5px 1.5px 0px 0px #000;
+  .exam-res-fileview-close {
+    flex-shrink: 0;
+    position: static;
   }
 
-  body.is-anthracite .exam-resources-video-input {
-    background-color: #2a2c2f;
-    border-color: #f2f2f4;
+  .exam-res-fileview-frame {
+    display: block;
+    width: 100%;
+    height: min(70vh, 520px);
+    border: 0;
+    background: #f2f2f2;
+  }
+
+  .exam-res-fileview-frame.is-hidden {
+    display: none;
+  }
+
+  .exam-res-fileview-fallback {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    height: min(70vh, 520px);
+    padding: 1.5rem;
+    text-align: center;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: rgba(18, 18, 18, 0.65);
+    background: #f2f2f2;
+  }
+
+  .exam-res-fileview-fallback.is-hidden {
+    display: none;
+  }
+
+  .exam-res-fileview-fallback:not(.is-hidden) {
+    display: flex;
+  }
+
+  body.is-anthracite .exam-res-fileview-header {
+    background: var(--dark-card-color, #3b3e42);
+    border-color: #000;
+  }
+
+  body.is-anthracite .exam-res-fileview-title {
     color: #f2f2f4;
   }
 
-  body.is-anthracite .exam-resources-video-input::placeholder {
-    color: rgba(242, 242, 244, 0.4);
-  }
-
-  body.is-anthracite .exam-resources-video-link {
-    background-color: #2a2c2f;
-    border-color: #f2f2f4;
-  }
-
-  body.is-anthracite .exam-resources-video-link:active {
-    background-color: #1c1d1f;
-  }
-
-  body.is-anthracite .exam-resources-video-link-icon,
-  body.is-anthracite .exam-resources-video-link-text {
-    color: #f2f2f4;
+  body.is-anthracite .exam-res-fileview-frame,
+  body.is-anthracite .exam-res-fileview-fallback {
+    background: #2a2c2f;
+    color: rgba(242, 242, 244, 0.7);
   }
 
   /* ---------- Sayfa 8: yeni kategori/rutin grubu isim pop-up'ı
@@ -9107,15 +9192,15 @@
   </div>
 
   <!-- Sayfa 11 Detay: üst çubuktaki "Kaynaklar" butonuyla açılan pop-up.
-       Cevap anahtarını görsel olarak, video çözümünü de link olarak
-       ayrı bir alanda saklar; page11AddBackdrop ile aynı kart dilini
-       kullanır. -->
+       Cevap anahtarını dosya (PDF/görsel) veya link olarak, video çözümü
+       linkini de ayrı bir alanda saklar; page11AddBackdrop ile aynı
+       kart dilini kullanır. -->
   <div class="settings-confirm-backdrop" id="examResourcesBackdrop">
     <div class="page11-modal-card exam-resources-card">
       <div class="exam-resources-header">
         <div class="page11-modal-heading">
           <span class="page11-modal-title">Kaynaklar</span>
-          <span class="page11-modal-subtitle">Cevap anahtarını görsel, video çözümünü link olarak ekle</span>
+          <span class="page11-modal-subtitle">Cevap anahtarını görsel veya dosya olarak ekle</span>
         </div>
         <button type="button" class="delete-btn exam-resources-close" id="examResourcesCancelBtn" aria-label="Kapat">×</button>
       </div>
@@ -9146,37 +9231,21 @@
         <div class="exam-resources-section-top">
           <span class="exam-resources-section-icon">
             <svg viewBox="0 0 24 24" width="15" height="15">
-              <circle cx="12" cy="12" r="8.3" fill="none" stroke="currentColor" stroke-width="2"/>
-              <path d="M10.1 8.6l5.3 3.4-5.3 3.4z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              <path d="M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9.5A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M14 3.5V7a1 1 0 0 0 1 1h3.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
             </svg>
           </span>
           <div class="exam-resources-section-text">
-            <span class="exam-resources-section-title">Video Çözüm</span>
-            <span class="exam-resources-section-hint">Bu denemenin video çözüm linkini ekle</span>
+            <span class="exam-resources-section-title">Dosya</span>
+            <span class="exam-resources-section-hint">PDF gibi dosyaları uygulama içinde açabilirsin</span>
           </div>
-          <button type="button" class="exam-resources-add-chip" id="examResourcesVideoChipBtn" aria-label="Video linki ekle">
+          <button type="button" class="exam-resources-add-chip" id="examResourcesAddFileBtn" aria-label="Dosya ekle">
             <svg viewBox="0 0 24 24" width="11" height="11"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
-            <span id="examResourcesVideoChipLabel">Ekle</span>
+            Ekle
           </button>
         </div>
-
-        <div class="exam-resources-video-form is-hidden" id="examResourcesVideoForm">
-          <input type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" class="exam-resources-video-input" id="examResourcesVideoInput" placeholder="https://youtube.com/...">
-          <button type="button" class="exam-resources-video-save" id="examResourcesVideoSaveBtn" aria-label="Linki kaydet">
-            <svg viewBox="0 0 24 24" width="13" height="13"><path d="M5 13l4 4 10-10" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-
-        <div class="exam-resources-video-link is-hidden" id="examResourcesVideoLinkRow">
-          <span class="exam-resources-video-link-icon">
-            <svg viewBox="0 0 24 24" width="15" height="15">
-              <circle cx="12" cy="12" r="8.3" fill="none" stroke="currentColor" stroke-width="2"/>
-              <path d="M10.1 8.6l5.3 3.4-5.3 3.4z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-            </svg>
-          </span>
-          <span class="exam-resources-video-link-text" id="examResourcesVideoLinkText"></span>
-          <button type="button" class="delete-btn exam-resources-video-link-remove" id="examResourcesVideoRemoveBtn" aria-label="Video linkini kaldır">×</button>
-        </div>
+        <div class="exam-resources-file-list" id="examResourcesFileList"></div>
+        <input type="file" multiple class="qhavuz-file-input" id="examResourcesFileInput">
       </div>
     </div>
   </div>
@@ -9197,6 +9266,24 @@
         </button>
       </div>
       <div class="exam-res-gallery-counter" id="examResGalleryCounter"></div>
+    </div>
+  </div>
+
+  <!-- Kaynaklar: cevap anahtarı olarak eklenen bir dosyayı uygulama
+       içinde açan önizleme pop-up'ı. Önizlenebilen türler (PDF, resim,
+       düz metin) iframe içinde gösterilir; diğerleri için dosyayı açmayı
+       sağlayan bir bağlantı sunulur. -->
+  <div class="qhavuz-lightbox-backdrop exam-res-fileview-backdrop" id="examResFileViewBackdrop">
+    <div class="qhavuz-lightbox-card exam-res-fileview-card">
+      <div class="exam-res-fileview-header">
+        <span class="exam-res-fileview-title" id="examResFileViewTitle"></span>
+        <button type="button" class="delete-btn exam-res-fileview-close" id="examResFileViewClose" aria-label="Kapat">×</button>
+      </div>
+      <iframe class="exam-res-fileview-frame" id="examResFileViewFrame" title="Dosya önizleme"></iframe>
+      <div class="exam-res-fileview-fallback is-hidden" id="examResFileViewFallback">
+        <span>Bu dosya türü uygulama içinde önizlenemiyor.</span>
+        <a href="#" class="add-task-btn" id="examResFileViewOpenLink" target="_blank" rel="noopener">Dosyayı Aç</a>
+      </div>
     </div>
   </div>
 
@@ -15341,25 +15428,21 @@
     });
   });
 
-  // ---- "Kaynaklar" pop-up'ı: cevap anahtarı görselleri ve video çözüm
-  // linki. Deneme nesnesine `resources` alanı olarak kaydedilir:
-  // { answerKeyImages: ["idb://..."], videoLink: "https://..." }
+  // ---- "Kaynaklar" pop-up'ı: cevap anahtarı görselleri ve dosyaları.
+  // Deneme nesnesine `resources` alanı olarak kaydedilir:
+  // { answerKeyImages: ["idb://..."], answerKeyFiles: [{id, ref, name, type}] }
   // Görseller Soru Havuzu'ndaki gibi IndexedDB'ye Blob olarak yazılır ve
-  // galeri lightbox'ında sağa/sola kaydırılarak gezilir; video linki ise
-  // düz bir metin olarak saklanır ve dokununca yeni sekmede açılır.
+  // galeri lightbox'ında sağa/sola kaydırılarak gezilir; dosyalar da ham
+  // Blob olarak aynı depoya yazılıp uygulama içindeki bir önizleme
+  // pop-up'ında (iframe) açılır.
   const examResourcesBackdrop = document.getElementById('examResourcesBackdrop');
   const examResourcesCancelBtn = document.getElementById('examResourcesCancelBtn');
   const examResourcesImageGrid = document.getElementById('examResourcesImageGrid');
   const examResourcesAddImageBtn = document.getElementById('examResourcesAddImageBtn');
   const examResourcesImageInput = document.getElementById('examResourcesImageInput');
-  const examResourcesVideoChipBtn = document.getElementById('examResourcesVideoChipBtn');
-  const examResourcesVideoChipLabel = document.getElementById('examResourcesVideoChipLabel');
-  const examResourcesVideoForm = document.getElementById('examResourcesVideoForm');
-  const examResourcesVideoInput = document.getElementById('examResourcesVideoInput');
-  const examResourcesVideoSaveBtn = document.getElementById('examResourcesVideoSaveBtn');
-  const examResourcesVideoLinkRow = document.getElementById('examResourcesVideoLinkRow');
-  const examResourcesVideoLinkText = document.getElementById('examResourcesVideoLinkText');
-  const examResourcesVideoRemoveBtn = document.getElementById('examResourcesVideoRemoveBtn');
+  const examResourcesFileList = document.getElementById('examResourcesFileList');
+  const examResourcesAddFileBtn = document.getElementById('examResourcesAddFileBtn');
+  const examResourcesFileInput = document.getElementById('examResourcesFileInput');
 
   const examResGalleryBackdrop = document.getElementById('examResGalleryBackdrop');
   const examResGalleryClose = document.getElementById('examResGalleryClose');
@@ -15369,12 +15452,19 @@
   const examResGalleryNext = document.getElementById('examResGalleryNext');
   const examResGalleryCounter = document.getElementById('examResGalleryCounter');
 
+  const examResFileViewBackdrop = document.getElementById('examResFileViewBackdrop');
+  const examResFileViewClose = document.getElementById('examResFileViewClose');
+  const examResFileViewTitle = document.getElementById('examResFileViewTitle');
+  const examResFileViewFrame = document.getElementById('examResFileViewFrame');
+  const examResFileViewFallback = document.getElementById('examResFileViewFallback');
+  const examResFileViewOpenLink = document.getElementById('examResFileViewOpenLink');
+
   // Bir denemenin `resources` alanını, eksik alt alanlar için güvenli
   // varsayılanlarla birlikte döndürür (eski kayıtlarda hiç yoktu).
   const page11GetResources = (exam) => {
     if (!exam.resources || typeof exam.resources !== 'object') exam.resources = {};
     if (!Array.isArray(exam.resources.answerKeyImages)) exam.resources.answerKeyImages = [];
-    if (typeof exam.resources.videoLink !== 'string') exam.resources.videoLink = '';
+    if (!Array.isArray(exam.resources.answerKeyFiles)) exam.resources.answerKeyFiles = [];
     return exam.resources;
   };
 
@@ -15382,13 +15472,15 @@
     const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
     if (!exam) { examDetailResourcesBtn.classList.remove('has-resources'); return { hasAnswerKey: false }; }
     const res = page11GetResources(exam);
-    const hasAnswerKey = res.answerKeyImages.length > 0 || !!res.videoLink;
+    const hasAnswerKey = res.answerKeyImages.length > 0 || res.answerKeyFiles.length > 0;
     examDetailResourcesBtn.classList.toggle('has-resources', hasAnswerKey);
     return { hasAnswerKey };
   };
 
+  const examResourcesFileIconSvg = '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9.5A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3.5V7a1 1 0 0 0 1 1h3.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+
   // Pop-up her açıldığında ve her ekleme/silmeden sonra görsel ızgarasını
-  // ve video linki alanını o denemenin güncel `resources` durumuna göre
+  // ve dosya listesini o denemenin güncel `resources` durumuna göre
   // baştan çizer.
   const renderExamResourcesModal = (exam) => {
     const res = page11GetResources(exam);
@@ -15425,16 +15517,45 @@
       examResourcesImageGrid.appendChild(thumb);
     });
 
-    // Video linki: kayıtlı bir link varsa link satırını göster ve chip'i
-    // "Düzenle"ye çevir; yoksa link satırını gizle ve chip "Ekle" kalsın.
-    // Form her render'da kapatılır (açık kalması gereken tek an, chip'e
-    // az önce basıldığı andır ve o zaten renderExamResourcesModal'ı
-    // tetiklemez).
-    const hasVideo = !!res.videoLink;
-    examResourcesVideoChipLabel.textContent = hasVideo ? 'Düzenle' : 'Ekle';
-    examResourcesVideoLinkRow.classList.toggle('is-hidden', !hasVideo);
-    examResourcesVideoLinkText.textContent = hasVideo ? res.videoLink : '';
-    examResourcesVideoForm.classList.add('is-hidden');
+    examResourcesFileList.innerHTML = '';
+    res.answerKeyFiles.forEach((file) => {
+      const row = document.createElement('div');
+      row.className = 'exam-resources-file-item';
+
+      const icon = document.createElement('span');
+      icon.className = 'exam-resources-file-item-icon';
+      icon.innerHTML = examResourcesFileIconSvg;
+      row.appendChild(icon);
+
+      const name = document.createElement('span');
+      name.className = 'exam-resources-file-item-name';
+      name.textContent = file.name || 'Dosya';
+      row.appendChild(name);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'delete-btn exam-resources-file-item-remove';
+      removeBtn.textContent = '×';
+      removeBtn.setAttribute('aria-label', 'Dosyayı sil');
+      removeBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await deleteImageRef(file.ref);
+        res.answerKeyFiles = res.answerKeyFiles.filter((it) => it.id !== file.id);
+        savePage11State();
+        renderExamResourcesModal(exam);
+        page11UpdateResourcesIndicator();
+      });
+      row.appendChild(removeBtn);
+
+      // Silme butonu haricinde satıra dokununca dosya, uygulama içindeki
+      // önizleme pop-up'ında açılır.
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('.exam-resources-file-item-remove')) return;
+        openExamResFileView(file);
+      });
+
+      examResourcesFileList.appendChild(row);
+    });
   };
 
   const openExamResourcesModal = () => {
@@ -15487,67 +15608,33 @@
     page11UpdateResourcesIndicator();
   });
 
-  // "Video Çözüm" chip'i: link yoksa/varsa formu açıp kapatır. Form
-  // açılırken kayıtlı link varsa girişe önceden doldurulur (düzenleme),
-  // link satırı geçici olarak gizlenir ve girişe odaklanılır.
-  const toggleExamResourcesVideoForm = (forceOpen) => {
+  // "+ Dosya Ekle": birden fazla dosya (PDF vb.) seçilebilir; ham Blob
+  // olarak, görsellerle aynı IndexedDB deposuna yazılır (sıkıştırma
+  // uygulanmaz, tür bilgisi ayrıca saklanır ki önizlemede kullanılsın).
+  examResourcesAddFileBtn.addEventListener('click', () => examResourcesFileInput.click());
+
+  examResourcesFileInput.addEventListener('change', async () => {
+    const files = Array.from(examResourcesFileInput.files || []);
+    examResourcesFileInput.value = '';
+    if (!files.length) return;
     const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
     if (!exam) return;
     const res = page11GetResources(exam);
-    const willOpen = typeof forceOpen === 'boolean'
-      ? forceOpen
-      : examResourcesVideoForm.classList.contains('is-hidden');
-    if (!willOpen) {
-      examResourcesVideoForm.classList.add('is-hidden');
-      examResourcesVideoLinkRow.classList.toggle('is-hidden', !res.videoLink);
-      return;
+
+    for (const file of files) {
+      const ref = await idbPutImageBlob(file);
+      if (!ref) continue;
+      res.answerKeyFiles.push({
+        id: randomFileId(),
+        ref,
+        name: file.name || 'Dosya',
+        type: file.type || ''
+      });
     }
-    examResourcesVideoInput.value = res.videoLink || '';
-    examResourcesVideoLinkRow.classList.add('is-hidden');
-    examResourcesVideoForm.classList.remove('is-hidden');
-    setTimeout(() => examResourcesVideoInput.focus(), 30);
-  };
 
-  examResourcesVideoChipBtn.addEventListener('click', () => toggleExamResourcesVideoForm());
-
-  // Linki kaydeder; şemasız yapıştırılan adreslere ("youtu.be/..." gibi)
-  // otomatik olarak "https://" eklenir ki dokununca doğrudan açılabilsin.
-  const saveExamResourcesVideoLink = () => {
-    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
-    if (!exam) return;
-    const res = page11GetResources(exam);
-    let value = examResourcesVideoInput.value.trim();
-    if (value && !/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(value)) value = `https://${value}`;
-    res.videoLink = value;
     savePage11State();
     renderExamResourcesModal(exam);
     page11UpdateResourcesIndicator();
-  };
-
-  examResourcesVideoSaveBtn.addEventListener('click', saveExamResourcesVideoLink);
-  examResourcesVideoInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); saveExamResourcesVideoLink(); }
-  });
-
-  // Video linkini kaldırır (link satırındaki × butonu).
-  examResourcesVideoRemoveBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
-    if (!exam) return;
-    const res = page11GetResources(exam);
-    res.videoLink = '';
-    savePage11State();
-    renderExamResourcesModal(exam);
-    page11UpdateResourcesIndicator();
-  });
-
-  // Silme butonu haricinde link satırına dokununca video, yeni sekmede açılır.
-  examResourcesVideoLinkRow.addEventListener('click', (e) => {
-    if (e.target.closest('.exam-resources-video-link-remove')) return;
-    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
-    if (!exam) return;
-    const res = page11GetResources(exam);
-    if (res.videoLink) window.open(res.videoLink, '_blank', 'noopener');
   });
 
   // ---- Cevap anahtarı galerisi: birden fazla görsel arasında sağa/sola
@@ -15622,6 +15709,45 @@
       }
     }, { passive: true });
   })();
+
+  // ---- Cevap anahtarı dosyası önizleme ----
+  // Tarayıcının iframe içinde doğrudan gösterebildiği türler (PDF, resim,
+  // düz metin) doğrudan uygulama içinde render edilir; diğer türlerde
+  // (ör. Word/Excel) tarayıcı bunları görüntüleyemediği için bunun yerine
+  // dosyayı açan bir bağlantı sunulur.
+  const examResFilePreviewable = (type) => (
+    !!type && (type === 'application/pdf' || type.startsWith('image/') || type.startsWith('text/'))
+  );
+
+  const openExamResFileView = async (file) => {
+    examResFileViewTitle.textContent = file.name || 'Dosya';
+    examResFileViewFrame.src = 'about:blank';
+    examResFileViewFrame.classList.add('is-hidden');
+    examResFileViewFallback.classList.add('is-hidden');
+    examResFileViewBackdrop.classList.add('is-open');
+
+    const url = await resolveImageSrc(file.ref);
+    if (!url) return;
+
+    if (examResFilePreviewable(file.type)) {
+      examResFileViewFrame.src = url;
+      examResFileViewFrame.classList.remove('is-hidden');
+    } else {
+      examResFileViewOpenLink.href = url;
+      examResFileViewOpenLink.download = file.name || '';
+      examResFileViewFallback.classList.remove('is-hidden');
+    }
+  };
+
+  const closeExamResFileView = () => {
+    examResFileViewBackdrop.classList.remove('is-open');
+    examResFileViewFrame.src = 'about:blank';
+  };
+
+  examResFileViewClose.addEventListener('click', closeExamResFileView);
+  examResFileViewBackdrop.addEventListener('click', (e) => {
+    if (e.target === examResFileViewBackdrop) closeExamResFileView();
+  });
 
   // ---- Yanlış/boş bırakılan soruya görsel ekleme pop-up'ı ----
   const page11QuestionBackdrop = document.getElementById('page11QuestionBackdrop');
