@@ -49,6 +49,17 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Uygulama genelinde kaydırma çubuklarını gizle (tüm kaydırılabilir
+     alanları tek tek işaretlemeye gerek kalmasın diye evrensel kural). */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE / eski Edge */
+  }
+
+  *::-webkit-scrollbar {
+    display: none; /* Safari / Chrome / yeni Edge */
+  }
+
   button, a, * {
     -webkit-tap-highlight-color: transparent;
   }
@@ -150,7 +161,7 @@
     bottom: 0;
     display: flex;
     justify-content: center;
-    padding: 16px 16px 16px;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px) + 20px);
     pointer-events: none;
   }
 
@@ -5819,6 +5830,13 @@
     border-radius: 1.1em;
     box-shadow: 6px 6px 0px 0px #000;
     overflow: hidden;
+    /* iOS Safari'de kaydırma sırasında border-radius + overflow:hidden
+       kombinasyonu köşelerde ara sıra ince bir boşluk/kesim hatası
+       (sızıntı) bırakabiliyor. Kartı kendi katmanına sabitleyip köşe
+       maskesini zorlayarak bu aralıklı sızıntıyı tamamen engelliyoruz. */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
   }
 
   .exam-detail-subject-accent {
