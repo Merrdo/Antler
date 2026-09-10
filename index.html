@@ -54,6 +54,11 @@
   * {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE / eski Edge */
+    /* iOS'ta önceden sadece bir sayfada tanımlıydı; diğer tüm
+       kaydırılabilir alanlarda (Ayarlar, deneme detayı vb.) bu eksik
+       olduğu için kaydırma bazen "yapışkan"/takılıyor hissettiriyordu.
+       Tüm elemanlara uygulamak native momentum kaydırmayı garantiler. */
+    -webkit-overflow-scrolling: touch;
   }
 
   *::-webkit-scrollbar {
@@ -1904,6 +1909,10 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.22s ease;
+    /* Pop-up açıkken arkadaki sayfanın kaydırılabilmesini (page9-add-backdrop
+       ile aynı çözüm) engeller. */
+    touch-action: none;
+    overscroll-behavior: contain;
   }
 
   .wheel-color-backdrop.is-open {
@@ -7948,6 +7957,11 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.22s ease;
+    /* Bu pop-up ailesi (Kaynaklar, tarih seçici, sıfırlama onayı vb.)
+       açıkken arkadaki sayfanın kaydırılabilmesini engeller (page9-add-backdrop
+       ile aynı çözüm). */
+    touch-action: none;
+    overscroll-behavior: contain;
   }
 
   .settings-confirm-backdrop.is-open {
