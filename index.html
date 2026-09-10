@@ -54,11 +54,6 @@
   * {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE / eski Edge */
-    /* iOS'ta önceden sadece bir sayfada tanımlıydı; diğer tüm
-       kaydırılabilir alanlarda (Ayarlar, deneme detayı vb.) bu eksik
-       olduğu için kaydırma bazen "yapışkan"/takılıyor hissettiriyordu.
-       Tüm elemanlara uygulamak native momentum kaydırmayı garantiler. */
-    -webkit-overflow-scrolling: touch;
   }
 
   *::-webkit-scrollbar {
@@ -1813,6 +1808,7 @@
   .wheel-options-scroll {
     max-height: 118px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     padding: 3px 4px;
     margin: -3px -4px;
@@ -1909,10 +1905,6 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.22s ease;
-    /* Pop-up açıkken arkadaki sayfanın kaydırılabilmesini (page9-add-backdrop
-       ile aynı çözüm) engeller. */
-    touch-action: none;
-    overscroll-behavior: contain;
   }
 
   .wheel-color-backdrop.is-open {
@@ -2034,6 +2026,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -2051,6 +2044,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -2822,6 +2816,7 @@
     max-width: 420px;
     max-height: 82vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     /* Kartın kendisi dikey olarak kaydırılabilir kalsın diye backdrop'un
        "touch-action: none" kısıtlamasını burada geri açıyoruz. */
     touch-action: pan-y;
@@ -3044,6 +3039,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -3446,6 +3442,7 @@
     width: 100%;
     max-height: 55vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     border: 2.5px solid #000;
     border-radius: 0.8rem;
@@ -3620,6 +3617,7 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px 28px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -4293,6 +4291,7 @@
     gap: 0.55rem;
     max-height: 320px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .page10-log-row {
@@ -4412,6 +4411,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -5399,6 +5399,7 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px 28px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* ---------- Sayfa 11 - Analizlerim / 0 Hata Testlerim (tam ekran) ----------
@@ -5412,6 +5413,7 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px 28px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Branş kartındaki doğru/yanlış/boş toplamlarını gösteren küçük satır;
@@ -6469,6 +6471,7 @@
     max-width: 300px;
     max-height: 26vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -7175,6 +7178,7 @@
     gap: 1.1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .calendar-topbar {
@@ -7457,6 +7461,7 @@
     gap: 1.1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Artık nav bar'da kendi sekmesi olmadığından (Sayfa 5'teki "Geçmiş"
@@ -7468,6 +7473,7 @@
     justify-content: flex-start;
     padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .laps-page-card {
@@ -7792,6 +7798,7 @@
     gap: 1.1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   #page-patterns .calendar-topbar {
@@ -7957,11 +7964,6 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.22s ease;
-    /* Bu pop-up ailesi (Kaynaklar, tarih seçici, sıfırlama onayı vb.)
-       açıkken arkadaki sayfanın kaydırılabilmesini engeller (page9-add-backdrop
-       ile aynı çözüm). */
-    touch-action: none;
-    overscroll-behavior: contain;
   }
 
   .settings-confirm-backdrop.is-open {
