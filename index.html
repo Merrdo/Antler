@@ -5841,18 +5841,26 @@
     border-radius: 1.1em;
     box-shadow: 6px 6px 0px 0px #000;
     overflow: hidden;
-    /* iOS Safari'de kaydırma sırasında border-radius + overflow:hidden
-       kombinasyonu köşelerde ara sıra ince bir boşluk/kesim hatası
-       (sızıntı) bırakabiliyor. Kartı kendi katmanına sabitleyip köşe
-       maskesini zorlayarak bu aralıklı sızıntıyı tamamen engelliyoruz. */
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    /* NOT: Daha önce burada köşe sızıntısını -webkit-mask-image +
+       translateZ(0) katman zorlamasıyla çözüyorduk. Ama mask-image,
+       WebKit'i bu kartı YAZILIMSAL (CPU) maskeleme moduna zorluyor;
+       bu da kaydırma sırasında her karede kartın yeniden çizilmesini
+       gerektiriyor ve tam da "parmak hareket ederken takılıp parmak
+       kalkınca düzelen" kaydırma donmasına yol açıyordu. Sızıntının
+       asıl kaynağı üstteki .exam-detail-subject-accent şeridinin köşe
+       kare kalması; onu doğrudan karta uydurarak (bkz. aşağıdaki kural)
+       maskeye hiç gerek kalmadan sorunu kaynağında çözüyoruz. */
   }
 
   .exam-detail-subject-accent {
     height: 7px;
     border-bottom: 2.5px solid #000;
+    /* Kartın border-radius'una (1.1em) kendi 4px çerçevesi düşüldükten
+       sonraki iç köşe yarıçapıyla uyumlu: şeridin kendi köşeleri hiç
+       kare kalmadığı için overflow:hidden'ın kaydırma sırasında ara
+       sıra köşede ince bir sızıntı bırakması ihtimali de ortadan kalkıyor. */
+    border-top-left-radius: calc(1.1em - 4px);
+    border-top-right-radius: calc(1.1em - 4px);
   }
 
   .exam-detail-subject-body {
