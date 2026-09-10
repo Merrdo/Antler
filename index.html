@@ -10966,40 +10966,15 @@
     ? APP_STATE.countdownSoundId
     : DEFAULT_COUNTDOWN_SOUND_ID;
 
-  // Sayaç dolduğunda seçili sesi çalmaya başlar ve kullanıcı tam ekrandan
-  // çıkana (dismissFinishedCountdown) kadar KESİNTİSİZ biçimde loop halinde
-  // çalmaya devam eder; dosya bulunamazsa veya tarayıcı otomatik oynatmayı
-  // engellerse sessizce geçilir (titreşim zaten var).
-  let countdownFinishAudio = null;
-
+  // Sayaç dolduğunda seçili sesi çalar; dosya bulunamazsa veya tarayıcı
+  // otomatik oynatmayı engellerse sessizce geçilir (titreşim zaten var).
   const playCountdownFinishSound = () => {
     const sound = COUNTDOWN_SOUND_OPTIONS.find((s) => s.id === countdownSelectedSoundId) || COUNTDOWN_SOUND_OPTIONS[0];
     if (!sound) return;
     try {
-      // Önceden çalan bir bitiş sesi varsa (örn. hızlı ardışık bitiş/çıkış
-      // senaryolarında) önce onu tamamen durdurup temizle.
-      if (countdownFinishAudio) {
-        try { countdownFinishAudio.pause(); } catch (err) { /* yok say */ }
-        countdownFinishAudio.src = '';
-        countdownFinishAudio = null;
-      }
       const audio = new Audio(sound.file);
-      audio.loop = true;
-      countdownFinishAudio = audio;
       audio.play().catch(() => {});
     } catch (err) { /* yok say */ }
-  };
-
-  // Tam ekrandan çıkılınca (dismissFinishedCountdown) çağrılır: loop
-  // halinde çalan bitiş sesini anında durdurur.
-  const stopCountdownFinishSound = () => {
-    if (!countdownFinishAudio) return;
-    try {
-      countdownFinishAudio.pause();
-      countdownFinishAudio.loop = false;
-      countdownFinishAudio.currentTime = 0;
-    } catch (err) { /* yok say */ }
-    countdownFinishAudio = null;
   };
 
   const formatCountdown = (ms) => {
@@ -11058,7 +11033,6 @@
   // sayacı yeni bir süre seçilebilecek kurulum ekranına döndürür.
   const dismissFinishedCountdown = () => {
     cdFinished = false;
-    stopCountdownFinishSound();
     document.body.classList.remove('is-countdown-running');
     document.body.classList.remove('is-countdown-finished');
     showCountdownSetup();
@@ -11115,7 +11089,6 @@
 
   const resetCountdown = () => {
     if (cdRunning) return;
-    stopCountdownFinishSound();
     cdTotalMs = (cdMinutes * 60 + cdSeconds) * 1000;
     cdRemainingMs = cdTotalMs;
     renderCountdownTime();
