@@ -31,6 +31,19 @@
   html, body {
     height: 100%;
     width: 100%;
+    /* html/body'nin kendisi ASLA kaymasın / elastik zıplamasın (iOS
+       "rubber-band" bounce). Bu olmadan, içeriği ekrana zaten sığan
+       sayfalarda (ör. Kronometre) yapılan bir kaydırma jesti, o sayfanın
+       kendi içeriği yerine tüm belgeyi (html/body) kaydırıp geri
+       yaylandırıyordu; bu hem sayfa geçişlerinde alt tarafta boş beyaz
+       alan kalmasına hem de içeriklerin her kaydırmada hafifçe kaymasına
+       sebep oluyordu. Kaydırma artık yalnızca kendi "overflow-y: auto"
+       tanımlı olan sayfa kutularının (#page-settings, #page-4 vb.) içinde
+       gerçekleşebilir. */
+    overflow: hidden;
+    position: fixed;
+    inset: 0;
+    overscroll-behavior: none;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
   }
@@ -1551,6 +1564,7 @@
   #page-4 {
     align-items: flex-start;
     overflow-y: auto;
+    overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
     padding-top: calc(40px + env(safe-area-inset-top));
     padding-bottom: calc(22px + env(safe-area-inset-bottom));
@@ -2027,6 +2041,7 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior-y: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -2044,6 +2059,7 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior-y: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -3037,6 +3053,7 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior-y: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -3612,6 +3629,7 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior-y: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -4405,6 +4423,7 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior-y: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -5216,6 +5235,7 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior-y: contain;
   }
 
   /* ---------- Sayfa 11 - Analizlerim / 0 Hata Testlerim (tam ekran) ----------
@@ -5229,6 +5249,7 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior-y: contain;
   }
 
   /* Branş kartındaki doğru/yanlış/boş toplamlarını gösteren küçük satır;
@@ -6978,6 +6999,7 @@
     gap: 1.1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior-y: contain;
   }
 
   .calendar-topbar {
@@ -7260,6 +7282,7 @@
     gap: 1.1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior-y: contain;
   }
 
   /* Artık nav bar'da kendi sekmesi olmadığından (Sayfa 5'teki "Geçmiş"
@@ -7271,6 +7294,7 @@
     justify-content: flex-start;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior-y: contain;
   }
 
   .laps-page-card {
@@ -7337,6 +7361,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -7595,6 +7620,7 @@
     gap: 1.1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior-y: contain;
   }
 
   #page-patterns .calendar-topbar {
