@@ -16889,22 +16889,36 @@
   // kaydırmaya bağlı olduğundan, kilitleyince o da devre dışı kalıyor ve
   // sevilen "kayma" hissi tamamen kayboluyor. Bu yüzden kaydırmayı
   // olduğu gibi bırakıp, sadece "0 dışında bir yerde kalıcı olarak
-  // durma" durumunu düzeltiyoruz: her scroll olayında konum 0 değilse
-  // anında 0'a geri alıyoruz. Sürükleme/esneme animasyonuna dokunmuyor,
-  // sadece animasyon bittiğinde 0'dan başka bir yerde kalmasını
-  // engelliyor.
+  // durma" durumunu düzeltiyoruz.
+  //
+  // Düzeltmeyi HER scroll olayında anında uygulamak sert/ani bir zıplama
+  // hissi veriyordu, çünkü native geri-yaylanma (bounce-back) animasyonu
+  // henüz bitmeden JS onu kesip anında 0'a atlıyordu. Bunun yerine:
+  // kaydırma tamamen durana kadar (debounce) bekliyoruz — native
+  // animasyon kendi akışında tamamlanabiliyor — ve ancak durduktan sonra
+  // hâlâ 0'da değilse, `behavior: 'smooth'` ile yumuşak bir animasyonla
+  // geri götürüyoruz. Böylece kullanıcı hiçbir zaman ani bir kesilme
+  // hissetmiyor.
   //
   // Bir input/textarea'ya yazarken bu düzeltmeyi uygulamıyoruz; çünkü
   // klavye açıldığında Safari'nin odaklanılan alanı görünür tutmak için
   // yaptığı gerekli kaydırmayı bozmamak gerekiyor.
+  let strayScrollSettleTimer = null;
+  const STRAY_SCROLL_SETTLE_DELAY = 140; // ms — kaydırma/bounce'ın oturması için bekleme
+
   const resetStrayBodyScroll = () => {
     const activeTag = document.activeElement && document.activeElement.tagName;
     const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA' ||
       (document.activeElement && document.activeElement.isContentEditable);
     if (isTyping) return;
-    if (window.scrollY !== 0 || window.scrollX !== 0) {
-      window.scrollTo(0, 0);
-    }
+
+    if (strayScrollSettleTimer) clearTimeout(strayScrollSettleTimer);
+    strayScrollSettleTimer = setTimeout(() => {
+      strayScrollSettleTimer = null;
+      if (window.scrollY !== 0 || window.scrollX !== 0) {
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      }
+    }, STRAY_SCROLL_SETTLE_DELAY);
   };
 
   window.addEventListener('scroll', resetStrayBodyScroll, { passive: true });
