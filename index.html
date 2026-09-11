@@ -26,6 +26,13 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    /* Kaydırılabilir olan (overflow-y:auto) iç kapsayıcılarda momentum
+       scroll pürüzsüz olsun ve kendi sınırına gelince scroll'u belgeye
+       (html/body'ye) sıçratıp geri bir rubber-band tetiklemesin.
+       Kaydırılmayan öğelerde bu iki özelliğin hiçbir etkisi yok,
+       o yüzden herkese uygulamak güvenli. */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
   }
 
   html, body {
@@ -33,6 +40,19 @@
     width: 100%;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
+    /* Belge (html/body) seviyesinde asla scroll/rubber-band olmasın.
+       iOS Safari'de sayfa esnetilince (overscroll bounce) position:fixed
+       katmanların (navbar, tema katmanları) arkasında kalan gerçek beyaz/boş
+       body zemini bir anlığına görünür oluyordu — "bazen beliriyor bazen
+       kayboluyor" dediğiniz ölü alan tam olarak buydu. Kaydırma sadece
+       .page içindeki overflow-y:auto alt kapsayıcılarda oluyor zaten,
+       bu yüzden belgeyi tamamen sabitleyip kaydırılamaz hale getirmek
+       güvenli ve gerekli. */
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* ---------- Scrollbar'ları gizle (kaydırma işlevi aynen çalışır) ---------- */
