@@ -5,7 +5,7 @@
 // yapılan güncellemeler CACHE_VERSION hiç değişmese bile bir sonraki
 // açılışta görünür.
 
-const CACHE_VERSION = 'takvimim-v1';
+const CACHE_VERSION = 'takvimim-v2';
 const CORE_ASSETS = [
   './manifest.json',
   './icons/favicon.png',
