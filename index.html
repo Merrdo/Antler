@@ -10241,6 +10241,35 @@
   // bir çark gibi başta hızlı, sona doğru belirgin şekilde yavaşlıyor.
   const wheelEase = (t) => 1 - Math.pow(1 - t, 4);
 
+  // ---- Çark dönüş sesi ---------------------------------------------------
+  // Ses dosyası index.html ile aynı klasördeki sounds/ altında tutulur.
+  // Tek dosyalık efekt, çarkın gerçek dönüş süresiyle (3.1–3.6 sn)
+  // birebir senkron başlatılır; tıklar ses dosyasının kendi fiziksel
+  // yavaşlama eğrisiyle eşleşir.
+  const WHEEL_SPIN_SOUND = 'sounds/cark-tok-tahta-gercek-hiz.mp3';
+  let wheelSpinAudio = null;
+
+  const playWheelSpinSound = () => {
+    try {
+      if (wheelSpinAudio) {
+        wheelSpinAudio.pause();
+        wheelSpinAudio.currentTime = 0;
+      }
+      wheelSpinAudio = new Audio(WHEEL_SPIN_SOUND);
+      wheelSpinAudio.volume = 0.9;
+      wheelSpinAudio.play().catch(() => {});
+    } catch (err) { /* ses desteklenmezse çark çalışmaya devam eder */ }
+  };
+
+  const stopWheelSpinSound = () => {
+    if (!wheelSpinAudio) return;
+    try {
+      wheelSpinAudio.pause();
+      wheelSpinAudio.currentTime = 0;
+    } catch (err) { /* yok say */ }
+    wheelSpinAudio = null;
+  };
+
   let spinAnimId = null;
 
   // Çarkı çevirir: rastgele bir dilim seçip, o dilimin merkezi göstergenin
@@ -10272,6 +10301,7 @@
 
     const duration = WHEEL_SPIN_MS + Math.random() * 500;
     const startTime = performance.now();
+    playWheelSpinSound();
     const pointerAngleAt = (rot) => ((360 - (rot % 360)) % 360 + 360) % 360;
     let lastSliceIdx = Math.floor(pointerAngleAt(startRotation) / slice) % n;
     setHubColor(lastSliceIdx);
@@ -10295,6 +10325,7 @@
       if (t < 1) {
         spinAnimId = requestAnimationFrame(step);
       } else {
+        stopWheelSpinSound();
         wheelRotation = endRotation;
         isSpinning = false;
         spinBtn.disabled = false;
