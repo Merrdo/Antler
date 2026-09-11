@@ -31,19 +31,6 @@
   html, body {
     height: 100%;
     width: 100%;
-    /* html/body'nin kendisi ASLA kaymasın / elastik zıplamasın (iOS
-       "rubber-band" bounce). Bu olmadan, içeriği ekrana zaten sığan
-       sayfalarda (ör. Kronometre) yapılan bir kaydırma jesti, o sayfanın
-       kendi içeriği yerine tüm belgeyi (html/body) kaydırıp geri
-       yaylandırıyordu; bu hem sayfa geçişlerinde alt tarafta boş beyaz
-       alan kalmasına hem de içeriklerin her kaydırmada hafifçe kaymasına
-       sebep oluyordu. Kaydırma artık yalnızca kendi "overflow-y: auto"
-       tanımlı olan sayfa kutularının (#page-settings, #page-4 vb.) içinde
-       gerçekleşebilir. */
-    overflow: hidden;
-    position: fixed;
-    inset: 0;
-    overscroll-behavior: none;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
   }
@@ -141,7 +128,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 24px 96px;
+    padding: 24px 24px calc(96px + env(safe-area-inset-bottom));
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -175,7 +162,7 @@
     bottom: 0;
     display: flex;
     justify-content: center;
-    padding: 16px 16px 0;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
     pointer-events: none;
   }
 
@@ -1564,10 +1551,9 @@
   #page-4 {
     align-items: flex-start;
     overflow-y: auto;
-    overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
     padding-top: calc(40px + env(safe-area-inset-top));
-    padding-bottom: 22px;
+    padding-bottom: calc(22px + env(safe-area-inset-bottom));
   }
 
   .wheel-page {
@@ -2041,7 +2027,6 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
-    overscroll-behavior-y: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -2059,7 +2044,6 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
-    overscroll-behavior-y: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -3053,7 +3037,6 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
-    overscroll-behavior-y: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -3627,9 +3610,8 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px 28px;
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior-y: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -4423,7 +4405,6 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
-    overscroll-behavior-y: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -5233,9 +5214,8 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px 28px;
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior-y: contain;
   }
 
   /* ---------- Sayfa 11 - Analizlerim / 0 Hata Testlerim (tam ekran) ----------
@@ -5247,9 +5227,8 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px 28px;
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior-y: contain;
   }
 
   /* Branş kartındaki doğru/yanlış/boş toplamlarını gösteren küçük satır;
@@ -6182,7 +6161,7 @@
     justify-content: center;
     gap: 0.9rem;
     padding: env(safe-area-inset-top) env(safe-area-inset-right)
-      0 env(safe-area-inset-left);
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
     z-index: 60;
     cursor: pointer;
     opacity: 0;
@@ -6875,7 +6854,7 @@
     justify-content: center;
     gap: 0.9rem;
     padding: env(safe-area-inset-top) env(safe-area-inset-right)
-      0 env(safe-area-inset-left);
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
     z-index: 60;
     cursor: pointer;
     opacity: 0;
@@ -6997,9 +6976,8 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior-y: contain;
   }
 
   .calendar-topbar {
@@ -7280,9 +7258,8 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior-y: contain;
   }
 
   /* Artık nav bar'da kendi sekmesi olmadığından (Sayfa 5'teki "Geçmiş"
@@ -7292,9 +7269,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior-y: contain;
   }
 
   .laps-page-card {
@@ -7361,7 +7337,6 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
-    overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -7618,9 +7593,8 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior-y: contain;
   }
 
   #page-patterns .calendar-topbar {
