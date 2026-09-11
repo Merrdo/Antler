@@ -4854,6 +4854,20 @@
      odaklı ve daha az kalabalık görünür. ---- */
   .exam-resources-card {
     max-width: 400px;
+    min-height: 430px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .exam-resources-placeholder {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: rgba(18, 18, 18, 0.4);
+  }
+
+  body.is-anthracite .exam-resources-placeholder {
+    color: rgba(242, 242, 244, 0.4);
   }
 
   .exam-resources-tabs {
@@ -8919,70 +8933,7 @@
        kart dilini kullanır. -->
   <div class="settings-confirm-backdrop" id="examResourcesBackdrop">
     <div class="page11-modal-card exam-resources-card">
-      <div class="page11-modal-heading">
-        <span class="page11-modal-title">Kaynaklar</span>
-        <span class="page11-modal-subtitle">Bu denemenin cevap anahtarını ve video çözümünü ekle</span>
-      </div>
-
-      <div class="settings-segmented exam-resources-tabs" id="examResourcesTabsSegmented">
-        <div class="settings-segmented-slider" id="examResourcesTabsSlider"></div>
-        <button type="button" class="settings-segmented-option exam-resources-tab-btn is-active" data-tab="answerkey">
-          <svg class="exam-resources-tab-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-            <circle cx="7.3" cy="16.7" r="3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M9.4 14.6L17.4 6.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M14.2 9.8l2.1 2.1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M16.2 7.8l2.1 2.1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span class="exam-resources-tab-label">Cevap Anahtarı</span>
-          <span class="exam-resources-tab-dot" id="examResourcesAnswerKeyDot"></span>
-        </button>
-        <button type="button" class="settings-segmented-option exam-resources-tab-btn" data-tab="video">
-          <svg class="exam-resources-tab-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-            <rect x="3" y="6" width="14" height="12" rx="2.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M17 10.2l4-2.4v9l-4-2.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span class="exam-resources-tab-label">Video Çözümü</span>
-          <span class="exam-resources-tab-dot" id="examResourcesVideoDot"></span>
-        </button>
-      </div>
-
-      <div class="exam-resources-panel is-active" id="examResourcesAnswerKeyPanel">
-        <span class="exam-resources-section-hint">Doğru cevapları PDF/görsel olarak yükle ya da bir link ekle</span>
-
-        <div class="exam-resources-field-group">
-          <span class="exam-resources-field-label">Dosya</span>
-          <div class="exam-resources-file-row" id="examResourcesFileRow">
-            <button type="button" class="exam-resources-file-btn" id="examResourcesFilePickBtn">
-              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                <path d="M8 12.5l5.2-5.2a2.6 2.6 0 0 1 3.7 3.7l-7 7a4.2 4.2 0 0 1-6-6l6.5-6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span id="examResourcesFileName">Dosya seç (PDF/görsel)</span>
-            </button>
-            <button type="button" class="delete-btn exam-resources-file-remove is-hidden" id="examResourcesFileRemoveBtn" aria-label="Dosyayı kaldır">×</button>
-          </div>
-          <input type="file" accept="application/pdf,image/*" id="examResourcesFileInput" class="qhavuz-file-input">
-        </div>
-
-        <div class="exam-resources-or-divider"><span>veya</span></div>
-
-        <div class="exam-resources-field-group">
-          <span class="exam-resources-field-label">Link</span>
-          <input type="url" class="page11-field-input" id="examResourcesAnswerLinkInput" placeholder="https://...">
-        </div>
-      </div>
-
-      <div class="exam-resources-panel" id="examResourcesVideoPanel">
-        <span class="exam-resources-section-hint">Bu denemenin video çözümü linkini ekle (YouTube, Drive vb.)</span>
-        <div class="exam-resources-field-group">
-          <span class="exam-resources-field-label">Link<span class="exam-resources-optional-tag">isteğe bağlı</span></span>
-          <input type="url" class="page11-field-input" id="examResourcesVideoLinkInput" placeholder="https://youtube.com/...">
-        </div>
-      </div>
-
-      <div class="settings-confirm-actions page11-modal-actions">
-        <button type="button" class="settings-confirm-cancel" id="examResourcesCancelBtn">Vazgeç</button>
-        <button type="button" class="page11-modal-confirm" id="examResourcesSaveBtn">Kaydet</button>
-      </div>
+      <span class="exam-resources-placeholder">Yakında</span>
     </div>
   </div>
 
@@ -10972,6 +10923,43 @@
   // engellerse sessizce geçilir (titreşim zaten var).
   let countdownFinishAudio = null;
 
+  // ---- iOS Safari "otomatik çalma" kısıtlaması için önden kilit açma ----
+  // Sayaç bittiğinde ses, hiçbir dokunuşun olmadığı bir requestAnimationFrame
+  // döngüsünden tetiklenir; iOS bu şekilde YENİ oluşturulan bir Audio
+  // nesnesini genelde sessizce engeller (dinleme önizlemesi çalışıyor çünkü
+  // o gerçek bir dokunuşla tetikleniyor). Bunu aşmak için "Başlat" butonuna
+  // basılan anda (gerçek dokunuş) aynı Audio nesnesini sesi kısarak bir kez
+  // çalıp hemen durduruyoruz; iOS bu nesneyi artık "izinli" sayıyor ve
+  // sayaç bitince aynı nesne üzerinden tekrar play() çağrıldığında sorunsuz
+  // çalıyor.
+  let countdownPrimedAudio = null;
+  let countdownPrimedSoundId = null;
+
+  const primeCountdownAudio = () => {
+    const sound = COUNTDOWN_SOUND_OPTIONS.find((s) => s.id === countdownSelectedSoundId) || COUNTDOWN_SOUND_OPTIONS[0];
+    if (!sound) return;
+    try {
+      const audio = new Audio(sound.file);
+      audio.loop = true;
+      audio.volume = 0;
+      const playPromise = audio.play();
+      const finishPriming = () => {
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.volume = 1;
+        } catch (err) { /* yok say */ }
+      };
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise.then(finishPriming).catch(finishPriming);
+      } else {
+        finishPriming();
+      }
+      countdownPrimedAudio = audio;
+      countdownPrimedSoundId = sound.id;
+    } catch (err) { /* yok say */ }
+  };
+
   const playCountdownFinishSound = () => {
     const sound = COUNTDOWN_SOUND_OPTIONS.find((s) => s.id === countdownSelectedSoundId) || COUNTDOWN_SOUND_OPTIONS[0];
     if (!sound) return;
@@ -10983,7 +10971,18 @@
         countdownFinishAudio.src = '';
         countdownFinishAudio = null;
       }
-      const audio = new Audio(sound.file);
+      // "Başlat" anında önceden kilidi açılmış, aynı sese ait bir nesne
+      // varsa onu yeniden kullan (iOS izin verir); yoksa (ör. eski kayıt/
+      // farklı akış) yeni oluşturmayı dene, en azından tamamen sessiz
+      // kalmasın.
+      let audio;
+      if (countdownPrimedAudio && countdownPrimedSoundId === sound.id) {
+        audio = countdownPrimedAudio;
+        audio.currentTime = 0;
+        audio.volume = 1;
+      } else {
+        audio = new Audio(sound.file);
+      }
       audio.loop = true;
       countdownFinishAudio = audio;
       audio.play().catch(() => {});
@@ -11076,6 +11075,7 @@
 
   const startCountdown = () => {
     if (cdRunning || cdRemainingMs <= 0) return;
+    primeCountdownAudio();
     cdRunning = true;
     cdFinished = false;
     cdStartedAt = performance.now();
@@ -15127,31 +15127,9 @@
     });
   });
 
-  // ---- "Kaynaklar" pop-up'ı: cevap anahtarı (dosya/link) + video çözümü
-  // linki. Deneme nesnesine `resources` alanı olarak kaydedilir:
-  // { answerKeyFile: {name, dataUrl}|null, answerKeyLink: string, videoUrl: string }
+  // ---- "Kaynaklar" pop-up'ı: içeriği kaldırıldı, yalnızca boş bir
+  // arayüz olarak açılıp kapanıyor. ----
   const examResourcesBackdrop = document.getElementById('examResourcesBackdrop');
-  const examResourcesTabsSegmented = document.getElementById('examResourcesTabsSegmented');
-  const examResourcesTabsSlider = document.getElementById('examResourcesTabsSlider');
-  const examResourcesTabBtns = Array.from(examResourcesTabsSegmented.querySelectorAll('.exam-resources-tab-btn'));
-  const examResourcesAnswerKeyDot = document.getElementById('examResourcesAnswerKeyDot');
-  const examResourcesVideoDot = document.getElementById('examResourcesVideoDot');
-  const examResourcesAnswerKeyPanel = document.getElementById('examResourcesAnswerKeyPanel');
-  const examResourcesVideoPanel = document.getElementById('examResourcesVideoPanel');
-  const examResourcesFileRow = document.getElementById('examResourcesFileRow');
-  const examResourcesFilePickBtn = document.getElementById('examResourcesFilePickBtn');
-  const examResourcesFileName = document.getElementById('examResourcesFileName');
-  const examResourcesFileRemoveBtn = document.getElementById('examResourcesFileRemoveBtn');
-  const examResourcesFileInput = document.getElementById('examResourcesFileInput');
-  const examResourcesAnswerLinkInput = document.getElementById('examResourcesAnswerLinkInput');
-  const examResourcesVideoLinkInput = document.getElementById('examResourcesVideoLinkInput');
-  const examResourcesCancelBtn = document.getElementById('examResourcesCancelBtn');
-  const examResourcesSaveBtn = document.getElementById('examResourcesSaveBtn');
-
-  const EXAM_RESOURCES_FILE_PLACEHOLDER = 'Dosya seç (PDF/görsel)';
-
-  let examResourcesPendingFile = null; // { name, dataUrl } | null
-  let examResourcesActiveTab = 'answerkey';
 
   const page11UpdateResourcesIndicator = () => {
     const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
@@ -15162,93 +15140,17 @@
     return { hasAnswerKey, hasVideo };
   };
 
-  const updateExamResourcesFileBtnUI = () => {
-    if (examResourcesPendingFile) {
-      examResourcesFileName.textContent = examResourcesPendingFile.name;
-      examResourcesFilePickBtn.classList.add('has-file');
-      examResourcesFileRemoveBtn.classList.remove('is-hidden');
-    } else {
-      examResourcesFileName.textContent = EXAM_RESOURCES_FILE_PLACEHOLDER;
-      examResourcesFilePickBtn.classList.remove('has-file');
-      examResourcesFileRemoveBtn.classList.add('is-hidden');
-    }
-  };
-
-  // "Cevap Anahtarı" ve "Video Çözümü" iki ayrı sekme: her an yalnızca
-  // biri görünür, böylece pop-up her seferinde tek bir işe odaklanır.
-  const setExamResourcesTab = (tab) => {
-    examResourcesActiveTab = tab;
-    examResourcesTabBtns.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.tab === tab));
-    examResourcesTabsSlider.style.transform = tab === 'video' ? 'translateX(100%)' : 'translateX(0)';
-    examResourcesAnswerKeyPanel.classList.toggle('is-active', tab === 'answerkey');
-    examResourcesVideoPanel.classList.toggle('is-active', tab === 'video');
-  };
-
-  examResourcesTabBtns.forEach((btn) => {
-    btn.addEventListener('click', () => setExamResourcesTab(btn.dataset.tab));
-  });
-
   const openExamResourcesModal = () => {
-    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
-    if (!exam) return;
-    const res = exam.resources || {};
-    examResourcesPendingFile = res.answerKeyFile || null;
-    examResourcesAnswerLinkInput.value = res.answerKeyLink || '';
-    examResourcesVideoLinkInput.value = res.videoUrl || '';
-    updateExamResourcesFileBtnUI();
-    examResourcesFileInput.value = '';
-    const { hasAnswerKey, hasVideo } = page11UpdateResourcesIndicator();
-    examResourcesAnswerKeyDot.parentElement.classList.toggle('has-content', hasAnswerKey);
-    examResourcesVideoDot.parentElement.classList.toggle('has-content', hasVideo);
-    setExamResourcesTab('answerkey');
     examResourcesBackdrop.classList.add('is-open');
   };
 
   const closeExamResourcesModal = () => {
     examResourcesBackdrop.classList.remove('is-open');
-    examResourcesFileInput.value = '';
   };
 
   examDetailResourcesBtn.addEventListener('click', openExamResourcesModal);
-  examResourcesCancelBtn.addEventListener('click', closeExamResourcesModal);
   examResourcesBackdrop.addEventListener('click', (e) => {
     if (e.target === examResourcesBackdrop) closeExamResourcesModal();
-  });
-
-  examResourcesFilePickBtn.addEventListener('click', () => examResourcesFileInput.click());
-
-  examResourcesFileInput.addEventListener('change', () => {
-    const file = examResourcesFileInput.files && examResourcesFileInput.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-      let dataUrl = reader.result;
-      if (file.type && file.type.startsWith('image/') && typeof compressImageDataUrl === 'function') {
-        dataUrl = await compressImageDataUrl(dataUrl);
-      }
-      examResourcesPendingFile = { name: file.name, dataUrl };
-      updateExamResourcesFileBtnUI();
-    };
-    reader.readAsDataURL(file);
-  });
-
-  examResourcesFileRemoveBtn.addEventListener('click', () => {
-    examResourcesPendingFile = null;
-    examResourcesFileInput.value = '';
-    updateExamResourcesFileBtnUI();
-  });
-
-  examResourcesSaveBtn.addEventListener('click', () => {
-    const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
-    if (!exam) return;
-    exam.resources = {
-      answerKeyFile: examResourcesPendingFile,
-      answerKeyLink: examResourcesAnswerLinkInput.value.trim(),
-      videoUrl: examResourcesVideoLinkInput.value.trim()
-    };
-    savePage11State();
-    page11UpdateResourcesIndicator();
-    closeExamResourcesModal();
   });
 
   // ---- Yanlış/boş bırakılan soruya görsel ekleme pop-up'ı ----
