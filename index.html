@@ -33,6 +33,19 @@
     width: 100%;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
+    /* Tüm sayfa kaydırması iç kapsayıcılarda (.page, overflow-y:auto)
+       yapılıyor; body/html'in kendisinin elastik (rubber-band) taşarak
+       kaydırılmasına hiç gerek yok. Bunu tamamen kapatmak, herhangi bir
+       iç alanın kaydırmayı buraya "zincirleyip" altta boyanmamış siyah
+       bir şerit ortaya çıkarmasını baştan engeller. */
+    overscroll-behavior: none;
+  }
+
+  html {
+    /* JS (syncChromeColor) tema değişince html/body arka planını günceller;
+       bu, JS henüz çalışmadan veya bir kaydırma taşmasında görünebilecek
+       varsayılan (koyu modda siyah) zemin yerine geçecek sabit bir yedek. */
+    background: #2b2f4a;
   }
 
   * {
@@ -7549,6 +7562,11 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    /* En alta/üste ulaşınca kaydırmanın body/html'e "zincirlenip"
+       elastik (rubber-band) taşmasını engeller; aksi halde iOS'ta bu
+       taşma anında altta boyanmamış (koyu temada siyah görünen) ince
+       bir şerit belirip kaybolabiliyor. */
+    overscroll-behavior: contain;
   }
 
   .settings-page {
