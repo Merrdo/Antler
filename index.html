@@ -31,6 +31,18 @@
   html, body {
     height: 100%;
     width: 100%;
+    /* body'yi görsel viewport'a sabitliyoruz: iOS Safari'de adres çubuğu
+       gizlenip görününce 100dvh değeri değiştiği için body gerçekten
+       kaydırılabilir hale geliyordu ve o küçük fark kalıcı bir scroll
+       pozisyonu olarak kalıp altta boşluk bırakıyordu (elle geri
+       çekilene kadar). position: fixed + overflow: hidden ile body'nin
+       kendi scroll pozisyonu tutması engelleniyor; .app'teki
+       min-height: 100dvh sayesinde büyüyüp küçülme animasyonu (istenen
+       "kayma" hissi) korunuyor, sadece artık her zaman tam oturuyor. */
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
   }
