@@ -18,6 +18,23 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Takvimim">
 
+<!-- Tarayıcı mı yoksa ana ekrana eklenmiş (standalone) mi olduğunu,
+     sayfa henüz çizilmeden en erken anda tespit edip <html>'e işaretler.
+     Böylece üst safe area'yı sadece tarayıcıda siyaha boyayabiliyoruz,
+     standalone modda hiçbir görsel titreme (flash) olmadan. -->
+<script>
+  (function () {
+    var isStandalone =
+      (window.navigator && window.navigator.standalone === true) ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+      (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches) ||
+      (window.matchMedia && window.matchMedia('(display-mode: minimal-ui)').matches);
+    if (!isStandalone) {
+      document.documentElement.classList.add('is-browser-mode');
+    }
+  })();
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@700;800&display=swap" rel="stylesheet">
@@ -111,21 +128,6 @@
 
   .pattern-layer.is-swapping {
     opacity: 0;
-  }
-
-  /* ---------- Üst Safe Area (saf siyah) ---------- */
-  /* Tarayıcıda (Safari sekmesi vb.) açıldığında, çentik/Dynamic Island'ın
-     bulunduğu üst safe area şeridi tema rengi ne olursa olsun her zaman
-     saf siyah görünsün diye tüm katmanların üzerinde sabit bir şerit. */
-  .safe-area-top-mask {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: env(safe-area-inset-top, 0px);
-    background: #000;
-    z-index: 9999;
-    pointer-events: none;
   }
 
   /* ---------- Sayfalar ---------- */
@@ -7933,12 +7935,34 @@
     background: var(--dark-card-color, #3b3e42);
     color: #f2f2f4;
   }
+
+  /* ---------- Üst safe area: sadece tarayıcıda siyah ---------- */
+  /* Ana ekrana eklenip (standalone) açıldığında bu katman gizli kalır;
+     normal tarayıcıda (Safari/Chrome sekmesi) açıldığında üstteki
+     çentik/status bar alanını saf siyaha boyar. Karar, <head> içindeki
+     erken script tarafından <html> üzerine eklenen "is-browser-mode"
+     sınıfına göre verilir (flash olmaması için mümkün olan en erken
+     anda, sayfa çizilmeden önce çalışır). */
+  .safe-area-top-fill {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top);
+    background: #000;
+    z-index: 99999;
+    pointer-events: none;
+    display: none;
+  }
+
+  html.is-browser-mode .safe-area-top-fill {
+    display: block;
+  }
 </style>
 </head>
 <body oncopy="return false" oncut="return false" onselectstart="return false" ondragstart="return false">
 
-<div class="safe-area-top-mask"></div>
-
+<div class="safe-area-top-fill" id="safeAreaTopFill"></div>
 <div class="theme-layer is-visible" id="themeLayerA"></div>
 <div class="theme-layer" id="themeLayerB"></div>
 <div class="pattern-layer" id="patternLayer"></div>
