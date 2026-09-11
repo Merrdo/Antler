@@ -1857,7 +1857,7 @@
     min-width: 0;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #121212;
   }
 
@@ -2372,7 +2372,7 @@
     padding: 0;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.92rem;
     line-height: 1.35;
     color: #121212;
     resize: none;
@@ -2399,7 +2399,7 @@
     padding: 0 0 1px;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.92rem;
     line-height: 1.35;
     color: #121212;
     resize: none;
@@ -2703,7 +2703,7 @@
     padding: 0;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 800;
-    font-size: 1rem;
+    font-size: 0.88rem;
     color: #121212;
   }
 
@@ -2983,7 +2983,7 @@
     padding: 0.55rem 0.7rem;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.88rem;
     color: #121212;
     background-color: #f2f2f2;
     border: 2.5px solid #000;
@@ -3972,7 +3972,7 @@
     text-align: center;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 800;
-    font-size: 1rem;
+    font-size: 0.85rem;
     color: #121212;
     background-color: transparent;
     border: none;
@@ -4675,7 +4675,7 @@
     box-sizing: border-box;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #121212;
     background-color: #f2f2f2;
     border: 2.5px solid #000;
@@ -4981,7 +4981,7 @@
     box-sizing: border-box;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #121212;
     background-color: #f2f2f2;
     border: 2.5px solid #000;
@@ -6795,7 +6795,7 @@
     text-align: center;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #121212;
     background-color: #f2f2f2;
     border: 2.5px solid #000;
@@ -16795,6 +16795,80 @@
   ['gesturestart', 'gesturechange', 'gestureend'].forEach((eventName) => {
     document.addEventListener(eventName, (e) => e.preventDefault());
   });
+
+  // Çift dokunmayla yakınlaştırmayı engelle (iOS Safari).
+  // ÖNEMLİ: Sadece AYNI elemana kısa sürede iki kez dokunulduğunda
+  // (gerçek çift-dokunma jesti) engelliyoruz. Farklı butonlara art arda
+  // hızlıca dokunmak çift-dokunma DEĞİLDİR; bunu da engellersek her
+  // butondan sonra ~300ms beklemeden bir sonrakine dokunulamaz hale gelir
+  // (click olayı hiç tetiklenmez), ki asıl şikayet edilen sorun buydu.
+  //
+  // ÖNEMLİ 2: Parmak belirgin şekilde hareket ettiyse (yani kullanıcı
+  // aslında kaydırma/flick yapıyorsa) bu bir çift-dokunma-zoom jesti
+  // DEĞİLDİR. Böyle bir durumda touchend'de preventDefault çağırmak,
+  // iOS'ta kaydırmanın ataletle devam eden ("momentum") hareketini anında
+  // kesiyor ve kaydırma "takılıp" sonra tamamen tepkisiz kalıyormuş gibi
+  // hissettiriyordu — Ayarlar gibi uzun sayfalarda art arda hızlı
+  // kaydırınca (flick) fark ediliyordu. Bu yüzden hareketi takip edip
+  // gerçek bir sürükleme/kaydırma olduğunda hiç preventDefault UYGULAMIYORUZ.
+  let lastTouchEndAt = 0;
+  let lastTouchEndTarget = null;
+  let touchGestureStartX = 0;
+  let touchGestureStartY = 0;
+  let touchGestureMoved = false;
+
+  // passive:true — kaydırmayı senkron olarak bloke etmez, tarayıcı
+  // kaydırmayı hemen (JS'i beklemeden) başlatabilir.
+  document.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      touchGestureStartX = e.touches[0].clientX;
+      touchGestureStartY = e.touches[0].clientY;
+      touchGestureMoved = false;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    if (Math.abs(t.clientX - touchGestureStartX) > 10 || Math.abs(t.clientY - touchGestureStartY) > 10) {
+      touchGestureMoved = true;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    const target = e.target;
+    // Butonlar, inputlar ve benzer interaktif kontroller kasıtlı olarak
+    // art arda hızlıca tıklanabilir (ör. +/- sayaç butonları). Bunlar
+    // çift-dokunma-zoom jesti DEĞİLDİR; bu yüzden bu tür elemanlarda
+    // preventDefault uygulamıyoruz, aksi halde ikinci hızlı tıklama hiç
+    // click olayı üretmiyordu (asıl şikayet edilen "hızlı tıklayınca
+    // tepki vermiyor" sorunu buydu).
+    const isInteractiveControl = target.closest(
+      'button, input, a, label, select, textarea, [role="button"]'
+    );
+    if (
+      !touchGestureMoved &&
+      !isInteractiveControl &&
+      target === lastTouchEndTarget &&
+      now - lastTouchEndAt <= 300
+    ) {
+      e.preventDefault();
+    }
+    lastTouchEndAt = now;
+    lastTouchEndTarget = target;
+  }, { passive: false });
+
+  // Not: İki parmakla yakınlaştırma (pinch) zaten CSS `touch-action:
+  // pan-x pan-y` (html/body) ve yukarıdaki gesturestart/change/end
+  // engellemesiyle (Safari) durduruluyor. Önceden burada ayrıca
+  // `touchmove` üzerinde `e.touches.length > 1` kontrolüyle bir de JS
+  // engeli vardı; document üzerinde passive:false bir touchmove
+  // dinleyicisinin var olması TEK PARMAKLA yapılan normal kaydırmalarda
+  // bile tarayıcının her karede JS'in bitmesini beklemesine (senkron
+  // "scroll-blocking listener") neden oluyordu — Ayarlar sayfasında
+  // hissedilen "takılma" şikayetinin asıl kaynağı buydu. O dinleyici,
+  // pinch koruması zaten başka yollarla sağlandığı için kaldırıldı.
 
   // Ctrl/Cmd + tekerlek ile (trackpad pinch) tarayıcı yakınlaştırmasını engelle.
   document.addEventListener('wheel', (e) => {
