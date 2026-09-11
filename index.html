@@ -7546,9 +7546,29 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    padding: 0 24px 96px;
+    overflow: hidden;
+  }
+
+  /* Kaydırılabilir içerik artık .page'in kendisinden ayrı bir katmanda.
+     Sebep: #page-settings hem sayfa geçiş animasyonunun (opacity/transform)
+     uygulandığı eleman hem de native touch-scroll konteyneri olunca,
+     iOS Safari hızlı kaydırmalarda eski karenin ekranda donup kalmasına
+     (ghosting / yırtılma) yol açabiliyor — ekran görüntüsündeki sorun
+     tam olarak bu. Kaydırmayı ayrı bir katmana taşıyıp bu ikisini
+     birbirinden ayırıyoruz. */
+  .page-settings-scroll {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
 
   .settings-page {
@@ -8435,6 +8455,7 @@
 
   <!-- Sekme 7: Ayarlar sayfası -->
   <section class="page" id="page-settings">
+    <div class="page-settings-scroll">
     <div class="settings-page">
       <div class="settings-hero">
         <span class="settings-hero-icon" aria-hidden="true">
@@ -8570,6 +8591,7 @@
       <div class="settings-footer">
         <span class="settings-footer-text">Takvimim · v1.0</span>
       </div>
+    </div>
     </div>
   </section>
 
