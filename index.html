@@ -33,26 +33,6 @@
     width: 100%;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
-    /* Sayfa hiçbir zaman kendi ekseninde taşmasın: Android tarayıcılarında
-       (özellikle Samsung Internet) içerik 1px bile taşsa kenarda beliren
-       kaydırma çubuğu/gölgesi böylece hiç ortaya çıkmaz. Uygulama içindeki
-       kaydırılabilir alanlar (listeler, kartlar vb.) kendi overflow-y:auto
-       değerleriyle ayrı ayrı kaydırılabiliyor; bu kural sadece en dıştaki
-       html/body eksenini kilitliyor. */
-    overflow: hidden;
-    overscroll-behavior: none;
-  }
-
-  /* ---------- Scrollbar'ları gizle (kaydırma işlevi aynen çalışır) ---------- */
-  * {
-    scrollbar-width: none;      /* Firefox */
-    -ms-overflow-style: none;   /* IE / eski Edge */
-  }
-
-  *::-webkit-scrollbar {
-    display: none;              /* Chrome, Safari, yeni Edge */
-    width: 0;
-    height: 0;
   }
 
   * {
@@ -67,6 +47,17 @@
 
   html {
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Uygulama genelinde kaydırma çubuklarını gizle (tüm kaydırılabilir
+     alanları tek tek işaretlemeye gerek kalmasın diye evrensel kural). */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE / eski Edge */
+  }
+
+  *::-webkit-scrollbar {
+    display: none; /* Safari / Chrome / yeni Edge */
   }
 
   button, a, * {
@@ -136,7 +127,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 24px calc(96px + env(safe-area-inset-bottom));
+    padding: 24px 24px 96px;
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -170,7 +161,7 @@
     bottom: 0;
     display: flex;
     justify-content: center;
-    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px) + 20px);
     pointer-events: none;
   }
 
@@ -1561,7 +1552,7 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding-top: calc(40px + env(safe-area-inset-top));
-    padding-bottom: calc(22px + env(safe-area-inset-bottom));
+    padding-bottom: 22px;
   }
 
   .wheel-page {
@@ -1817,6 +1808,7 @@
   .wheel-options-scroll {
     max-height: 118px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     padding: 3px 4px;
     margin: -3px -4px;
@@ -2034,6 +2026,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -2051,6 +2044,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -2822,6 +2816,7 @@
     max-width: 420px;
     max-height: 82vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     /* Kartın kendisi dikey olarak kaydırılabilir kalsın diye backdrop'un
        "touch-action: none" kısıtlamasını burada geri açıyoruz. */
     touch-action: pan-y;
@@ -3044,6 +3039,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -3446,6 +3442,7 @@
     width: 100%;
     max-height: 55vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     border: 2.5px solid #000;
     border-radius: 0.8rem;
@@ -3618,8 +3615,9 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 28px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -4293,6 +4291,7 @@
     gap: 0.55rem;
     max-height: 320px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .page10-log-row {
@@ -4412,6 +4411,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -5397,8 +5397,9 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 28px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* ---------- Sayfa 11 - Analizlerim / 0 Hata Testlerim (tam ekran) ----------
@@ -5410,8 +5411,9 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 28px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Branş kartındaki doğru/yanlış/boş toplamlarını gösteren küçük satır;
@@ -5839,11 +5841,26 @@
     border-radius: 1.1em;
     box-shadow: 6px 6px 0px 0px #000;
     overflow: hidden;
+    /* NOT: Daha önce burada köşe sızıntısını -webkit-mask-image +
+       translateZ(0) katman zorlamasıyla çözüyorduk. Ama mask-image,
+       WebKit'i bu kartı YAZILIMSAL (CPU) maskeleme moduna zorluyor;
+       bu da kaydırma sırasında her karede kartın yeniden çizilmesini
+       gerektiriyor ve tam da "parmak hareket ederken takılıp parmak
+       kalkınca düzelen" kaydırma donmasına yol açıyordu. Sızıntının
+       asıl kaynağı üstteki .exam-detail-subject-accent şeridinin köşe
+       kare kalması; onu doğrudan karta uydurarak (bkz. aşağıdaki kural)
+       maskeye hiç gerek kalmadan sorunu kaynağında çözüyoruz. */
   }
 
   .exam-detail-subject-accent {
     height: 7px;
     border-bottom: 2.5px solid #000;
+    /* Kartın border-radius'una (1.1em) kendi 4px çerçevesi düşüldükten
+       sonraki iç köşe yarıçapıyla uyumlu: şeridin kendi köşeleri hiç
+       kare kalmadığı için overflow:hidden'ın kaydırma sırasında ara
+       sıra köşede ince bir sızıntı bırakması ihtimali de ortadan kalkıyor. */
+    border-top-left-radius: calc(1.1em - 4px);
+    border-top-right-radius: calc(1.1em - 4px);
   }
 
   .exam-detail-subject-body {
@@ -6462,6 +6479,7 @@
     max-width: 300px;
     max-height: 26vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -7043,7 +7061,7 @@
     /* Bkz. .stopwatch-fullscreen'deki aynı not: üst/alt güvenli alanları
        birbirine eşitleyerek sayacın her zaman tam ekran merkezinde
        kalmasını sağlıyoruz. */
-    padding: max(env(safe-area-inset-top), env(safe-area-inset-bottom))
+    padding: max(env(safe-area-inset-top), 0px)
       max(env(safe-area-inset-right), env(safe-area-inset-left));
     z-index: 60;
     cursor: pointer;
@@ -7166,8 +7184,9 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .calendar-topbar {
@@ -7448,8 +7467,9 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Artık nav bar'da kendi sekmesi olmadığından (Sayfa 5'teki "Geçmiş"
@@ -7459,8 +7479,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .laps-page-card {
@@ -7783,8 +7804,9 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 20px 22px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   #page-patterns .calendar-topbar {
@@ -9969,34 +9991,51 @@
     {
       name: 'Orijinal',
       gradient: 'linear-gradient(135deg, #2b2f4a 0%, #2b2f4a 50%, #2b2f4a 100%)',
+      color: '#2b2f4a',
       text: '#f2f2f7'
     },
     {
       name: 'Koyu',
       gradient: 'linear-gradient(135deg, #121212 0%, #121212 50%, #121212 100%)',
+      color: '#121212',
       text: '#f5f5f5'
     },
     {
       name: 'Saf Siyah',
       gradient: 'linear-gradient(135deg, #000000 0%, #000000 50%, #000000 100%)',
+      color: '#000000',
       text: '#f5f5f5'
     },
     {
       name: 'Yeşil',
       gradient: 'linear-gradient(135deg, #dff0d0 0%, #dff0d0 50%, #dff0d0 100%)',
+      color: '#dff0d0',
       text: '#3b5943'
     },
     {
       name: 'Krem',
       gradient: 'linear-gradient(135deg, #f2e8d5 0%, #f2e8d5 50%, #f2e8d5 100%)',
+      color: '#f2e8d5',
       text: '#4a3f2f'
     },
     {
       name: 'Kahve',
       gradient: 'linear-gradient(135deg, #4a3226 0%, #4a3226 50%, #4a3226 100%)',
+      color: '#4a3226',
       text: '#f3e6d8'
     }
   ];
+
+  // Sayfanın en dışındaki gerçek arka plan (html/body) ve tarayıcı/PWA
+  // arayüzünün rengini (theme-color meta) aktif temayla senkron tutar.
+  // Bunlar güncellenmezse, güvenli alan (safe area / kaydırma çubuğu
+  // şeridi) gibi bölgelerde her zaman sabit eski renk görünür kalır.
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  const syncChromeColor = (hex) => {
+    document.documentElement.style.backgroundColor = hex;
+    document.body.style.backgroundColor = hex;
+    if (themeColorMeta) themeColorMeta.setAttribute('content', hex);
+  };
 
   const layerA = document.getElementById('themeLayerA');
   const layerB = document.getElementById('themeLayerB');
@@ -10008,6 +10047,7 @@
 
   layerA.style.background = themes[themeIndex].gradient;
   document.documentElement.style.setProperty('--theme-text', themes[themeIndex].text);
+  syncChromeColor(themes[themeIndex].color);
 
   const applyNextTheme = () => {
     themeIndex = (themeIndex + 1) % themes.length;
@@ -10018,6 +10058,7 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
+    syncChromeColor(theme.color);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
@@ -10048,6 +10089,7 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
+    syncChromeColor(theme.color);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
