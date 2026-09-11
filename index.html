@@ -10970,79 +10970,28 @@
   // çıkana (dismissFinishedCountdown) kadar KESİNTİSİZ biçimde loop halinde
   // çalmaya devam eder; dosya bulunamazsa veya tarayıcı otomatik oynatmayı
   // engellerse sessizce geçilir (titreşim zaten var).
-  //
-  // NOT (iOS düzeltmesi): iOS Safari, bir <audio>/Audio() elemanının play()
-  // çağrısının bir kullanıcı jestinin (dokunma/tık) senkron çağrı yığını
-  // içinde yapılmasını şart koşuyor. Sayaç dolduğunda sesi çalma isteği ise
-  // requestAnimationFrame döngüsünden, yani bir jest OLMADAN geliyordu; bu
-  // yüzden iOS'ta ses hiç duyulmuyordu (önizleme dokunmayla çalıştığı için
-  // "çalışıyor" gibi görünüyordu). Çözüm: HER ZAMAN aynı, kalıcı <audio>
-  // elemanını kullanmak ve bu elemanın "kilidini", sayacı başlatan/devam
-  // ettiren dokunuşun (gerçek kullanıcı jesti) içinde sessizce bir kez
-  // play()+pause() yaparak açmak; sayaç bitince de zaten kilidi açılmış
-  // olan bu aynı elemanı tekrar kullanmak.
   let countdownFinishAudio = null;
 
-  const getCountdownFinishAudioEl = () => {
-    if (!countdownFinishAudio) {
-      countdownFinishAudio = new Audio();
-    }
-    return countdownFinishAudio;
-  };
-
-  // Seçili sese göre elemanın src'sini (gerekirse) günceller.
-  const ensureCountdownFinishAudioSrc = (audio) => {
-    const sound = COUNTDOWN_SOUND_OPTIONS.find((s) => s.id === countdownSelectedSoundId) || COUNTDOWN_SOUND_OPTIONS[0];
-    if (!sound) return null;
-    if (audio.getAttribute('data-sound-id') !== sound.id) {
-      audio.src = sound.file;
-      audio.setAttribute('data-sound-id', sound.id);
-    }
-    return sound;
-  };
-
-  // Sayacı başlatan/devam ettiren dokunuşun İÇİNDE (senkron olarak) çağrılır:
-  // iOS'un bu <audio> elemanı için sonraki (jestsiz) play() çağrılarına izin
-  // vermesi için sesi bir anlığına, duyulmayacak şekilde (volume 0) çalıp
-  // hemen durdurur.
-  const unlockCountdownFinishAudioForGesture = () => {
-    try {
-      const audio = getCountdownFinishAudioEl();
-      ensureCountdownFinishAudioSrc(audio);
-      const previousVolume = audio.volume;
-      audio.loop = false;
-      audio.volume = 0;
-      const restore = () => {
-        try {
-          audio.pause();
-          audio.currentTime = 0;
-          audio.volume = previousVolume;
-        } catch (err) { /* yok say */ }
-      };
-      const playAttempt = audio.play();
-      if (playAttempt && typeof playAttempt.then === 'function') {
-        playAttempt.then(restore).catch(restore);
-      } else {
-        restore();
-      }
-    } catch (err) { /* yok say */ }
-  };
-
   const playCountdownFinishSound = () => {
+    const sound = COUNTDOWN_SOUND_OPTIONS.find((s) => s.id === countdownSelectedSoundId) || COUNTDOWN_SOUND_OPTIONS[0];
+    if (!sound) return;
     try {
-      const audio = getCountdownFinishAudioEl();
-      ensureCountdownFinishAudioSrc(audio);
+      // Önceden çalan bir bitiş sesi varsa (örn. hızlı ardışık bitiş/çıkış
+      // senaryolarında) önce onu tamamen durdurup temizle.
+      if (countdownFinishAudio) {
+        try { countdownFinishAudio.pause(); } catch (err) { /* yok say */ }
+        countdownFinishAudio.src = '';
+        countdownFinishAudio = null;
+      }
+      const audio = new Audio(sound.file);
       audio.loop = true;
-      audio.currentTime = 0;
-      audio.volume = 1;
+      countdownFinishAudio = audio;
       audio.play().catch(() => {});
     } catch (err) { /* yok say */ }
   };
 
   // Tam ekrandan çıkılınca (dismissFinishedCountdown) çağrılır: loop
-  // halinde çalan bitiş sesini anında durdurur. Eleman kasıtlı olarak
-  // null'lanmaz; iOS kilidi açık kalsın diye aynı eleman bir sonraki
-  // sayaç turunda tekrar kullanılır.
+  // halinde çalan bitiş sesini anında durdurur.
   const stopCountdownFinishSound = () => {
     if (!countdownFinishAudio) return;
     try {
@@ -11050,6 +10999,7 @@
       countdownFinishAudio.loop = false;
       countdownFinishAudio.currentTime = 0;
     } catch (err) { /* yok say */ }
+    countdownFinishAudio = null;
   };
 
   const formatCountdown = (ms) => {
@@ -11126,11 +11076,6 @@
 
   const startCountdown = () => {
     if (cdRunning || cdRemainingMs <= 0) return;
-    // Sayacı başlatan bu dokunuş gerçek bir kullanıcı jesti olduğu için,
-    // bitiş sesi elemanının kilidini şimdi (senkron olarak) açıyoruz;
-    // aksi halde sayaç dolduğunda (jestsiz) çalınmaya çalışan ses iOS
-    // tarafından sessizce engelleniyordu.
-    unlockCountdownFinishAudioForGesture();
     cdRunning = true;
     cdFinished = false;
     cdStartedAt = performance.now();
