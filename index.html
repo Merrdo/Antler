@@ -113,6 +113,21 @@
     opacity: 0;
   }
 
+  /* ---------- Üst Safe Area (saf siyah) ---------- */
+  /* Tarayıcıda (Safari sekmesi vb.) açıldığında, çentik/Dynamic Island'ın
+     bulunduğu üst safe area şeridi tema rengi ne olursa olsun her zaman
+     saf siyah görünsün diye tüm katmanların üzerinde sabit bir şerit. */
+  .safe-area-top-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 0px);
+    background: #000;
+    z-index: 9999;
+    pointer-events: none;
+  }
+
   /* ---------- Sayfalar ---------- */
 
   .app {
@@ -7921,6 +7936,8 @@
 </style>
 </head>
 <body oncopy="return false" oncut="return false" onselectstart="return false" ondragstart="return false">
+
+<div class="safe-area-top-mask"></div>
 
 <div class="theme-layer is-visible" id="themeLayerA"></div>
 <div class="theme-layer" id="themeLayerB"></div>
