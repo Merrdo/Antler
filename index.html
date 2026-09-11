@@ -777,12 +777,6 @@
     color: #f2f2f4;
   }
 
-  body.is-anthracite .stopwatch-history-btn {
-    background-color: var(--dark-card-color, #3b3e42);
-    border-color: #000;
-    color: #f2f2f4;
-  }
-
   body.is-anthracite .delete-btn {
     background-color: var(--dark-card-color, #3b3e42);
     border-color: #000;
@@ -1132,11 +1126,6 @@
      tekrar görünür oluyor. */
   body.is-anthracite .add-task-btn:active,
   body.is-anthracite .add-task-btn.is-pressed {
-    background-color: var(--accent-color, #ff90e8);
-  }
-
-  body.is-anthracite .stopwatch-history-btn:active,
-  body.is-anthracite .stopwatch-history-btn.is-pressed {
     background-color: var(--accent-color, #ff90e8);
   }
 
@@ -3894,13 +3883,9 @@
   }
 
   .page9-stepper-btn {
-    -webkit-appearance: none;
-    appearance: none;
-    box-sizing: border-box;
     flex-shrink: 0;
     width: 1.6rem;
     height: 1.85rem;
-    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3912,33 +3897,12 @@
     color: #121212;
     background-color: transparent;
     border: none;
-    border-radius: 0;
-    outline: none;
     cursor: pointer;
-    touch-action: manipulation;
-    transition: background-color 0.1s ease;
+    transition: background-color 0.15s ease;
   }
 
-  .page9-stepper-btn:active,
-  .page9-stepper-btn.is-pressed {
+  .page9-stepper-btn:active {
     background-color: var(--accent-color, #ff90e8);
-  }
-
-  /* .page9-stepper'ın kendisi overflow:hidden ile köşeleri yuvarlıyor,
-     ama içindeki eksi/artı butonlarının arka planı düz köşeli bir
-     dikdörtgen olduğu için köşelere yaklaşınca pembe dolgu ile dış
-     çerçevenin kavisi arasında ince bir boşluk (pill'in kendi gri
-     zemini) görünüyordu. En baştaki ve en sondaki butona, çerçevenin
-     kavisiyle birebir eşleşen bir iç yarıçap vererek bu boşluğu
-     kapatıyoruz; böylece pembe dolgu tam köşeye kadar oturuyor. */
-  .page9-stepper-btn:first-child {
-    border-top-left-radius: calc(0.65rem - 2.5px);
-    border-bottom-left-radius: calc(0.65rem - 2.5px);
-  }
-
-  .page9-stepper-btn:last-child {
-    border-top-right-radius: calc(0.65rem - 2.5px);
-    border-bottom-right-radius: calc(0.65rem - 2.5px);
   }
 
   /* "+" karakteri bu fontta optik olarak hafif yukarıda duruyor;
@@ -5676,7 +5640,6 @@
 
   /* ---------- Sayfa 5: Kronometre ---------- */
   .stopwatch-page {
-    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -5694,23 +5657,32 @@
     pointer-events: none;
   }
 
+  /* Başlık ve Geçmiş butonunu aynı satırda tutan üst bar. Grid'in kenar
+     kolonları eşit (1fr) olduğu için ortadaki başlık, sağdaki buton farklı
+     genişlikte olsa da her zaman tam ortada kalır. */
+  .stopwatch-top-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: 100%;
+  }
+
+  .stopwatch-top-bar .stopwatch-title {
+    grid-column: 2;
+  }
+
+  .stopwatch-top-bar .stopwatch-history-btn {
+    grid-column: 3;
+    justify-self: end;
+  }
+
   .stopwatch-title {
     font-family: "Space Grotesk", sans-serif;
     font-weight: 800;
     font-size: 1.4rem;
-    text-align: left;
+    text-align: center;
     color: var(--theme-text, #f2f2f7);
     transition: color 0.5s ease;
-  }
-
-  /* Başlık ve Geçmiş butonunu aynı üst satırda tutan satır: başlık solda,
-     buton sağda. */
-  .stopwatch-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
-    width: 100%;
   }
 
   .stopwatch-display {
@@ -5774,19 +5746,19 @@
   }
 
   /* Turlarım ve Sıfırla butonlarını eskisi gibi birbirine yakın ve
-     hizalı tutan üst satır. Bu satırın yüksekliği artık HER ZAMAN
-     sabittir (butonlar görünmese bile alan ayrılmış kalır); böylece
-     süre başlayıp/duraklayıp butonlar belirdiğinde ya da kaybolduğunda
-     kart ve üstündeki başlık yerinde sabit kalır, sadece butonların
-     kendisi (opacity/scale ile, bkz. .is-hidden) hareket eder. */
+     hizalı tutan satır. Bu satırın yüksekliği artık her zaman sabit
+     (butonlar gizliyken de aynı boşluk ayrılır); böylece süre sıfırdan
+     çıkıp butonlar belirdiğinde kart ve üstündeki başlık yerinden
+     oynamaz — sadece butonların kendisi (aşağıda tanımlı opacity/transform
+     geçişiyle) yumuşakça "belirir".*/
   .stopwatch-controls-top {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     gap: 0.5rem;
+    min-height: 3.6rem;
     padding: 0.3rem 0.3rem 0.5rem;
-    margin-bottom: 0.6rem;
   }
 
   .stopwatch-reset-btn {
@@ -5819,14 +5791,13 @@
     pointer-events: none;
   }
 
-  /* Kronometre Geçmişi (Sayfa 10) sayfasını açan buton: başlık satırında
-     sağda duran normal yazılı buton. Turlarım/Sıfırla'nın aksine süre
-     sıfır olsa da her zaman görünür, çünkü geçmiş kayıtlara sayaç
+  /* Kronometre Geçmişi (Sayfa 10) sayfasını açan buton; artık başlıkla
+     aynı üst satırda, sağ kenarda duruyor. Turlarım/Sıfırla'nın aksine
+     süre sıfır olsa da her zaman görünür, çünkü geçmiş kayıtlara sayaç
      çalışmıyorken de bakılabilmeli. */
   .stopwatch-history-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    flex-shrink: 0;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.85rem;
   }
 
   /* Sayaç çalışırken devreye giren tam ekran görünüm: sayı sayacı,
@@ -7066,8 +7037,7 @@
     <!-- Kronometre: sayaç çalışırken sadece rakam kartı ekranda kalır,
          başlık, butonlar ve alt nav bar (is-stopwatch-running sınıfıyla) gizlenir. -->
     <div class="stopwatch-page" id="stopwatchPage">
-      <!-- Başlık solda, Geçmiş butonu sağda: aynı üst satırda yan yana. -->
-      <div class="stopwatch-header">
+      <div class="stopwatch-top-bar">
         <h1 class="stopwatch-title">Kronometre</h1>
         <button type="button" class="add-task-btn stopwatch-history-btn" id="stopwatchHistoryBtn">Geçmiş</button>
       </div>
@@ -11208,43 +11178,6 @@
 
   const page9NextColor = (track) => WHEEL_PALETTE[page9State.subjects[track].length % WHEEL_PALETTE.length];
 
-  // Bir butona basılı tutulunca adımı tekrar tekrar çalıştırır (ilk basışta
-  // hemen bir kez, kısa bir bekleme sonrasında da hızlıca art arda).
-  // Fare/dokunma (pointer olayları) ile hem "tek tık" hem "basılı tutup
-  // hızlandırma" davranışını tek yerden yönetir; klavye ile tetiklenen
-  // "click" olayları da (pointer olayı olmadığında) ayrıca çalışır.
-  const attachHoldRepeat = (btn, stepFn, { delay = 420, interval = 90 } = {}) => {
-    let holdTimeout = null;
-    let holdInterval = null;
-    let firedByPointer = false;
-
-    const stopHold = () => {
-      if (holdTimeout) { clearTimeout(holdTimeout); holdTimeout = null; }
-      if (holdInterval) { clearInterval(holdInterval); holdInterval = null; }
-      btn.classList.remove('is-pressed');
-    };
-
-    btn.addEventListener('pointerdown', (e) => {
-      if (e.pointerType === 'mouse' && e.button !== 0) return;
-      firedByPointer = true;
-      btn.classList.add('is-pressed');
-      stepFn();
-      stopHold();
-      holdTimeout = setTimeout(() => {
-        holdInterval = setInterval(stepFn, interval);
-      }, delay);
-    });
-
-    ['pointerup', 'pointercancel', 'pointerleave'].forEach((evt) => {
-      btn.addEventListener(evt, stopHold);
-    });
-
-    btn.addEventListener('click', () => {
-      if (firedByPointer) { firedByPointer = false; return; }
-      stepFn();
-    });
-  };
-
   // Seçili tarih + branş için tek bir log kaydını doğrudan istenen sayıya
   // ayarlar (ekleme değil, o günkü toplamı belirleme). count 0 ise kayıt
   // tamamen silinir; aksi halde mevcut kayıt güncellenir ya da oluşturulur.
@@ -11413,10 +11346,10 @@
       page9SetCount(subject.id, count);
     };
 
-    attachHoldRepeat(minusBtn, () => {
+    minusBtn.addEventListener('click', () => {
       commitCount((parseInt(input.value, 10) || 0) - 5);
     });
-    attachHoldRepeat(plusBtn, () => {
+    plusBtn.addEventListener('click', () => {
       commitCount((parseInt(input.value, 10) || 0) + 5);
     });
     input.addEventListener('change', () => commitCount(input.value));
