@@ -31,18 +31,6 @@
   html, body {
     height: 100%;
     width: 100%;
-    /* body'yi görsel viewport'a sabitliyoruz: iOS Safari'de adres çubuğu
-       gizlenip görününce 100dvh değeri değiştiği için body gerçekten
-       kaydırılabilir hale geliyordu ve o küçük fark kalıcı bir scroll
-       pozisyonu olarak kalıp altta boşluk bırakıyordu (elle geri
-       çekilene kadar). position: fixed + overflow: hidden ile body'nin
-       kendi scroll pozisyonu tutması engelleniyor; .app'teki
-       min-height: 100dvh sayesinde büyüyüp küçülme animasyonu (istenen
-       "kayma" hissi) korunuyor, sadece artık her zaman tam oturuyor. */
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
-    overscroll-behavior: none;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
   }
@@ -16886,6 +16874,41 @@
   document.addEventListener('wheel', (e) => {
     if (e.ctrlKey) e.preventDefault();
   }, { passive: false });
+</script>
+
+<script>
+  // ---------- Body'nin kalıcı olarak kaymasını engelle ----------
+  // Uygulamanın .app kutusu min-height: 100dvh kullanıyor. iOS Safari'de
+  // adres çubuğu parmakla kaydırırken gizlenince 100dvh büyüyor; bu da
+  // body'yi GERÇEKTEN (native rubber-band bounce değil, kalıcı) birkaç
+  // piksel kaydırabiliyor ve o pozisyonda takılı kalıyordu — en altta
+  // sabit bir boşluk olarak görünen buydu.
+  //
+  // ÖNEMLİ: body'yi position:fixed ile tamamen kilitlemek bunu çözer
+  // ama adres çubuğunun kayarken gizlenmesi de native olarak GERÇEK bir
+  // kaydırmaya bağlı olduğundan, kilitleyince o da devre dışı kalıyor ve
+  // sevilen "kayma" hissi tamamen kayboluyor. Bu yüzden kaydırmayı
+  // olduğu gibi bırakıp, sadece "0 dışında bir yerde kalıcı olarak
+  // durma" durumunu düzeltiyoruz: her scroll olayında konum 0 değilse
+  // anında 0'a geri alıyoruz. Sürükleme/esneme animasyonuna dokunmuyor,
+  // sadece animasyon bittiğinde 0'dan başka bir yerde kalmasını
+  // engelliyor.
+  //
+  // Bir input/textarea'ya yazarken bu düzeltmeyi uygulamıyoruz; çünkü
+  // klavye açıldığında Safari'nin odaklanılan alanı görünür tutmak için
+  // yaptığı gerekli kaydırmayı bozmamak gerekiyor.
+  const resetStrayBodyScroll = () => {
+    const activeTag = document.activeElement && document.activeElement.tagName;
+    const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA' ||
+      (document.activeElement && document.activeElement.isContentEditable);
+    if (isTyping) return;
+    if (window.scrollY !== 0 || window.scrollX !== 0) {
+      window.scrollTo(0, 0);
+    }
+  };
+
+  window.addEventListener('scroll', resetStrayBodyScroll, { passive: true });
+  window.addEventListener('resize', resetStrayBodyScroll, { passive: true });
 </script>
 
 <script>
