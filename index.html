@@ -98,20 +98,22 @@
      dışında) yapılır. Bizim tarafımızda ayarlayabildiğimiz tek şey, arka
      plan katmanının (aşağıdaki .theme-layer) solma süresi/eğrisi — o
      yüzden tek bir değişkende topladık.
-     ÖLÇÜM (kullanıcının attığı ekran kaydından, 60fps kare kare analiz
-     edilerek): ilk denemede tahmin TERSİYMİŞ — güvenli alan bizim arka
-     planımızdan DAHA YAVAŞ değişiyor, daha hızlı değil. Aynı anda
-     tetiklenen iki geçiş karşılaştırıldığında güvenli alan şeridi
-     ~480-500ms sürüyor ve eğrisi başta çok hızlı, sonda uzun bir kuyruk
-     halinde yavaşlıyor (üstel/"ease-out" tarzı); bizim eski 300ms/linear
-     ayarımız ise ~230ms'de bitip güvenli alanı geride bırakıyordu. Süre
-     480ms'e çıkarıldı, eğri de bu hızlı-başlangıç/yavaş-kuyruk şeklini
-     taklit eden bir cubic-bezier ile değiştirildi. Cihazda hâlâ ton farkı
-     görülürse SADECE bu iki değeri (süre ve eğri) küçük adımlarla
-     deneyerek eşleştirmek yeterli olacak. */
+     ÖLÇÜM 2 (kullanıcının attığı YouTube referans videosundan, gerçek
+     kare zaman damgalarıyla [~60fps, ffprobe pts_time] kare kare piksel
+     analizi yapılarak — üç ayrı tema geçişinin hepsinde tutarlı): geçiş
+     süresi 480ms DEĞİL, yaklaşık 267ms (16 kare × 16.7ms) sürüyor. Eğri
+     de önceki tahminin (hızlı başlangıç/uzun kuyruk, "ease-out" tarzı)
+     TERSİNE, simetrik bir "ease-in-out" eğrisine uyuyor: %50 sürede
+     ilerleme ~%53 — yani ortada hızlanıp uçlarda yavaşlayan klasik bir
+     S-eğrisi. Referansta üst şerit (top) ve arka plan (body) örneklemin
+     HER karesinde birebir aynı değeri veriyor (fark yalnızca 1-2 birimlik
+     sıkıştırma gürültüsü) — yani hedef, iki katmanın da TEK ve AYNI
+     eğriyle birebir senkron gitmesi. Cihazda hâlâ ton farkı görülürse
+     SADECE bu iki değeri (süre ve eğri) küçük adımlarla deneyerek
+     eşleştirmek yeterli olacak. */
   :root {
-    --theme-transition-duration: 480ms;
-    --theme-transition-easing: cubic-bezier(0.16, 1, 0.3, 1);
+    --theme-transition-duration: 267ms;
+    --theme-transition-easing: cubic-bezier(0.42, 0, 0.58, 1);
   }
 
   /* İki katman üst üste durur; tema değişince biri solup kaybolurken
@@ -7590,7 +7592,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
@@ -7607,12 +7608,30 @@
   /* Sayfa başlığı artık küçük bir ikon+yazı satırı değil; ekteki referans
      tasarımdaki ("SETTINGS") gibi kendi başına duran, büyük, kalın ve
      ortalanmış bir başlık. İkon kaldırıldı, yazı tek başına sayfanın
-     "kimliği" gibi öne çıkıyor. */
+     "kimliği" gibi öne çıkıyor.
+
+     REFERANS VİDEO: başlık kaydırma sırasında YERİNDE SABİT kalıyor,
+     altındaki liste onun ARKASINDAN kayıyor (klasik "sticky header").
+     Bunu elde etmek için:
+     - position: sticky + top değeri, önceden #page-settings'in
+       padding-top'unda duran "48px + güvenli alan" boşluğunu artık
+       burada taşıyor (o padding-top kaldırıldı, gerek kalmadı).
+     - Arkasından kayan kartlar başlığın ARKASINDA görünmesin diye
+       (yarı saydam kalırsa altlarındaki kart şeffaf görünür) arka plan
+       rengi opak: aktif temanın düz rengiyle JS tarafından eşleniyor
+       (bkz. applyTheme/applyNextTheme içindeki settingsHeroEl satırı),
+       tema geçişindeki aynı süre/eğriyle (--theme-transition-*) solarak
+       değişiyor ki tema değişirken de arka planla senkron kalsın. */
   .settings-hero {
+    position: sticky;
+    top: calc(48px + env(safe-area-inset-top));
+    z-index: 5;
     display: flex;
     justify-content: center;
     width: 100%;
     padding: 0.2rem 0 0.4rem;
+    background-color: transparent;
+    transition: background-color var(--theme-transition-duration) var(--theme-transition-easing);
   }
 
   .settings-title {
@@ -10918,6 +10937,15 @@
     if (themeColorMeta) themeColorMeta.setAttribute('content', hex);
   };
 
+  // Ayarlar sayfasındaki sabit (sticky) "Ayarlar" başlığının arka planı;
+  // altından kayan kartların arkasında şeffaf görünmemesi için her tema
+  // değişiminde aktif temanın düz rengiyle güncelleniyor (theme-color
+  // meta etiketiyle aynı mantık).
+  const settingsHeroEl = document.querySelector('.settings-hero');
+  const updateSettingsHeroBg = (hex) => {
+    if (settingsHeroEl) settingsHeroEl.style.backgroundColor = hex;
+  };
+
   const layerA = document.getElementById('themeLayerA');
   const layerB = document.getElementById('themeLayerB');
   // Daha önce seçilmiş bir tema kaydedilmişse (localStorage), uygulama onunla açılır.
@@ -10929,6 +10957,7 @@
   layerA.style.background = themes[themeIndex].gradient;
   document.documentElement.style.setProperty('--theme-text', themes[themeIndex].text);
   updateThemeColorMeta(themes[themeIndex].color);
+  updateSettingsHeroBg(themes[themeIndex].color);
 
   const applyNextTheme = () => {
     themeIndex = (themeIndex + 1) % themes.length;
@@ -10940,6 +10969,7 @@
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
     updateThemeColorMeta(theme.color);
+    updateSettingsHeroBg(theme.color);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
@@ -10971,6 +11001,7 @@
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
     updateThemeColorMeta(theme.color);
+    updateSettingsHeroBg(theme.color);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
