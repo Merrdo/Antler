@@ -28,44 +28,11 @@
     box-sizing: border-box;
   }
 
-  html {
+  html, body {
     height: 100%;
     width: 100%;
-    overscroll-behavior: none;
-  }
-
-  body {
-    /* Body'yi viewport'a tamamen kilitler: sayfanın kendisi artık ne
-       yukarı/aşağı kayabilir ne de iOS'un "rubber band" zıplama
-       efektiyle esneyebilir. İçindeki overflow-y:auto olan alt
-       kutular (listeler, galeriler vb.) kendi içlerinde normal
-       kaymaya ve o alanlarda rubber band'e devam eder. */
-    position: fixed;
-    inset: 0;
-    overscroll-behavior: none;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
-  }
-
-  /* ---- Bir pop-up (ör. "Kaynaklar" ve galerisi) açıkken arka plandaki
-     sayfanın (ör. #page-11-detail'in kendi overflow-y:auto kaydırması)
-     parmakla kaydırılmasını engeller; body'ye bu sınıf eklenip
-     çıkarılarak açık/kapalı arasında geçiş yapılır. ---- */
-  body.has-modal-open {
-    overflow: hidden;
-    touch-action: none;
-  }
-
-  /* ---------- Scrollbar'ları gizle (kaydırma işlevi aynen çalışır) ---------- */
-  * {
-    scrollbar-width: none;      /* Firefox */
-    -ms-overflow-style: none;   /* IE / eski Edge */
-  }
-
-  *::-webkit-scrollbar {
-    display: none;              /* Chrome, Safari, yeni Edge */
-    width: 0;
-    height: 0;
   }
 
   * {
@@ -137,11 +104,10 @@
   /* ---------- Sayfalar ---------- */
 
   .app {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
-    background: transparent;
   }
 
   .page {
@@ -150,7 +116,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
+    padding: 24px 24px calc(96px + env(safe-area-inset-bottom));
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -1834,12 +1800,6 @@
     overflow-x: hidden;
     padding: 3px 4px;
     margin: -3px -4px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .wheel-options-scroll::-webkit-scrollbar {
-    display: none;
   }
 
   .wheel-options-list {
@@ -2049,12 +2009,6 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  #page-8::-webkit-scrollbar {
-    display: none;
   }
 
   /* ---------- Sayfa 9: Soru Takibi ----------
@@ -2066,12 +2020,6 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  #page-9::-webkit-scrollbar {
-    display: none;
   }
 
   /* Sayfa yatayda ortalanmış kalsın diye (justify-content artık
@@ -2818,12 +2766,6 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.22s ease;
-    /* Pop-up açıkken arkadaki sayfanın kaydırma/rubber-band hareketiyle
-       birlikte hareket etmesini (iOS'ta sık görülen) engeller; sadece
-       kart içindeki .page9-add-card kendi overflow-y'siyle kaydırılabilir
-       kalır. */
-    touch-action: none;
-    overscroll-behavior: contain;
   }
 
   .page9-add-backdrop.is-open {
@@ -2836,10 +2778,6 @@
     max-width: 420px;
     max-height: 82vh;
     overflow-y: auto;
-    /* Kartın kendisi dikey olarak kaydırılabilir kalsın diye backdrop'un
-       "touch-action: none" kısıtlamasını burada geri açıyoruz. */
-    touch-action: pan-y;
-    overscroll-behavior: contain;
     background: #fff;
     border: 4px solid #000;
     border-radius: 1.1em;
@@ -3059,12 +2997,6 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  #page-camera::-webkit-scrollbar {
-    display: none;
   }
 
   .qhavuz-wrap {
@@ -3634,12 +3566,6 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  #page-camera-test::-webkit-scrollbar {
-    display: none;
   }
 
   .qhavuz-test-wrap {
@@ -4427,12 +4353,6 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  #page-11::-webkit-scrollbar {
-    display: none;
   }
 
   .page11-wrap {
@@ -4933,7 +4853,6 @@
   .exam-res-gallery-viewport {
     position: relative;
     background: #f2f2f2;
-    touch-action: pan-y;
   }
 
   .exam-res-gallery-viewport img {
@@ -6760,7 +6679,6 @@
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
     margin: -0.6rem;
     padding: 0.6rem;
   }
@@ -7539,7 +7457,6 @@
     align-items: center;
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
-    padding-bottom: calc(96px + env(safe-area-inset-bottom));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -10008,24 +9925,6 @@
 
   const layerA = document.getElementById('themeLayerA');
   const layerB = document.getElementById('themeLayerB');
-
-  // Sekmede/tarayıcıda açıkken üstteki durum çubuğu/adres çubuğu alanının
-  // rengini, o an aktif temanın arka plan rengiyle eşler. Gradyanın ilk
-  // hex durağını kullanıyoruz (temalarımız düz renk, tek durak).
-  const metaThemeColorTag = document.querySelector('meta[name="theme-color"]');
-  const updateMetaThemeColor = (gradient) => {
-    if (!metaThemeColorTag) return;
-    const match = gradient.match(/#[0-9a-fA-F]{6}/);
-    if (match) {
-      metaThemeColorTag.setAttribute('content', match[0]);
-      // body'nin kendi arkaplanını da aynı renge çekiyoruz; böylece
-      // theme-layer'ın kapsamadığı olası kenar boşlukları (ör. iOS'ta
-      // home indicator bandı) her zaman aktif temanın rengiyle kalır,
-      // eski sabit lacivert görünmez.
-      document.body.style.background = match[0];
-    }
-  };
-
   // Daha önce seçilmiş bir tema kaydedilmişse (localStorage), uygulama onunla açılır.
   const savedThemeIndex = APP_STATE.theme;
   let themeIndex = (typeof savedThemeIndex === 'number' && themes[savedThemeIndex]) ? savedThemeIndex : 0;
@@ -10034,7 +9933,6 @@
 
   layerA.style.background = themes[themeIndex].gradient;
   document.documentElement.style.setProperty('--theme-text', themes[themeIndex].text);
-  updateMetaThemeColor(themes[themeIndex].gradient);
 
   const applyNextTheme = () => {
     themeIndex = (themeIndex + 1) % themes.length;
@@ -10045,7 +9943,6 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
-    updateMetaThemeColor(theme.gradient);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
@@ -10076,7 +9973,6 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
-    updateMetaThemeColor(theme.gradient);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
@@ -15466,30 +15362,16 @@
     examResourcesVideoForm.classList.add('is-hidden');
   };
 
-  // Pop-up (ve üzerinden açılabilen galerisi) açıkken arka plandaki
-  // sayfanın kaydırılmasını engeller; ikisinden biri hâlâ açıksa body
-  // kilidi kaldırılmaz.
-  const lockExamResourcesBackgroundScroll = () => {
-    document.body.classList.add('has-modal-open');
-  };
-  const unlockExamResourcesBackgroundScrollIfClosed = () => {
-    if (!examResourcesBackdrop.classList.contains('is-open') && !examResGalleryBackdrop.classList.contains('is-open')) {
-      document.body.classList.remove('has-modal-open');
-    }
-  };
-
   const openExamResourcesModal = () => {
     const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
     if (!exam) return;
     renderExamResourcesModal(exam);
     page11UpdateResourcesIndicator();
     examResourcesBackdrop.classList.add('is-open');
-    lockExamResourcesBackgroundScroll();
   };
 
   const closeExamResourcesModal = () => {
     examResourcesBackdrop.classList.remove('is-open');
-    unlockExamResourcesBackgroundScrollIfClosed();
   };
 
   examDetailResourcesBtn.addEventListener('click', openExamResourcesModal);
@@ -15619,12 +15501,10 @@
     examResGalleryIndex = index;
     renderExamResGallery();
     examResGalleryBackdrop.classList.add('is-open');
-    lockExamResourcesBackgroundScroll();
   };
 
   const closeExamResGallery = () => {
     examResGalleryBackdrop.classList.remove('is-open');
-    unlockExamResourcesBackgroundScrollIfClosed();
   };
 
   examResGalleryPrev.addEventListener('click', () => {
@@ -17291,55 +17171,6 @@
   document.addEventListener('wheel', (e) => {
     if (e.ctrlKey) e.preventDefault();
   }, { passive: false });
-</script>
-
-<script>
-  // ---------- Body'nin kalıcı olarak kaymasını engelle ----------
-  // Uygulamanın .app kutusu min-height: 100dvh kullanıyor. iOS Safari'de
-  // adres çubuğu parmakla kaydırırken gizlenince 100dvh büyüyor; bu da
-  // body'yi GERÇEKTEN (native rubber-band bounce değil, kalıcı) birkaç
-  // piksel kaydırabiliyor ve o pozisyonda takılı kalıyordu — en altta
-  // sabit bir boşluk olarak görünen buydu.
-  //
-  // ÖNEMLİ: body'yi position:fixed ile tamamen kilitlemek bunu çözer
-  // ama adres çubuğunun kayarken gizlenmesi de native olarak GERÇEK bir
-  // kaydırmaya bağlı olduğundan, kilitleyince o da devre dışı kalıyor ve
-  // sevilen "kayma" hissi tamamen kayboluyor. Bu yüzden kaydırmayı
-  // olduğu gibi bırakıp, sadece "0 dışında bir yerde kalıcı olarak
-  // durma" durumunu düzeltiyoruz.
-  //
-  // Düzeltmeyi HER scroll olayında anında uygulamak sert/ani bir zıplama
-  // hissi veriyordu, çünkü native geri-yaylanma (bounce-back) animasyonu
-  // henüz bitmeden JS onu kesip anında 0'a atlıyordu. Bunun yerine:
-  // kaydırma tamamen durana kadar (debounce) bekliyoruz — native
-  // animasyon kendi akışında tamamlanabiliyor — ve ancak durduktan sonra
-  // hâlâ 0'da değilse, `behavior: 'smooth'` ile yumuşak bir animasyonla
-  // geri götürüyoruz. Böylece kullanıcı hiçbir zaman ani bir kesilme
-  // hissetmiyor.
-  //
-  // Bir input/textarea'ya yazarken bu düzeltmeyi uygulamıyoruz; çünkü
-  // klavye açıldığında Safari'nin odaklanılan alanı görünür tutmak için
-  // yaptığı gerekli kaydırmayı bozmamak gerekiyor.
-  let strayScrollSettleTimer = null;
-  const STRAY_SCROLL_SETTLE_DELAY = 140; // ms — kaydırma/bounce'ın oturması için bekleme
-
-  const resetStrayBodyScroll = () => {
-    const activeTag = document.activeElement && document.activeElement.tagName;
-    const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA' ||
-      (document.activeElement && document.activeElement.isContentEditable);
-    if (isTyping) return;
-
-    if (strayScrollSettleTimer) clearTimeout(strayScrollSettleTimer);
-    strayScrollSettleTimer = setTimeout(() => {
-      strayScrollSettleTimer = null;
-      if (window.scrollY !== 0 || window.scrollX !== 0) {
-        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      }
-    }, STRAY_SCROLL_SETTLE_DELAY);
-  };
-
-  window.addEventListener('scroll', resetStrayBodyScroll, { passive: true });
-  window.addEventListener('resize', resetStrayBodyScroll, { passive: true });
 </script>
 
 <script>
