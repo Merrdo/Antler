@@ -38,13 +38,16 @@
   /* ---- Sayfanın (body) kendisi hiçbir zaman kaymasın / zıplamasın ----
      Uygulama tamamen kendi iç scroll container'larında (overflow-y:auto
      olan sayfa içerikleri) kaydırılıyor; body/html seviyesinde kaydırma
-     hiç gerekmiyor. Bunu position:fixed + overflow:hidden ile tamamen
-     kilitliyoruz ki navbar dahil tüm ekran parmakla dokunulunca oynayıp
-     "geri sıçramasın" — native (rubber-band) zıplama hissi sadece asıl
-     kaydırılabilir olan iç alanlarda (liste/kart içerikleri) kalsın. */
+     hiç gerekmiyor. Bunu sade `overflow: hidden` ile kilitliyoruz ki
+     navbar dahil tüm ekran parmakla dokunulunca oynayıp "geri
+     sıçramasın" — native (rubber-band) zıplama hissi sadece asıl
+     kaydırılabilir olan iç alanlarda (liste/kart içerikleri) kalsın.
+     NOT: Burada bilerek `position: fixed` KULLANMIYORUZ — html'e
+     position:fixed vermek iOS'ta gerçek viewport yüksekliği ve
+     safe-area-inset hesaplamasını bozup alt kısımda içeriksiz boş bir
+     şerit bırakıyordu. Sade overflow:hidden, safe-area/viewport
+     davranışını bozmadan aynı sonucu (kaydırma/bounce yok) veriyor. */
   html, body {
-    position: fixed;
-    inset: 0;
     overflow: hidden;
     overscroll-behavior: none;
   }
