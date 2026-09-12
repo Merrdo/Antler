@@ -10782,34 +10782,49 @@
     {
       name: 'Orijinal',
       gradient: 'linear-gradient(135deg, #2b2f4a 0%, #2b2f4a 50%, #2b2f4a 100%)',
+      color: '#2b2f4a',
       text: '#f2f2f7'
     },
     {
       name: 'Koyu',
       gradient: 'linear-gradient(135deg, #121212 0%, #121212 50%, #121212 100%)',
+      color: '#121212',
       text: '#f5f5f5'
     },
     {
       name: 'Saf Siyah',
       gradient: 'linear-gradient(135deg, #000000 0%, #000000 50%, #000000 100%)',
+      color: '#000000',
       text: '#f5f5f5'
     },
     {
       name: 'Yeşil',
       gradient: 'linear-gradient(135deg, #dff0d0 0%, #dff0d0 50%, #dff0d0 100%)',
+      color: '#dff0d0',
       text: '#3b5943'
     },
     {
       name: 'Krem',
       gradient: 'linear-gradient(135deg, #f2e8d5 0%, #f2e8d5 50%, #f2e8d5 100%)',
+      color: '#f2e8d5',
       text: '#4a3f2f'
     },
     {
       name: 'Kahve',
       gradient: 'linear-gradient(135deg, #4a3226 0%, #4a3226 50%, #4a3226 100%)',
+      color: '#4a3226',
       text: '#f3e6d8'
     }
   ];
+
+  // iPhone'da üst güvenli alan (çentik/Dynamic Island şeridi) tarayıcı
+  // tarafından <meta name="theme-color"> rengiyle boyanır. Tema her
+  // değiştiğinde bu meta etiketini de güncelleyerek üst şeridin her zaman
+  // o an aktif arka plan rengiyle aynı anda değişmesini sağlıyoruz.
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  const updateThemeColorMeta = (hex) => {
+    if (themeColorMeta) themeColorMeta.setAttribute('content', hex);
+  };
 
   const layerA = document.getElementById('themeLayerA');
   const layerB = document.getElementById('themeLayerB');
@@ -10821,6 +10836,7 @@
 
   layerA.style.background = themes[themeIndex].gradient;
   document.documentElement.style.setProperty('--theme-text', themes[themeIndex].text);
+  updateThemeColorMeta(themes[themeIndex].color);
 
   const applyNextTheme = () => {
     themeIndex = (themeIndex + 1) % themes.length;
@@ -10831,6 +10847,7 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
+    updateThemeColorMeta(theme.color);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
@@ -10861,6 +10878,7 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
+    updateThemeColorMeta(theme.color);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
