@@ -33,22 +33,15 @@
     width: 100%;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
-    /* Android'de (özellikle ana ekrana eklenmiş PWA/WebView modunda)
-       body'nin kendi kaydırma çubuğu bazen webkit-scrollbar kuralına
-       rağmen görünür kalabiliyor; overflow'u burada da açıkça
-       tanımlayıp aşağıdaki scrollbar-gizleme kurallarının bu
-       elemanlara kesin uygulanmasını sağlıyoruz. */
-    overflow: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    /* iOS'un "rubber band" / bounce efektini (sayfayı sınırın ötesine
+       çekince zıplayıp geri gelmesi) tamamen kapatır. Sayfa artık
+       kaydırma gerektirmeyen yerlerde sabit kalır, kaydırılabilen
+       içerikler ise normal kaymaya devam eder. */
+    overscroll-behavior-y: none;
   }
 
-  html::-webkit-scrollbar,
-  body::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-    background: transparent;
+  * {
+    overscroll-behavior: none;
   }
 
   /* ---- Bir pop-up (ör. "Kaynaklar" ve galerisi) açıkken arka plandaki
@@ -64,20 +57,12 @@
   * {
     scrollbar-width: none;      /* Firefox */
     -ms-overflow-style: none;   /* IE / eski Edge */
-    scrollbar-color: transparent transparent; /* Bazı Chromium/Android sürümleri */
   }
 
   *::-webkit-scrollbar {
     display: none;              /* Chrome, Safari, yeni Edge */
     width: 0;
     height: 0;
-    background: transparent;
-  }
-
-  *::-webkit-scrollbar-thumb,
-  *::-webkit-scrollbar-track {
-    display: none;
-    background: transparent;
   }
 
   * {
@@ -161,7 +146,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 24px calc(96px + env(safe-area-inset-bottom));
+    padding: calc(24px + env(safe-area-inset-top)) 24px calc(96px + env(safe-area-inset-bottom));
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.2s ease, transform 0.2s ease;
