@@ -14,7 +14,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap" rel="stylesheet">
 <style>
   * {
     margin: 0;
@@ -7590,10 +7590,78 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding-top: calc(48px + env(safe-area-inset-top));
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* Sayfa başlığı artık küçük bir ikon+yazı satırı değil; ekteki referans
+     tasarımdaki ("SETTINGS") gibi kendi başına duran, büyük, kalın ve
+     ortalanmış bir başlık. İkon kaldırıldı, yazı tek başına sayfanın
+     "kimliği" gibi öne çıkıyor.
+     Referans videodaki gibi bu başlık artık listeyle birlikte KAYMIYOR:
+     güvenli alanın hemen altında sabit duruyor, altındaki liste kendi
+     kutusunda kayıyor ve başlığın alt kenarında temiz bir şekilde
+     "kesiliyor" (referans videodaki SETTINGS başlığıyla aynı davranış). */
+  .settings-hero {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    padding: calc(48px + env(safe-area-inset-top)) 24px 0.6rem;
+  }
+
+  /* Başlığın altındaki her şey kendi kutusunda kayar; böylece liste
+     yukarı kaydırıldığında öğeler başlığın ARKASINA değil, bu kutunun
+     üst kenarında düzgünce kesilerek kaybolur. */
+  .settings-scroll {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    box-sizing: border-box;
+    padding: 0 24px calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .settings-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Başlık ile kayan liste arasındaki sınır artık düz/görünmez bir kesim
+     değil; bir bilet kuponu gibi "buradan kesin" çizgisi. Uygulamanın
+     kalın-siyah-çizgi brüt diliyle uyumlu, kesikli çizgi + ortada küçük
+     bir makas ikonu. */
+  .settings-tear {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+    padding: 0.3rem 24px 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--theme-text, #000);
+    opacity: 0.4;
+    transition: color 0.5s ease;
+  }
+
+  .settings-tear-line {
+    flex: 1 1 auto;
+    height: 0;
+    border-top: 2.5px dashed currentColor;
+  }
+
+  .settings-tear-scissors {
+    flex: 0 0 auto;
+    display: block;
   }
 
   .settings-page {
@@ -7604,22 +7672,11 @@
     max-width: 360px;
   }
 
-  /* Sayfa başlığı artık küçük bir ikon+yazı satırı değil; ekteki referans
-     tasarımdaki ("SETTINGS") gibi kendi başına duran, büyük, kalın ve
-     ortalanmış bir başlık. İkon kaldırıldı, yazı tek başına sayfanın
-     "kimliği" gibi öne çıkıyor. */
-  .settings-hero {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    padding: 0.2rem 0 0.4rem;
-  }
-
   .settings-title {
-    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
+    font-family: "Playfair Display", "Archivo Expanded", "Space Grotesk", serif;
     font-weight: 800;
-    font-size: clamp(2rem, 9vw, 2.6rem);
-    letter-spacing: 0.01em;
+    font-size: clamp(2.1rem, 9.5vw, 2.8rem);
+    letter-spacing: 0.015em;
     text-transform: uppercase;
     text-align: center;
     color: var(--theme-text, #f2f2f7);
@@ -9218,11 +9275,24 @@
 
   <!-- Sekme 7: Ayarlar sayfası -->
   <section class="page" id="page-settings">
-    <div class="settings-page">
-      <div class="settings-hero">
-        <h1 class="settings-title">Ayarlar</h1>
-      </div>
+    <div class="settings-hero">
+      <h1 class="settings-title">Ayarlar</h1>
+    </div>
 
+    <div class="settings-tear" aria-hidden="true">
+      <span class="settings-tear-line"></span>
+      <svg class="settings-tear-scissors" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="6" cy="6" r="2.6"></circle>
+        <circle cx="6" cy="18" r="2.6"></circle>
+        <line x1="19.5" y1="4" x2="8.4" y2="15.5"></line>
+        <line x1="14.2" y1="14.2" x2="19.5" y2="20"></line>
+        <line x1="8.4" y1="8.5" x2="11.6" y2="12"></line>
+      </svg>
+      <span class="settings-tear-line"></span>
+    </div>
+
+    <div class="settings-scroll" id="settingsScroll">
+    <div class="settings-page">
       <div class="settings-section">
         <span class="settings-section-label">Görünüm</span>
         <div class="settings-card">
@@ -9348,6 +9418,7 @@
       <div class="settings-footer">
         <span class="settings-footer-text">Takvimim · v1.0</span>
       </div>
+    </div>
     </div>
   </section>
 
