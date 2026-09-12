@@ -7604,30 +7604,24 @@
     max-width: 360px;
   }
 
+  /* Sayfa başlığı artık küçük bir ikon+yazı satırı değil; ekteki referans
+     tasarımdaki ("SETTINGS") gibi kendi başına duran, büyük, kalın ve
+     ortalanmış bir başlık. İkon kaldırıldı, yazı tek başına sayfanın
+     "kimliği" gibi öne çıkıyor. */
   .settings-hero {
     display: flex;
-    align-items: center;
-    gap: 0.8rem;
-  }
-
-  .settings-hero-icon {
-    flex-shrink: 0;
-    width: 2.75rem;
-    height: 2.75rem;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    background-color: #fff;
-    border: 3px solid #000;
-    border-radius: 50%;
-    box-shadow: 3px 3px 0px 0px #000;
-    color: #121212;
+    width: 100%;
+    padding: 0.2rem 0 0.4rem;
   }
 
   .settings-title {
-    font-family: "Space Grotesk", sans-serif;
+    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
     font-weight: 800;
-    font-size: 1.55rem;
+    font-size: clamp(2rem, 9vw, 2.6rem);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    text-align: center;
     color: var(--theme-text, #f2f2f7);
     transition: color 0.5s ease;
   }
@@ -8113,8 +8107,7 @@
 
   /* ---------- Anahtar aktifken (karanlık mod) Ayarlar sayfasının beyaz
      yüzeyleri de diğer sayfalardaki gibi antresit tona geçer. ---------- */
-  body.is-anthracite .settings-card,
-  body.is-anthracite .settings-hero-icon {
+  body.is-anthracite .settings-card {
     background-color: var(--dark-card-color, #3b3e42);
     color: #f2f2f4;
   }
@@ -9227,11 +9220,6 @@
   <section class="page" id="page-settings">
     <div class="settings-page">
       <div class="settings-hero">
-        <span class="settings-hero-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="20" height="20">
-            <path fill-rule="evenodd" fill="currentColor" d="M18.02 10.5 L20.49 10.65 L20.49 13.35 L18.02 13.5 L17.31 15.19 L18.96 17.05 L17.05 18.96 L15.19 17.31 L13.5 18.02 L13.35 20.49 L10.65 20.49 L10.5 18.02 L8.81 17.31 L6.95 18.96 L5.04 17.05 L6.69 15.19 L5.98 13.5 L3.51 13.35 L3.51 10.65 L5.98 10.5 L6.69 8.81 L5.04 6.95 L6.95 5.04 L8.81 6.69 L10.5 5.98 L10.65 3.51 L13.35 3.51 L13.5 5.98 L15.19 6.69 L17.05 5.04 L18.96 6.95 L17.31 8.81 Z M14.6 12 A2.6 2.6 0 1 0 9.4 12 A2.6 2.6 0 1 0 14.6 12 Z"/>
-          </svg>
-        </span>
         <h1 class="settings-title">Ayarlar</h1>
       </div>
 
