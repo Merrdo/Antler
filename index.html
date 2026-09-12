@@ -10006,6 +10006,17 @@
 
   const layerA = document.getElementById('themeLayerA');
   const layerB = document.getElementById('themeLayerB');
+
+  // Sekmede/tarayıcıda açıkken üstteki durum çubuğu/adres çubuğu alanının
+  // rengini, o an aktif temanın arka plan rengiyle eşler. Gradyanın ilk
+  // hex durağını kullanıyoruz (temalarımız düz renk, tek durak).
+  const metaThemeColorTag = document.querySelector('meta[name="theme-color"]');
+  const updateMetaThemeColor = (gradient) => {
+    if (!metaThemeColorTag) return;
+    const match = gradient.match(/#[0-9a-fA-F]{6}/);
+    if (match) metaThemeColorTag.setAttribute('content', match[0]);
+  };
+
   // Daha önce seçilmiş bir tema kaydedilmişse (localStorage), uygulama onunla açılır.
   const savedThemeIndex = APP_STATE.theme;
   let themeIndex = (typeof savedThemeIndex === 'number' && themes[savedThemeIndex]) ? savedThemeIndex : 0;
@@ -10014,6 +10025,7 @@
 
   layerA.style.background = themes[themeIndex].gradient;
   document.documentElement.style.setProperty('--theme-text', themes[themeIndex].text);
+  updateMetaThemeColor(themes[themeIndex].gradient);
 
   const applyNextTheme = () => {
     themeIndex = (themeIndex + 1) % themes.length;
@@ -10024,6 +10036,7 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
+    updateMetaThemeColor(theme.gradient);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
@@ -10054,6 +10067,7 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
+    updateMetaThemeColor(theme.gradient);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
