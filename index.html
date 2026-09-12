@@ -28,20 +28,25 @@
     box-sizing: border-box;
   }
 
-  html, body {
+  html {
     height: 100%;
     width: 100%;
-    /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
-    touch-action: pan-x pan-y;
-    /* iOS'un "rubber band" / bounce efektini (sayfayı sınırın ötesine
-       çekince zıplayıp geri gelmesi) tamamen kapatır. Sayfa artık
-       kaydırma gerektirmeyen yerlerde sabit kalır, kaydırılabilen
-       içerikler ise normal kaymaya devam eder. */
-    overscroll-behavior-y: none;
+    overscroll-behavior: none;
   }
 
-  * {
+  body {
+    /* Body'yi viewport'a tamamen kilitler: sayfanın kendisi artık ne
+       yukarı/aşağı kayabilir ne de iOS'un "rubber band" zıplama
+       efektiyle esneyebilir. İçindeki overflow-y:auto olan alt
+       kutular (listeler, galeriler vb.) kendi içlerinde normal
+       kaymaya ve o alanlarda rubber band'e devam eder. */
+    position: fixed;
+    inset: 0;
+    height: 100%;
+    width: 100%;
     overscroll-behavior: none;
+    /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
+    touch-action: pan-x pan-y;
   }
 
   /* ---- Bir pop-up (ör. "Kaynaklar" ve galerisi) açıkken arka plandaki
