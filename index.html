@@ -5,31 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Takvimim</title>
 
-<script>
-  // ---------- Gerçek ekran yüksekliğini CSS'e ver ----------
-  // iOS'ta "Ana Ekrana Ekle" ile açılan standalone PWA modunda vh/dvh
-  // birimleri bazı sürümlerde tam ekranı (özellikle alt safe area/home
-  // indicator kısmını) doğru raporlamıyor; tarayıcı sekmesinde sorun
-  // yokken standalone modda alt kısımda boş bir şerit kalmasının asıl
-  // sebebi buydu. En güvenilir çözüm: JS'den `window.innerHeight`'ı
-  // (gerçek görünür viewport, standalone dahil her modda doğru) alıp
-  // bir CSS custom property'sine yazmak ve layout'u ona bağlamak.
-  // Bunu CSS boyanmadan önce, head'in en başında çalıştırıyoruz ki
-  // açılışta bir "zıplama/flaş" olmasın.
-  const setRealVH = () => {
-    document.documentElement.style.setProperty('--real-vh', window.innerHeight + 'px');
-  };
-  setRealVH();
-  window.addEventListener('resize', setRealVH);
-  window.addEventListener('orientationchange', setRealVH);
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', setRealVH);
-  }
-</script>
-
 <!-- PWA: manifest ve tema rengi -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2b2f4a" id="themeColorMeta">
+<meta name="theme-color" content="#2b2f4a">
 
 <!-- Favicon ve uygulama ikonları -->
 <link rel="icon" href="icons/favicon.png" type="image/png">
@@ -52,27 +30,9 @@
 
   html, body {
     height: 100%;
-    min-height: -webkit-fill-available;
     width: 100%;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
-  }
-
-  /* ---- Sayfanın (body) kendisi hiçbir zaman kaymasın / zıplamasın ----
-     Uygulama tamamen kendi iç scroll container'larında (overflow-y:auto
-     olan sayfa içerikleri) kaydırılıyor; body/html seviyesinde kaydırma
-     hiç gerekmiyor. Bunu sade `overflow: hidden` ile kilitliyoruz ki
-     navbar dahil tüm ekran parmakla dokunulunca oynayıp "geri
-     sıçramasın" — native (rubber-band) zıplama hissi sadece asıl
-     kaydırılabilir olan iç alanlarda (liste/kart içerikleri) kalsın.
-     NOT: Burada bilerek `position: fixed` KULLANMIYORUZ — html'e
-     position:fixed vermek iOS'ta gerçek viewport yüksekliği ve
-     safe-area-inset hesaplamasını bozup alt kısımda içeriksiz boş bir
-     şerit bırakıyordu. Sade overflow:hidden, safe-area/viewport
-     davranışını bozmadan aynı sonucu (kaydırma/bounce yok) veriyor. */
-  html, body {
-    overflow: hidden;
-    overscroll-behavior: none;
   }
 
   /* ---- Bir pop-up (ör. "Kaynaklar" ve galerisi) açıkken arka plandaki
@@ -166,18 +126,7 @@
 
   .app {
     position: relative;
-    /* NOT: Önceden burada `min-height: 100dvh` kullanılıyordu. iOS'ta
-       "Ana Ekrana Ekle" ile açılan standalone PWA modunda `dvh` birimi
-       bazı sürümlerde safe-area (home indicator) alanını hesaba katmadan
-       raporlanabiliyor; bu da tarayıcı sekmesinde sorun yokken standalone
-       modda alt kısımda boş bir şerit kalmasına yol açan asıl sebepti.
-       html/body zaten `height: 100%` ile gerçek tam ekranı güvenilir
-       şekilde kaplıyor, o yüzden .app'i dvh yerine aynı yüzde zincirine
-       bağlıyoruz; -webkit-fill-available de eski standalone modlar için
-       ekstra güvence. */
-    height: 100%;
-    height: var(--real-vh, 100%);
-    min-height: -webkit-fill-available;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
   }
@@ -188,7 +137,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 24px calc(96px + 0px);
+    padding: 24px 24px calc(96px + env(safe-area-inset-bottom));
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -222,7 +171,7 @@
     bottom: 0;
     display: flex;
     justify-content: center;
-    padding: 16px 16px calc(16px + 0px);
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
     pointer-events: none;
   }
 
@@ -1611,10 +1560,9 @@
   #page-4 {
     align-items: flex-start;
     overflow-y: auto;
-    overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-    padding-top: calc(40px + 0px);
-    padding-bottom: calc(22px + 0px);
+    padding-top: calc(40px + env(safe-area-inset-top));
+    padding-bottom: calc(22px + env(safe-area-inset-bottom));
   }
 
   .wheel-page {
@@ -1870,7 +1818,6 @@
   .wheel-options-scroll {
     max-height: 118px;
     overflow-y: auto;
-    overscroll-behavior: contain;
     overflow-x: hidden;
     padding: 3px 4px;
     margin: -3px -4px;
@@ -2086,9 +2033,8 @@
   #page-8 {
     align-items: flex-start;
     justify-content: flex-start;
-    padding-top: calc(48px + 0px);
+    padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
-    overscroll-behavior: contain;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -2104,9 +2050,8 @@
   #page-9 {
     align-items: flex-start;
     justify-content: flex-start;
-    padding-top: calc(48px + 0px);
+    padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
-    overscroll-behavior: contain;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -2878,7 +2823,6 @@
     max-width: 420px;
     max-height: 82vh;
     overflow-y: auto;
-    overscroll-behavior: contain;
     /* Kartın kendisi dikey olarak kaydırılabilir kalsın diye backdrop'un
        "touch-action: none" kısıtlamasını burada geri açıyoruz. */
     touch-action: pan-y;
@@ -3099,9 +3043,8 @@
   #page-camera {
     align-items: flex-start;
     justify-content: flex-start;
-    padding-top: calc(48px + 0px);
+    padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
-    overscroll-behavior: contain;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -3504,7 +3447,6 @@
     width: 100%;
     max-height: 55vh;
     overflow-y: auto;
-    overscroll-behavior: contain;
     overflow-x: hidden;
     border: 2.5px solid #000;
     border-radius: 0.8rem;
@@ -3677,9 +3619,8 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
-    padding: calc(22px + 0px) 20px calc(28px + 0px);
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -4353,7 +4294,6 @@
     gap: 0.55rem;
     max-height: 320px;
     overflow-y: auto;
-    overscroll-behavior: contain;
   }
 
   .page10-log-row {
@@ -4471,9 +4411,8 @@
   #page-11 {
     align-items: flex-start;
     justify-content: flex-start;
-    padding-top: calc(48px + 0px);
+    padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
-    overscroll-behavior: contain;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -5459,9 +5398,8 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
-    padding: calc(22px + 0px) 20px calc(28px + 0px);
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior: contain;
   }
 
   /* ---------- Sayfa 11 - Analizlerim / 0 Hata Testlerim (tam ekran) ----------
@@ -5473,9 +5411,8 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1rem;
-    padding: calc(22px + 0px) 20px calc(28px + 0px);
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior: contain;
   }
 
   /* Branş kartındaki doğru/yanlış/boş toplamlarını gösteren küçük satır;
@@ -6402,13 +6339,9 @@
   .stopwatch-fullscreen {
     position: fixed;
     inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.9rem;
-    padding: 0px 0px
-      0px 0px;
+    display: block;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
     z-index: 60;
     cursor: pointer;
     opacity: 0;
@@ -6450,6 +6383,12 @@
   }
 
   .stopwatch-fullscreen-hint {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0.9rem;
+    width: max-content;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
     font-size: 0.85rem;
@@ -6482,10 +6421,14 @@
   /* Boş bir alana dokununca beliren "Tur" butonu; süre sıfırlanınca
      veya sayaç kapatılınca tekrar gizlenir. */
   .stopwatch-lap-btn {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-top: 2.7rem;
+    transform: translateX(-50%) scale(0.85);
     padding: 0.65rem 1.5rem;
     font-size: 0.95rem;
     opacity: 0;
-    transform: scale(0.85);
     pointer-events: none;
     transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
       box-shadow 0.2s ease, background-color 0.2s ease;
@@ -6493,7 +6436,7 @@
 
   .stopwatch-lap-btn.is-visible {
     opacity: 1;
-    transform: scale(1);
+    transform: translateX(-50%) scale(1);
     pointer-events: auto;
   }
 
@@ -6502,11 +6445,11 @@
      göre DEĞİŞMEZ. Tur listesi buna göre mutlak konumlandığı için,
      liste büyüdükçe/küçüldükçe saat asla yukarı/aşağı kaymaz. */
   .stopwatch-fullscreen-core {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.9rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block;
   }
 
   /* Kaydedilen turların listesi: normal akışın DIŞINDA, kutunun hemen
@@ -6517,12 +6460,11 @@
     position: absolute;
     top: 100%;
     left: 50%;
-    margin-top: 0.9rem;
+    margin-top: 5.4rem;
     width: 100%;
     max-width: 300px;
     max-height: 26vh;
     overflow-y: auto;
-    overscroll-behavior: contain;
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -7101,8 +7043,8 @@
     align-items: center;
     justify-content: center;
     gap: 0.9rem;
-    padding: 0px 0px
-      0px 0px;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
     z-index: 60;
     cursor: pointer;
     opacity: 0;
@@ -7224,9 +7166,8 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + 0px) 20px calc(22px + 0px);
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior: contain;
   }
 
   .calendar-topbar {
@@ -7507,9 +7448,8 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + 0px) 20px calc(22px + 0px);
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior: contain;
   }
 
   /* Artık nav bar'da kendi sekmesi olmadığından (Sayfa 5'teki "Geçmiş"
@@ -7519,9 +7459,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: calc(22px + 0px) 20px calc(22px + 0px);
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior: contain;
   }
 
   .laps-page-card {
@@ -7586,9 +7525,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding-top: calc(48px + 0px);
+    padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
-    overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -7845,9 +7783,8 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.1rem;
-    padding: calc(22px + 0px) 20px calc(22px + 0px);
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    overscroll-behavior: contain;
   }
 
   #page-patterns .calendar-topbar {
@@ -10057,19 +9994,6 @@
 
   const layerA = document.getElementById('themeLayerA');
   const layerB = document.getElementById('themeLayerB');
-
-  // CSS'nin uzanamadığı alanları (iOS'ta home indicator / adres çubuğu
-  // şeridi gibi, sayfanın DOM'u DIŞINDA tarayıcının kendi çizdiği
-  // kısımlar) rengiyle boyayan tek yer <meta name="theme-color"> etiketi.
-  // Uygulamanın teması değiştikçe bu etiketi de güncel tutmazsak, o şerit
-  // hep ilk (statik) renkte kalır ve tema değişince "arka planla uyuşmayan
-  // bir bant/safe area" olarak göze batar. Bu yüzden her tema
-  // değişiminde bu etiketi o an aktif temanın rengiyle senkronluyoruz.
-  const themeColorMeta = document.getElementById('themeColorMeta');
-  const syncMetaThemeColor = (gradient) => {
-    const match = gradient.match(/#[0-9a-fA-F]{6}/);
-    if (match && themeColorMeta) themeColorMeta.setAttribute('content', match[0]);
-  };
   // Daha önce seçilmiş bir tema kaydedilmişse (localStorage), uygulama onunla açılır.
   const savedThemeIndex = APP_STATE.theme;
   let themeIndex = (typeof savedThemeIndex === 'number' && themes[savedThemeIndex]) ? savedThemeIndex : 0;
@@ -10078,7 +10002,6 @@
 
   layerA.style.background = themes[themeIndex].gradient;
   document.documentElement.style.setProperty('--theme-text', themes[themeIndex].text);
-  syncMetaThemeColor(themes[themeIndex].gradient);
 
   const applyNextTheme = () => {
     themeIndex = (themeIndex + 1) % themes.length;
@@ -10089,7 +10012,6 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
-    syncMetaThemeColor(theme.gradient);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
@@ -10120,7 +10042,6 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
-    syncMetaThemeColor(theme.gradient);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
@@ -17338,13 +17259,52 @@
 </script>
 
 <script>
-  // ---------- Body artık hiç kaymıyor ----------
-  // html/body position:fixed + overflow:hidden ile tamamen kilitli
-  // olduğu için (bkz. CSS) body'nin kayıp "0 dışında kalıcı durması"
-  // veya native rubber-band bounce'ının debounce ile 0'a geri
-  // çekilmesi gibi bir soruna artık gerek yok — kayma en baştan hiç
-  // gerçekleşmiyor. Önceki stray-scroll-reset script'i bu yüzden
-  // kaldırıldı.
+  // ---------- Body'nin kalıcı olarak kaymasını engelle ----------
+  // Uygulamanın .app kutusu min-height: 100dvh kullanıyor. iOS Safari'de
+  // adres çubuğu parmakla kaydırırken gizlenince 100dvh büyüyor; bu da
+  // body'yi GERÇEKTEN (native rubber-band bounce değil, kalıcı) birkaç
+  // piksel kaydırabiliyor ve o pozisyonda takılı kalıyordu — en altta
+  // sabit bir boşluk olarak görünen buydu.
+  //
+  // ÖNEMLİ: body'yi position:fixed ile tamamen kilitlemek bunu çözer
+  // ama adres çubuğunun kayarken gizlenmesi de native olarak GERÇEK bir
+  // kaydırmaya bağlı olduğundan, kilitleyince o da devre dışı kalıyor ve
+  // sevilen "kayma" hissi tamamen kayboluyor. Bu yüzden kaydırmayı
+  // olduğu gibi bırakıp, sadece "0 dışında bir yerde kalıcı olarak
+  // durma" durumunu düzeltiyoruz.
+  //
+  // Düzeltmeyi HER scroll olayında anında uygulamak sert/ani bir zıplama
+  // hissi veriyordu, çünkü native geri-yaylanma (bounce-back) animasyonu
+  // henüz bitmeden JS onu kesip anında 0'a atlıyordu. Bunun yerine:
+  // kaydırma tamamen durana kadar (debounce) bekliyoruz — native
+  // animasyon kendi akışında tamamlanabiliyor — ve ancak durduktan sonra
+  // hâlâ 0'da değilse, `behavior: 'smooth'` ile yumuşak bir animasyonla
+  // geri götürüyoruz. Böylece kullanıcı hiçbir zaman ani bir kesilme
+  // hissetmiyor.
+  //
+  // Bir input/textarea'ya yazarken bu düzeltmeyi uygulamıyoruz; çünkü
+  // klavye açıldığında Safari'nin odaklanılan alanı görünür tutmak için
+  // yaptığı gerekli kaydırmayı bozmamak gerekiyor.
+  let strayScrollSettleTimer = null;
+  const STRAY_SCROLL_SETTLE_DELAY = 140; // ms — kaydırma/bounce'ın oturması için bekleme
+
+  const resetStrayBodyScroll = () => {
+    const activeTag = document.activeElement && document.activeElement.tagName;
+    const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA' ||
+      (document.activeElement && document.activeElement.isContentEditable);
+    if (isTyping) return;
+
+    if (strayScrollSettleTimer) clearTimeout(strayScrollSettleTimer);
+    strayScrollSettleTimer = setTimeout(() => {
+      strayScrollSettleTimer = null;
+      if (window.scrollY !== 0 || window.scrollX !== 0) {
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      }
+    }, STRAY_SCROLL_SETTLE_DELAY);
+  };
+
+  window.addEventListener('scroll', resetStrayBodyScroll, { passive: true });
+  window.addEventListener('resize', resetStrayBodyScroll, { passive: true });
 </script>
 
 <script>
