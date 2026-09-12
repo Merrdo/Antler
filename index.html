@@ -11,12 +11,6 @@
 
 <!-- Favicon ve uygulama ikonları -->
 <link rel="icon" href="icons/favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-
-<!-- PWA: iOS "Ana Ekrana Ekle" desteği -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Takvimim">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1571,6 +1565,7 @@
     align-items: flex-start;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     padding-top: calc(40px + env(safe-area-inset-top));
     padding-bottom: calc(22px + env(safe-area-inset-bottom));
   }
@@ -1829,6 +1824,8 @@
     max-height: 118px;
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     padding: 3px 4px;
     margin: -3px -4px;
     scrollbar-width: none;
@@ -2046,6 +2043,8 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -2063,6 +2062,8 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -2833,6 +2834,7 @@
     max-width: 420px;
     max-height: 82vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     /* Kartın kendisi dikey olarak kaydırılabilir kalsın diye backdrop'un
        "touch-action: none" kısıtlamasını burada geri açıyoruz. */
     touch-action: pan-y;
@@ -3056,6 +3058,8 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -3458,6 +3462,8 @@
     max-height: 55vh;
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     border: 2.5px solid #000;
     border-radius: 0.8rem;
     margin-bottom: 0.9rem;
@@ -3631,6 +3637,8 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -4304,6 +4312,8 @@
     gap: 0.55rem;
     max-height: 320px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   .page10-log-row {
@@ -4424,6 +4434,8 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -5410,6 +5422,8 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   /* ---------- Sayfa 11 - Analizlerim / 0 Hata Testlerim (tam ekran) ----------
@@ -5423,6 +5437,8 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   /* Branş kartındaki doğru/yanlış/boş toplamlarını gösteren küçük satır;
@@ -6475,6 +6491,8 @@
     max-width: 300px;
     max-height: 26vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -7178,6 +7196,8 @@
     gap: 1.1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   .calendar-topbar {
@@ -7460,6 +7480,8 @@
     gap: 1.1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   /* Artık nav bar'da kendi sekmesi olmadığından (Sayfa 5'teki "Geçmiş"
@@ -7471,6 +7493,8 @@
     justify-content: flex-start;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   .laps-page-card {
@@ -7538,6 +7562,7 @@
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   .settings-page {
@@ -7795,6 +7820,8 @@
     gap: 1.1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   #page-patterns .calendar-topbar {
@@ -8312,6 +8339,103 @@
       color: #fff;
     }
 
+    /* Yanal paneldeki bir sekme seçildiğinde, alttaki mobil nav bar'da
+       zaten var olan aynı ikon animasyonları burada da oynar (aynı
+       keyframe'ler ve aynı ikon alt sınıfları yeniden kullanılır;
+       yalnızca tetikleyici seçici ".nav-input:checked" yerine
+       ".sidebar-nav-item.is-active" olur). */
+    .sidebar-nav-item.is-active .nav-icon-home path {
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      animation: navHomeDraw 0.45s ease-out both;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-home path:nth-of-type(1) {
+      animation-delay: 0s;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-home path:nth-of-type(2) {
+      animation-delay: 0.22s;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-stopwatch .nav-stopwatch-hand {
+      transform-box: fill-box;
+      transform-origin: 50% 100%;
+      animation: navStopwatchHandSpin 0.5s ease-in-out both;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-stopwatch .nav-stopwatch-btn {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: navStopwatchBtnPress 0.28s ease-in-out 0.5s both;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-gunluk path {
+      animation: navGunlukTickAppear 0.15s linear both;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-gunluk path:nth-of-type(1) {
+      animation-delay: 0.16s;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-gunluk path:nth-of-type(2) {
+      animation-delay: 0s;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-checklist .nav-checklist-check {
+      stroke-dasharray: 12;
+      stroke-dashoffset: 12;
+      animation: navChecklistCheckDraw 0.3s ease-out 0.16s both;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-exam rect {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: navExamPaperIn 0.2s ease-out both;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-exam line {
+      stroke-dasharray: 8;
+      stroke-dashoffset: 8;
+      animation: navExamLineWrite 0.32s ease-in-out both;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-exam line:nth-of-type(1) {
+      animation-delay: 0.12s;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-exam line:nth-of-type(2) {
+      animation-delay: 0.38s;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-exam line:nth-of-type(3) {
+      stroke-dasharray: 5;
+      stroke-dashoffset: 5;
+      animation-delay: 0.64s;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-camera .nav-camera-flash-glow {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: navCameraFlashGlow 0.65s ease-out both;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-camera .nav-camera-flash {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: navCameraFlashCore 0.55s ease-out both;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-camera .nav-camera-flash-rays {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: navCameraFlashRays 0.5s ease-out both;
+    }
+
+    .sidebar-nav-item.is-active .nav-icon-gear {
+      animation: navGearSpin 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
     /* Panel kapalıyken ekranın solunda asılı duran, tekrar açmaya yarayan
        küçük "dil" (tab) düğmesi. */
     .sidebar-toggle-tab {
@@ -8621,7 +8745,7 @@
     <div class="sidebar-nav-slider" id="sidebarNavSlider"></div>
 
     <button type="button" class="sidebar-nav-item is-active" data-page="page-1">
-      <svg class="sidebar-nav-icon" viewBox="0 0 24 24">
+      <svg class="sidebar-nav-icon nav-icon-home" viewBox="0 0 24 24">
         <path d="M4 11.5L12 4l8 7.5"/>
         <path d="M6 9.625v9.375a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9.375"/>
       </svg>
@@ -8629,17 +8753,17 @@
     </button>
 
     <button type="button" class="sidebar-nav-item" data-page="page-5">
-      <svg class="sidebar-nav-icon" viewBox="0 0 24 24">
+      <svg class="sidebar-nav-icon nav-icon-stopwatch" viewBox="0 0 24 24">
         <circle cx="12" cy="13" r="8"/>
-        <line x1="12" y1="9" x2="12" y2="13"/>
-        <line x1="9" y1="3" x2="15" y2="3"/>
+        <line class="nav-stopwatch-hand" x1="12" y1="9" x2="12" y2="13"/>
+        <line class="nav-stopwatch-btn" x1="9" y1="3" x2="15" y2="3"/>
         <line x1="12" y1="3" x2="12" y2="5"/>
       </svg>
       <span class="sidebar-nav-label">Kronometre</span>
     </button>
 
     <button type="button" class="sidebar-nav-item" data-page="page-8">
-      <svg class="sidebar-nav-icon" viewBox="0 0 24 24">
+      <svg class="sidebar-nav-icon nav-icon-gunluk" viewBox="0 0 24 24">
         <path d="m3 17 2 2 4-4"/>
         <path d="m3 7 2 2 4-4"/>
         <line x1="13" y1="6" x2="21" y2="6"/>
@@ -8649,24 +8773,36 @@
     </button>
 
     <button type="button" class="sidebar-nav-item" data-page="page-camera">
-      <svg class="sidebar-nav-icon" viewBox="0 0 24 24">
+      <svg class="sidebar-nav-icon nav-icon-camera" viewBox="0 0 24 24">
         <path d="M3 8.5a1.5 1.5 0 0 1 1.5-1.5h2.4l1.3-1.8a1.5 1.5 0 0 1 1.2-.6h5.2a1.5 1.5 0 0 1 1.2.6l1.3 1.8h2.4A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/>
         <circle cx="12" cy="13" r="3.4"/>
+        <circle class="nav-camera-flash-glow" cx="12" cy="13" r="3"/>
+        <circle class="nav-camera-flash" cx="12" cy="13" r="1.3"/>
+        <g class="nav-camera-flash-rays">
+          <line x1="12" y1="13" x2="12" y2="6.5"/>
+          <line x1="12" y1="13" x2="12" y2="19.5"/>
+          <line x1="12" y1="13" x2="5.5" y2="13"/>
+          <line x1="12" y1="13" x2="18.5" y2="13"/>
+          <line x1="12" y1="13" x2="7.4" y2="8.4"/>
+          <line x1="12" y1="13" x2="16.6" y2="17.6"/>
+          <line x1="12" y1="13" x2="7.4" y2="17.6"/>
+          <line x1="12" y1="13" x2="16.6" y2="8.4"/>
+        </g>
       </svg>
       <span class="sidebar-nav-label">Soru Havuzu</span>
     </button>
 
     <button type="button" class="sidebar-nav-item" data-page="page-9">
-      <svg class="sidebar-nav-icon" viewBox="0 0 24 24">
+      <svg class="sidebar-nav-icon nav-icon-checklist" viewBox="0 0 24 24">
         <rect x="5" y="5.5" width="14" height="15" rx="2.4"/>
-        <rect x="9" y="3" width="6" height="2.5" rx="1"/>
-        <polyline points="8.3 13 10.8 15.5 15.7 9.5"/>
+        <rect class="nav-checklist-clip" x="9" y="3" width="6" height="2.5" rx="1"/>
+        <polyline class="nav-checklist-check" points="8.3 13 10.8 15.5 15.7 9.5"/>
       </svg>
       <span class="sidebar-nav-label">Soru Takibi</span>
     </button>
 
     <button type="button" class="sidebar-nav-item" data-page="page-11">
-      <svg class="sidebar-nav-icon" viewBox="0 0 24 24">
+      <svg class="sidebar-nav-icon nav-icon-exam" viewBox="0 0 24 24">
         <rect x="5" y="3" width="14" height="18" rx="2"/>
         <line x1="8" y1="8" x2="16" y2="8"/>
         <line x1="8" y1="12" x2="16" y2="12"/>
@@ -8676,7 +8812,7 @@
     </button>
 
     <button type="button" class="sidebar-nav-item" data-page="page-settings">
-      <svg class="sidebar-nav-icon" viewBox="0 0 24 24">
+      <svg class="sidebar-nav-icon nav-icon-gear" viewBox="0 0 24 24">
         <path d="M9.59356 3.94014C9.68397 3.39768 10.1533 3.00009 10.7033 3.00009H13.2972C13.8472 3.00009 14.3165 3.39768 14.4069 3.94014L14.6204 5.22119C14.6828 5.59523 14.9327 5.9068 15.2645 6.09045C15.3387 6.13151 15.412 6.17393 15.4844 6.21766C15.8095 6.41393 16.2048 6.47495 16.5604 6.34175L17.7772 5.88587C18.2922 5.69293 18.8712 5.9006 19.1462 6.37687L20.4432 8.6233C20.7181 9.09957 20.6085 9.70482 20.1839 10.0544L19.1795 10.8812C18.887 11.122 18.742 11.4938 18.7491 11.8726C18.7498 11.915 18.7502 11.9575 18.7502 12.0001C18.7502 12.0427 18.7498 12.0852 18.7491 12.1275C18.742 12.5064 18.887 12.8782 19.1795 13.119L20.1839 13.9458C20.6085 14.2953 20.7181 14.9006 20.4432 15.3769L19.1462 17.6233C18.8712 18.0996 18.2922 18.3072 17.7772 18.1143L16.5604 17.6584C16.2048 17.5252 15.8095 17.5862 15.4844 17.7825C15.412 17.8263 15.3387 17.8687 15.2645 17.9097C14.9327 18.0934 14.6828 18.4049 14.6204 18.779L14.4069 20.06C14.3165 20.6025 13.8472 21.0001 13.2972 21.0001H10.7033C10.1533 21.0001 9.68397 20.6025 9.59356 20.06L9.38005 18.779C9.31771 18.4049 9.06774 18.0934 8.73597 17.9097C8.66179 17.8687 8.58847 17.8263 8.51604 17.7825C8.19101 17.5863 7.79568 17.5252 7.44011 17.6584L6.22325 18.1143C5.70826 18.3072 5.12926 18.0996 4.85429 17.6233L3.55731 15.3769C3.28234 14.9006 3.39199 14.2954 3.81657 13.9458L4.82092 13.119C5.11343 12.8782 5.25843 12.5064 5.25141 12.1276C5.25063 12.0852 5.25023 12.0427 5.25023 12.0001C5.25023 11.9575 5.25063 11.915 5.25141 11.8726C5.25843 11.4938 5.11343 11.122 4.82092 10.8812L3.81657 10.0544C3.39199 9.70484 3.28234 9.09958 3.55731 8.62332L4.85429 6.37688C5.12926 5.90061 5.70825 5.69295 6.22325 5.88588L7.4401 6.34176C7.79566 6.47496 8.19099 6.41394 8.51603 6.21767C8.58846 6.17393 8.66179 6.13151 8.73597 6.09045C9.06774 5.9068 9.31771 5.59523 9.38005 5.22119L9.59356 3.94014Z"/>
         <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3432 10.3431 9.00001 12 9.00001C13.6569 9.00001 15 10.3432 15 12Z"/>
       </svg>
@@ -10143,18 +10279,6 @@
   const goToPage = (id) => {
     const nextPage = document.getElementById(id);
     if (!nextPage || nextPage === activePage) return;
-
-    // iOS'ta bir metin/numara alanına yazıp klavyeyi kapatmadan alt
-    // menüden başka bir sayfaya geçilirse, odak (focus) o input'ta takılı
-    // kalabiliyor. Klavyenin kendisi ekrandan gitse bile üstündeki "◂ ▸ ...
-    // Bitti" araç çubuğu (accessory bar) ekranda asılı kalabiliyor ve
-    // hangi sayfaya gidilirse gidilsin görünmeye devam ediyor. Sayfa
-    // değişirken hâlâ odaklı bir input/textarea varsa onu bilinçli olarak
-    // "blur" ediyoruz ki klavye ve araç çubuğu düzgünce kapansın.
-    const active = document.activeElement;
-    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
-      active.blur();
-    }
 
     const prevPage = activePage;
     activePage = nextPage;
@@ -17866,140 +17990,10 @@
 
 <script>
   // ---------- Yakınlaştırmayı Engelle ----------
-  // Safari, viewport meta etiketini (user-scalable=no) yok sayıp iki
-  // parmakla veya çift dokunarak yakınlaştırmaya izin verebiliyor;
-  // bu yüzden jest olaylarını da burada engelliyoruz.
-  ['gesturestart', 'gesturechange', 'gestureend'].forEach((eventName) => {
-    document.addEventListener(eventName, (e) => e.preventDefault());
-  });
-
-  // Çift dokunmayla yakınlaştırmayı engelle (iOS Safari).
-  // ÖNEMLİ: Sadece AYNI elemana kısa sürede iki kez dokunulduğunda
-  // (gerçek çift-dokunma jesti) engelliyoruz. Farklı butonlara art arda
-  // hızlıca dokunmak çift-dokunma DEĞİLDİR; bunu da engellersek her
-  // butondan sonra ~300ms beklemeden bir sonrakine dokunulamaz hale gelir
-  // (click olayı hiç tetiklenmez), ki asıl şikayet edilen sorun buydu.
-  //
-  // ÖNEMLİ 2: Parmak belirgin şekilde hareket ettiyse (yani kullanıcı
-  // aslında kaydırma/flick yapıyorsa) bu bir çift-dokunma-zoom jesti
-  // DEĞİLDİR. Böyle bir durumda touchend'de preventDefault çağırmak,
-  // iOS'ta kaydırmanın ataletle devam eden ("momentum") hareketini anında
-  // kesiyor ve kaydırma "takılıp" sonra tamamen tepkisiz kalıyormuş gibi
-  // hissettiriyordu — Ayarlar gibi uzun sayfalarda art arda hızlı
-  // kaydırınca (flick) fark ediliyordu. Bu yüzden hareketi takip edip
-  // gerçek bir sürükleme/kaydırma olduğunda hiç preventDefault UYGULAMIYORUZ.
-  let lastTouchEndAt = 0;
-  let lastTouchEndTarget = null;
-  let touchGestureStartX = 0;
-  let touchGestureStartY = 0;
-  let touchGestureMoved = false;
-
-  // passive:true — kaydırmayı senkron olarak bloke etmez, tarayıcı
-  // kaydırmayı hemen (JS'i beklemeden) başlatabilir.
-  document.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 1) {
-      touchGestureStartX = e.touches[0].clientX;
-      touchGestureStartY = e.touches[0].clientY;
-      touchGestureMoved = false;
-    }
-  }, { passive: true });
-
-  document.addEventListener('touchmove', (e) => {
-    if (e.touches.length !== 1) return;
-    const t = e.touches[0];
-    if (Math.abs(t.clientX - touchGestureStartX) > 10 || Math.abs(t.clientY - touchGestureStartY) > 10) {
-      touchGestureMoved = true;
-    }
-  }, { passive: true });
-
-  document.addEventListener('touchend', (e) => {
-    const now = Date.now();
-    const target = e.target;
-    // Butonlar, inputlar ve benzer interaktif kontroller kasıtlı olarak
-    // art arda hızlıca tıklanabilir (ör. +/- sayaç butonları). Bunlar
-    // çift-dokunma-zoom jesti DEĞİLDİR; bu yüzden bu tür elemanlarda
-    // preventDefault uygulamıyoruz, aksi halde ikinci hızlı tıklama hiç
-    // click olayı üretmiyordu (asıl şikayet edilen "hızlı tıklayınca
-    // tepki vermiyor" sorunu buydu).
-    const isInteractiveControl = target.closest(
-      'button, input, a, label, select, textarea, [role="button"]'
-    );
-    if (
-      !touchGestureMoved &&
-      !isInteractiveControl &&
-      target === lastTouchEndTarget &&
-      now - lastTouchEndAt <= 300
-    ) {
-      e.preventDefault();
-    }
-    lastTouchEndAt = now;
-    lastTouchEndTarget = target;
-  }, { passive: false });
-
-  // Not: İki parmakla yakınlaştırma (pinch) zaten CSS `touch-action:
-  // pan-x pan-y` (html/body) ve yukarıdaki gesturestart/change/end
-  // engellemesiyle (Safari) durduruluyor. Önceden burada ayrıca
-  // `touchmove` üzerinde `e.touches.length > 1` kontrolüyle bir de JS
-  // engeli vardı; document üzerinde passive:false bir touchmove
-  // dinleyicisinin var olması TEK PARMAKLA yapılan normal kaydırmalarda
-  // bile tarayıcının her karede JS'in bitmesini beklemesine (senkron
-  // "scroll-blocking listener") neden oluyordu — Ayarlar sayfasında
-  // hissedilen "takılma" şikayetinin asıl kaynağı buydu. O dinleyici,
-  // pinch koruması zaten başka yollarla sağlandığı için kaldırıldı.
-
   // Ctrl/Cmd + tekerlek ile (trackpad pinch) tarayıcı yakınlaştırmasını engelle.
   document.addEventListener('wheel', (e) => {
     if (e.ctrlKey) e.preventDefault();
   }, { passive: false });
-</script>
-
-<script>
-  // ---------- Body'nin kalıcı olarak kaymasını engelle ----------
-  // Uygulamanın .app kutusu min-height: 100dvh kullanıyor. iOS Safari'de
-  // adres çubuğu parmakla kaydırırken gizlenince 100dvh büyüyor; bu da
-  // body'yi GERÇEKTEN (native rubber-band bounce değil, kalıcı) birkaç
-  // piksel kaydırabiliyor ve o pozisyonda takılı kalıyordu — en altta
-  // sabit bir boşluk olarak görünen buydu.
-  //
-  // ÖNEMLİ: body'yi position:fixed ile tamamen kilitlemek bunu çözer
-  // ama adres çubuğunun kayarken gizlenmesi de native olarak GERÇEK bir
-  // kaydırmaya bağlı olduğundan, kilitleyince o da devre dışı kalıyor ve
-  // sevilen "kayma" hissi tamamen kayboluyor. Bu yüzden kaydırmayı
-  // olduğu gibi bırakıp, sadece "0 dışında bir yerde kalıcı olarak
-  // durma" durumunu düzeltiyoruz.
-  //
-  // Düzeltmeyi HER scroll olayında anında uygulamak sert/ani bir zıplama
-  // hissi veriyordu, çünkü native geri-yaylanma (bounce-back) animasyonu
-  // henüz bitmeden JS onu kesip anında 0'a atlıyordu. Bunun yerine:
-  // kaydırma tamamen durana kadar (debounce) bekliyoruz — native
-  // animasyon kendi akışında tamamlanabiliyor — ve ancak durduktan sonra
-  // hâlâ 0'da değilse, `behavior: 'smooth'` ile yumuşak bir animasyonla
-  // geri götürüyoruz. Böylece kullanıcı hiçbir zaman ani bir kesilme
-  // hissetmiyor.
-  //
-  // Bir input/textarea'ya yazarken bu düzeltmeyi uygulamıyoruz; çünkü
-  // klavye açıldığında Safari'nin odaklanılan alanı görünür tutmak için
-  // yaptığı gerekli kaydırmayı bozmamak gerekiyor.
-  let strayScrollSettleTimer = null;
-  const STRAY_SCROLL_SETTLE_DELAY = 140; // ms — kaydırma/bounce'ın oturması için bekleme
-
-  const resetStrayBodyScroll = () => {
-    const activeTag = document.activeElement && document.activeElement.tagName;
-    const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA' ||
-      (document.activeElement && document.activeElement.isContentEditable);
-    if (isTyping) return;
-
-    if (strayScrollSettleTimer) clearTimeout(strayScrollSettleTimer);
-    strayScrollSettleTimer = setTimeout(() => {
-      strayScrollSettleTimer = null;
-      if (window.scrollY !== 0 || window.scrollX !== 0) {
-        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      }
-    }, STRAY_SCROLL_SETTLE_DELAY);
-  };
-
-  window.addEventListener('scroll', resetStrayBodyScroll, { passive: true });
-  window.addEventListener('resize', resetStrayBodyScroll, { passive: true });
 </script>
 
 <script>
