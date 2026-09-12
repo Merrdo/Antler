@@ -7,7 +7,7 @@
 
 <!-- PWA: manifest ve tema rengi -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2b2f4a">
+<meta name="theme-color" content="#2b2f4a" id="themeColorMeta">
 
 <!-- Favicon ve uygulama ikonları -->
 <link rel="icon" href="icons/favicon.png" type="image/png">
@@ -10023,6 +10023,19 @@
 
   const layerA = document.getElementById('themeLayerA');
   const layerB = document.getElementById('themeLayerB');
+
+  // CSS'nin uzanamadığı alanları (iOS'ta home indicator / adres çubuğu
+  // şeridi gibi, sayfanın DOM'u DIŞINDA tarayıcının kendi çizdiği
+  // kısımlar) rengiyle boyayan tek yer <meta name="theme-color"> etiketi.
+  // Uygulamanın teması değiştikçe bu etiketi de güncel tutmazsak, o şerit
+  // hep ilk (statik) renkte kalır ve tema değişince "arka planla uyuşmayan
+  // bir bant/safe area" olarak göze batar. Bu yüzden her tema
+  // değişiminde bu etiketi o an aktif temanın rengiyle senkronluyoruz.
+  const themeColorMeta = document.getElementById('themeColorMeta');
+  const syncMetaThemeColor = (gradient) => {
+    const match = gradient.match(/#[0-9a-fA-F]{6}/);
+    if (match && themeColorMeta) themeColorMeta.setAttribute('content', match[0]);
+  };
   // Daha önce seçilmiş bir tema kaydedilmişse (localStorage), uygulama onunla açılır.
   const savedThemeIndex = APP_STATE.theme;
   let themeIndex = (typeof savedThemeIndex === 'number' && themes[savedThemeIndex]) ? savedThemeIndex : 0;
@@ -10031,6 +10044,7 @@
 
   layerA.style.background = themes[themeIndex].gradient;
   document.documentElement.style.setProperty('--theme-text', themes[themeIndex].text);
+  syncMetaThemeColor(themes[themeIndex].gradient);
 
   const applyNextTheme = () => {
     themeIndex = (themeIndex + 1) % themes.length;
@@ -10041,6 +10055,7 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
+    syncMetaThemeColor(theme.gradient);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
@@ -10071,6 +10086,7 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
+    syncMetaThemeColor(theme.gradient);
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
