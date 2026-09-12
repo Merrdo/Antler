@@ -35,6 +35,15 @@
     touch-action: pan-x pan-y;
   }
 
+  /* ---- Bir pop-up (ör. "Kaynaklar" ve galerisi) açıkken arka plandaki
+     sayfanın (ör. #page-11-detail'in kendi overflow-y:auto kaydırması)
+     parmakla kaydırılmasını engeller; body'ye bu sınıf eklenip
+     çıkarılarak açık/kapalı arasında geçiş yapılır. ---- */
+  body.has-modal-open {
+    overflow: hidden;
+    touch-action: none;
+  }
+
   /* ---------- Scrollbar'ları gizle (kaydırma işlevi aynen çalışır) ---------- */
   * {
     scrollbar-width: none;      /* Firefox */
@@ -15416,16 +15425,30 @@
     examResourcesVideoForm.classList.add('is-hidden');
   };
 
+  // Pop-up (ve üzerinden açılabilen galerisi) açıkken arka plandaki
+  // sayfanın kaydırılmasını engeller; ikisinden biri hâlâ açıksa body
+  // kilidi kaldırılmaz.
+  const lockExamResourcesBackgroundScroll = () => {
+    document.body.classList.add('has-modal-open');
+  };
+  const unlockExamResourcesBackgroundScrollIfClosed = () => {
+    if (!examResourcesBackdrop.classList.contains('is-open') && !examResGalleryBackdrop.classList.contains('is-open')) {
+      document.body.classList.remove('has-modal-open');
+    }
+  };
+
   const openExamResourcesModal = () => {
     const exam = page11State.exams.find((it) => it.id === page11ActiveExamId);
     if (!exam) return;
     renderExamResourcesModal(exam);
     page11UpdateResourcesIndicator();
     examResourcesBackdrop.classList.add('is-open');
+    lockExamResourcesBackgroundScroll();
   };
 
   const closeExamResourcesModal = () => {
     examResourcesBackdrop.classList.remove('is-open');
+    unlockExamResourcesBackgroundScrollIfClosed();
   };
 
   examDetailResourcesBtn.addEventListener('click', openExamResourcesModal);
@@ -15555,10 +15578,12 @@
     examResGalleryIndex = index;
     renderExamResGallery();
     examResGalleryBackdrop.classList.add('is-open');
+    lockExamResourcesBackgroundScroll();
   };
 
   const closeExamResGallery = () => {
     examResGalleryBackdrop.classList.remove('is-open');
+    unlockExamResourcesBackgroundScrollIfClosed();
   };
 
   examResGalleryPrev.addEventListener('click', () => {
