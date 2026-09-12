@@ -141,6 +141,7 @@
     inset: 0;
     display: flex;
     flex-direction: column;
+    background: transparent;
   }
 
   .page {
@@ -149,7 +150,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: calc(24px + env(safe-area-inset-top)) 24px calc(96px + env(safe-area-inset-bottom));
+    padding: calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -180,10 +181,10 @@
     position: fixed;
     left: 0;
     right: 0;
-    bottom: env(safe-area-inset-bottom);
+    bottom: 0;
     display: flex;
     justify-content: center;
-    padding: 16px;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
     pointer-events: none;
   }
 
@@ -7538,6 +7539,7 @@
     align-items: center;
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -10014,7 +10016,14 @@
   const updateMetaThemeColor = (gradient) => {
     if (!metaThemeColorTag) return;
     const match = gradient.match(/#[0-9a-fA-F]{6}/);
-    if (match) metaThemeColorTag.setAttribute('content', match[0]);
+    if (match) {
+      metaThemeColorTag.setAttribute('content', match[0]);
+      // body'nin kendi arkaplanını da aynı renge çekiyoruz; böylece
+      // theme-layer'ın kapsamadığı olası kenar boşlukları (ör. iOS'ta
+      // home indicator bandı) her zaman aktif temanın rengiyle kalır,
+      // eski sabit lacivert görünmez.
+      document.body.style.background = match[0];
+    }
   };
 
   // Daha önce seçilmiş bir tema kaydedilmişse (localStorage), uygulama onunla açılır.
