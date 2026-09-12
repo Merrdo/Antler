@@ -31,8 +31,17 @@
   html, body {
     height: 100%;
     width: 100%;
-    /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   * {
@@ -17085,92 +17094,94 @@
 </script>
 
 <script>
-  // ---------- Yakınlaştırmayı Engelle ----------
-  // Safari, viewport meta etiketini (user-scalable=no) yok sayıp iki
-  // parmakla veya çift dokunarak yakınlaştırmaya izin verebiliyor;
-  // bu yüzden jest olaylarını da burada engelliyoruz.
-  ['gesturestart', 'gesturechange', 'gestureend'].forEach((eventName) => {
-    document.addEventListener(eventName, (e) => e.preventDefault());
-  });
+  // ================= ZOOM ENGELLEME =================
+  (function(){
+    // Not: Çift dokunmayla zoom yapmayı engellemek için touchend bazlı,
+    // "son 300ms içindeki her touchend'i preventDefault et" yöntemi KULLANILMIYOR.
+    // Bu yöntem, arka arkaya hızlı dokunulduğunda (ör. sayaç +/- butonları)
+    // ikinci ve sonraki dokunuşların click olayını iptal ederek uygulamayı
+    // hantallaştırıyordu (hızlı basınca tepki vermiyor, yavaş basmak gerekiyordu).
+    // Çift dokunmayla zoom'u engellemek için zaten <html>/<body> üzerinde
+    // "touch-action: pan-x pan-y" tanımlı; bu, tarayıcıya native seviyede
+    // aynı işi yapıyor ve hızlı dokunuşları engellemiyor.
 
-  // Çift dokunmayla yakınlaştırmayı engelle (iOS Safari).
-  // ÖNEMLİ: Sadece AYNI elemana kısa sürede iki kez dokunulduğunda
-  // (gerçek çift-dokunma jesti) engelliyoruz. Farklı butonlara art arda
-  // hızlıca dokunmak çift-dokunma DEĞİLDİR; bunu da engellersek her
-  // butondan sonra ~300ms beklemeden bir sonrakine dokunulamaz hale gelir
-  // (click olayı hiç tetiklenmez), ki asıl şikayet edilen sorun buydu.
-  //
-  // ÖNEMLİ 2: Parmak belirgin şekilde hareket ettiyse (yani kullanıcı
-  // aslında kaydırma/flick yapıyorsa) bu bir çift-dokunma-zoom jesti
-  // DEĞİLDİR. Böyle bir durumda touchend'de preventDefault çağırmak,
-  // iOS'ta kaydırmanın ataletle devam eden ("momentum") hareketini anında
-  // kesiyor ve kaydırma "takılıp" sonra tamamen tepkisiz kalıyormuş gibi
-  // hissettiriyordu — Ayarlar gibi uzun sayfalarda art arda hızlı
-  // kaydırınca (flick) fark ediliyordu. Bu yüzden hareketi takip edip
-  // gerçek bir sürükleme/kaydırma olduğunda hiç preventDefault UYGULAMIYORUZ.
-  let lastTouchEndAt = 0;
-  let lastTouchEndTarget = null;
-  let touchGestureStartX = 0;
-  let touchGestureStartY = 0;
-  let touchGestureMoved = false;
+    // Pinch zoom (iki parmak) engelleme
+    document.addEventListener('touchmove', function(e){
+      if(e.touches.length > 1){
+        e.preventDefault();
+      }
+    }, { passive:false });
 
-  // passive:true — kaydırmayı senkron olarak bloke etmez, tarayıcı
-  // kaydırmayı hemen (JS'i beklemeden) başlatabilir.
-  document.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 1) {
-      touchGestureStartX = e.touches[0].clientX;
-      touchGestureStartY = e.touches[0].clientY;
-      touchGestureMoved = false;
+    document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
+    document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
+    document.addEventListener('gestureend', function(e){ e.preventDefault(); });
+
+    // Ctrl / Cmd + tekerlek ile zoom engelleme (masaüstü)
+    document.addEventListener('wheel', function(e){
+      if(e.ctrlKey || e.metaKey){ e.preventDefault(); }
+    }, { passive:false });
+
+    // Ctrl/Cmd + (+/-/0) klavye kısayolları ile zoom engelleme
+    document.addEventListener('keydown', function(e){
+      if((e.ctrlKey || e.metaKey) && ['+','-','=','0'].includes(e.key)){
+        e.preventDefault();
+      }
+    });
+  })();
+</script>
+
+<script>
+  // ================= ARKA PLAN KİLİDİ: herhangi bir pop-up/kayar pencere açıkken arka plan kaydırılamasın =================
+  (function(){
+    const KILIT_SECICI = '.settings-confirm-backdrop.is-open, .page9-add-backdrop.is-open, .qhavuz-lightbox-backdrop.is-open, .wheel-color-backdrop.is-open';
+    let kilitliKonum = 0;
+    let kilitliMi = false;
+
+    function acikOverlayVarMi(){
+      return !!document.querySelector(KILIT_SECICI);
     }
-  }, { passive: true });
 
-  document.addEventListener('touchmove', (e) => {
-    if (e.touches.length !== 1) return;
-    const t = e.touches[0];
-    if (Math.abs(t.clientX - touchGestureStartX) > 10 || Math.abs(t.clientY - touchGestureStartY) > 10) {
-      touchGestureMoved = true;
+    function govdeyiKilitle(){
+      if(kilitliMi) return;
+      kilitliMi = true;
+      kilitliKonum = window.scrollY || document.documentElement.scrollTop || 0;
+      document.body.style.position = 'fixed';
+      document.body.style.top = (-kilitliKonum) + 'px';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
     }
-  }, { passive: true });
-
-  document.addEventListener('touchend', (e) => {
-    const now = Date.now();
-    const target = e.target;
-    // Butonlar, inputlar ve benzer interaktif kontroller kasıtlı olarak
-    // art arda hızlıca tıklanabilir (ör. +/- sayaç butonları). Bunlar
-    // çift-dokunma-zoom jesti DEĞİLDİR; bu yüzden bu tür elemanlarda
-    // preventDefault uygulamıyoruz, aksi halde ikinci hızlı tıklama hiç
-    // click olayı üretmiyordu (asıl şikayet edilen "hızlı tıklayınca
-    // tepki vermiyor" sorunu buydu).
-    const isInteractiveControl = target.closest(
-      'button, input, a, label, select, textarea, [role="button"]'
-    );
-    if (
-      !touchGestureMoved &&
-      !isInteractiveControl &&
-      target === lastTouchEndTarget &&
-      now - lastTouchEndAt <= 300
-    ) {
-      e.preventDefault();
+    function govdeKilidiniAc(){
+      if(!kilitliMi) return;
+      kilitliMi = false;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      // Not: sayfada scroll-behavior:smooth tanımlı olduğu için normal bir
+      // scrollTo çağrısı burada gözle görülür, istenmeyen bir "kayma"
+      // animasyonuna sebep oluyordu. Bu geri dönüş kullanıcı odaklı bir
+      // kaydırma değil, konumu sessizce eski haline getirme işlemi
+      // olduğundan anlık (instant) yapılmalı.
+      const oncekiDavranis = document.documentElement.style.scrollBehavior;
+      document.documentElement.style.scrollBehavior = 'auto';
+      window.scrollTo(0, kilitliKonum);
+      document.documentElement.style.scrollBehavior = oncekiDavranis;
     }
-    lastTouchEndAt = now;
-    lastTouchEndTarget = target;
-  }, { passive: false });
+    function durumuKontrolEt(){
+      if(acikOverlayVarMi()){ govdeyiKilitle(); } else { govdeKilidiniAc(); }
+    }
 
-  // Not: İki parmakla yakınlaştırma (pinch) zaten CSS `touch-action:
-  // pan-x pan-y` (html/body) ve yukarıdaki gesturestart/change/end
-  // engellemesiyle (Safari) durduruluyor. Önceden burada ayrıca
-  // `touchmove` üzerinde `e.touches.length > 1` kontrolüyle bir de JS
-  // engeli vardı; document üzerinde passive:false bir touchmove
-  // dinleyicisinin var olması TEK PARMAKLA yapılan normal kaydırmalarda
-  // bile tarayıcının her karede JS'in bitmesini beklemesine (senkron
-  // "scroll-blocking listener") neden oluyordu — Ayarlar sayfasında
-  // hissedilen "takılma" şikayetinin asıl kaynağı buydu. O dinleyici,
-  // pinch koruması zaten başka yollarla sağlandığı için kaldırıldı.
-
-  // Ctrl/Cmd + tekerlek ile (trackpad pinch) tarayıcı yakınlaştırmasını engelle.
-  document.addEventListener('wheel', (e) => {
-    if (e.ctrlKey) e.preventDefault();
-  }, { passive: false });
+    const izlenecekOverlayler = document.querySelectorAll('.settings-confirm-backdrop, .page9-add-backdrop, .qhavuz-lightbox-backdrop, .wheel-color-backdrop');
+    if(izlenecekOverlayler.length){
+      const gozlemci = new MutationObserver(durumuKontrolEt);
+      izlenecekOverlayler.forEach(function(el){
+        gozlemci.observe(el, { attributes:true, attributeFilter:['class'] });
+      });
+    }
+    durumuKontrolEt();
+  })();
 </script>
 
 <script>
