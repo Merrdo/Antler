@@ -42,8 +42,6 @@
        kaymaya ve o alanlarda rubber band'e devam eder. */
     position: fixed;
     inset: 0;
-    height: 100%;
-    width: 100%;
     overscroll-behavior: none;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
@@ -139,8 +137,8 @@
   /* ---------- Sayfalar ---------- */
 
   .app {
-    position: relative;
-    min-height: 100dvh;
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
   }
