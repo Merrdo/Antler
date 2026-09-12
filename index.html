@@ -35,6 +35,20 @@
     touch-action: pan-x pan-y;
   }
 
+  /* ---- Sayfanın (body) kendisi hiçbir zaman kaymasın / zıplamasın ----
+     Uygulama tamamen kendi iç scroll container'larında (overflow-y:auto
+     olan sayfa içerikleri) kaydırılıyor; body/html seviyesinde kaydırma
+     hiç gerekmiyor. Bunu position:fixed + overflow:hidden ile tamamen
+     kilitliyoruz ki navbar dahil tüm ekran parmakla dokunulunca oynayıp
+     "geri sıçramasın" — native (rubber-band) zıplama hissi sadece asıl
+     kaydırılabilir olan iç alanlarda (liste/kart içerikleri) kalsın. */
+  html, body {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
   /* ---- Bir pop-up (ör. "Kaynaklar" ve galerisi) açıkken arka plandaki
      sayfanın (ör. #page-11-detail'in kendi overflow-y:auto kaydırması)
      parmakla kaydırılmasını engeller; body'ye bu sınıf eklenip
@@ -1560,6 +1574,7 @@
   #page-4 {
     align-items: flex-start;
     overflow-y: auto;
+    overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     padding-top: calc(40px + env(safe-area-inset-top));
     padding-bottom: calc(22px + env(safe-area-inset-bottom));
@@ -1818,6 +1833,7 @@
   .wheel-options-scroll {
     max-height: 118px;
     overflow-y: auto;
+    overscroll-behavior: contain;
     overflow-x: hidden;
     padding: 3px 4px;
     margin: -3px -4px;
@@ -2035,6 +2051,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    overscroll-behavior: contain;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -2052,6 +2069,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    overscroll-behavior: contain;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -2823,6 +2841,7 @@
     max-width: 420px;
     max-height: 82vh;
     overflow-y: auto;
+    overscroll-behavior: contain;
     /* Kartın kendisi dikey olarak kaydırılabilir kalsın diye backdrop'un
        "touch-action: none" kısıtlamasını burada geri açıyoruz. */
     touch-action: pan-y;
@@ -3045,6 +3064,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    overscroll-behavior: contain;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -3447,6 +3467,7 @@
     width: 100%;
     max-height: 55vh;
     overflow-y: auto;
+    overscroll-behavior: contain;
     overflow-x: hidden;
     border: 2.5px solid #000;
     border-radius: 0.8rem;
@@ -3621,6 +3642,7 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -4294,6 +4316,7 @@
     gap: 0.55rem;
     max-height: 320px;
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .page10-log-row {
@@ -4413,6 +4436,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    overscroll-behavior: contain;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -5400,6 +5424,7 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   /* ---------- Sayfa 11 - Analizlerim / 0 Hata Testlerim (tam ekran) ----------
@@ -5413,6 +5438,7 @@
     gap: 1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   /* Branş kartındaki doğru/yanlış/boş toplamlarını gösteren küçük satır;
@@ -6124,14 +6150,6 @@
 
   /* ---------- Sayfa 5: Kronometre ---------- */
 
-  /* Sayfa 5'in kendisi (#page-5), diğer sayfaların aksine, kartı dikeyde
-     üstteki başlık ile alttaki butonlar arasında GERÇEKTEN ortalamak için
-     tam yüksekliğe geriliyor (bkz. .stopwatch-page/.countdown-page'deki
-     margin-top/bottom: auto ile ortalanan .stopwatch-display). */
-  #page-5 {
-    align-items: stretch;
-  }
-
   /* Kronometre <-> Sayaç (geri sayım) geçişini bir kart çevirme (flip)
      animasyonuyla yapan sahne. Perspektif burada, dönen katman (inner)
      ise bunun içinde tanımlanır; gizli başlık butonuna dokununca JS bu
@@ -6140,13 +6158,11 @@
   .stopwatch-flip-stage {
     width: 100%;
     max-width: 340px;
-    height: 100%;
     perspective: 1200px;
   }
 
   .stopwatch-flip-inner {
     width: 100%;
-    height: 100%;
     transform-style: preserve-3d;
     will-change: transform;
   }
@@ -6156,7 +6172,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 100%;
+    gap: 1.4rem;
     width: 100%;
     max-width: 340px;
     transition: opacity 0.3s ease, transform 0.3s ease;
@@ -6170,7 +6186,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 100%;
+    gap: 1.4rem;
     width: 100%;
     max-width: 340px;
     transition: opacity 0.3s ease, transform 0.3s ease;
@@ -6219,20 +6235,13 @@
   }
 
   /* Başlık ve Geçmiş butonunu aynı üst satırda tutan satır: başlık solda,
-     buton sağda. Karta bilinçli olarak yakın tutulur (bkz. margin-bottom)
-     ki başlık kartın sol üst köşesine "iliştirilmiş" gibi tek bir bütün
-     olarak görünsün; kopuk/ayrık durmasın. Üstteki margin-top: auto ise
-     bu başlık+kart+buton bütününü, aralarındaki boşlukları BOZMADAN,
-     sayfanın tamamında dikeyde ortalamak için kullanılıyor (bkz.
-     .stopwatch-controls'daki margin-bottom: auto ile eşleşir). */
+     buton sağda. */
   .stopwatch-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.6rem;
     width: 100%;
-    margin-top: auto;
-    margin-bottom: 0.55rem;
   }
 
   .stopwatch-display {
@@ -6293,8 +6302,6 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    margin-top: 1.4rem;
-    margin-bottom: auto;
   }
 
   /* Turlarım ve Sıfırla butonlarını eskisi gibi birbirine yakın ve
@@ -6478,6 +6485,7 @@
     max-width: 300px;
     max-height: 26vh;
     overflow-y: auto;
+    overscroll-behavior: contain;
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -6517,11 +6525,6 @@
     align-items: center;
     gap: 1.4rem;
     width: 100%;
-    /* Üstteki margin-top: auto artık .stopwatch-header'da olduğu için
-       burada sadece alttaki boşluğu emiyor; böylece [başlık+kurulum
-       kartı] birlikte, aralarındaki sabit boşluk bozulmadan, sayfada
-       dikeyde ortalanmış olur. */
-    margin-bottom: auto;
   }
 
   .countdown-setup-card {
@@ -7186,6 +7189,7 @@
     gap: 1.1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .calendar-topbar {
@@ -7468,6 +7472,7 @@
     gap: 1.1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   /* Artık nav bar'da kendi sekmesi olmadığından (Sayfa 5'teki "Geçmiş"
@@ -7479,6 +7484,7 @@
     justify-content: flex-start;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .laps-page-card {
@@ -7545,6 +7551,7 @@
     justify-content: flex-start;
     padding-top: calc(48px + env(safe-area-inset-top));
     overflow-y: auto;
+    overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -7803,6 +7810,7 @@
     gap: 1.1rem;
     padding: calc(22px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   #page-patterns .calendar-topbar {
@@ -17277,52 +17285,13 @@
 </script>
 
 <script>
-  // ---------- Body'nin kalıcı olarak kaymasını engelle ----------
-  // Uygulamanın .app kutusu min-height: 100dvh kullanıyor. iOS Safari'de
-  // adres çubuğu parmakla kaydırırken gizlenince 100dvh büyüyor; bu da
-  // body'yi GERÇEKTEN (native rubber-band bounce değil, kalıcı) birkaç
-  // piksel kaydırabiliyor ve o pozisyonda takılı kalıyordu — en altta
-  // sabit bir boşluk olarak görünen buydu.
-  //
-  // ÖNEMLİ: body'yi position:fixed ile tamamen kilitlemek bunu çözer
-  // ama adres çubuğunun kayarken gizlenmesi de native olarak GERÇEK bir
-  // kaydırmaya bağlı olduğundan, kilitleyince o da devre dışı kalıyor ve
-  // sevilen "kayma" hissi tamamen kayboluyor. Bu yüzden kaydırmayı
-  // olduğu gibi bırakıp, sadece "0 dışında bir yerde kalıcı olarak
-  // durma" durumunu düzeltiyoruz.
-  //
-  // Düzeltmeyi HER scroll olayında anında uygulamak sert/ani bir zıplama
-  // hissi veriyordu, çünkü native geri-yaylanma (bounce-back) animasyonu
-  // henüz bitmeden JS onu kesip anında 0'a atlıyordu. Bunun yerine:
-  // kaydırma tamamen durana kadar (debounce) bekliyoruz — native
-  // animasyon kendi akışında tamamlanabiliyor — ve ancak durduktan sonra
-  // hâlâ 0'da değilse, `behavior: 'smooth'` ile yumuşak bir animasyonla
-  // geri götürüyoruz. Böylece kullanıcı hiçbir zaman ani bir kesilme
-  // hissetmiyor.
-  //
-  // Bir input/textarea'ya yazarken bu düzeltmeyi uygulamıyoruz; çünkü
-  // klavye açıldığında Safari'nin odaklanılan alanı görünür tutmak için
-  // yaptığı gerekli kaydırmayı bozmamak gerekiyor.
-  let strayScrollSettleTimer = null;
-  const STRAY_SCROLL_SETTLE_DELAY = 140; // ms — kaydırma/bounce'ın oturması için bekleme
-
-  const resetStrayBodyScroll = () => {
-    const activeTag = document.activeElement && document.activeElement.tagName;
-    const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA' ||
-      (document.activeElement && document.activeElement.isContentEditable);
-    if (isTyping) return;
-
-    if (strayScrollSettleTimer) clearTimeout(strayScrollSettleTimer);
-    strayScrollSettleTimer = setTimeout(() => {
-      strayScrollSettleTimer = null;
-      if (window.scrollY !== 0 || window.scrollX !== 0) {
-        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      }
-    }, STRAY_SCROLL_SETTLE_DELAY);
-  };
-
-  window.addEventListener('scroll', resetStrayBodyScroll, { passive: true });
-  window.addEventListener('resize', resetStrayBodyScroll, { passive: true });
+  // ---------- Body artık hiç kaymıyor ----------
+  // html/body position:fixed + overflow:hidden ile tamamen kilitli
+  // olduğu için (bkz. CSS) body'nin kayıp "0 dışında kalıcı durması"
+  // veya native rubber-band bounce'ının debounce ile 0'a geri
+  // çekilmesi gibi bir soruna artık gerek yok — kayma en baştan hiç
+  // gerçekleşmiyor. Önceki stray-scroll-reset script'i bu yüzden
+  // kaldırıldı.
 </script>
 
 <script>
