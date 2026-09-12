@@ -92,6 +92,22 @@
   }
 
   /* ---------- Tema Katmanları ---------- */
+  /* iPhone'da üst/alt güvenli alan (çentik, Dynamic Island, alt çubuk)
+     tarayıcı tarafından <meta name="theme-color"> rengine göre boyanır
+     ve bu boyama tarayıcının KENDİ animasyonuyla (bizim kontrolümüz
+     dışında) yapılır. Bizim tarafımızda ayarlayabildiğimiz tek şey, arka
+     plan katmanının (aşağıdaki .theme-layer) solma süresi/eğrisi — o
+     yüzden tek bir değişkende topladık: iOS'un güvenli alanı boyama
+     hızına göre BURADAKİ süreyi/eğriyi ayarlayınca, ikisi birlikte "tek
+     bir bütün" gibi aynı anda değişir. Şu an iOS'ta gözlemlenen hıza
+     yakın bir tahmin olarak 300ms / linear kullanıyoruz; cihazda hâlâ
+     ton farkı görülürse SADECE bu iki değeri (süre ve eğri) küçük
+     adımlarla deneyerek eşleştirmek yeterli olacak. */
+  :root {
+    --theme-transition-duration: 300ms;
+    --theme-transition-easing: linear;
+  }
+
   /* İki katman üst üste durur; tema değişince biri solup kaybolurken
      diğeri belirir, böylece gradient geçişi de yumuşak animasyonlu olur
      (CSS background-image doğrudan interpolasyon desteklemediği için). */
@@ -100,7 +116,7 @@
     inset: 0;
     z-index: -1;
     opacity: 0;
-    transition: opacity 0.6s ease;
+    transition: opacity var(--theme-transition-duration) var(--theme-transition-easing);
   }
 
   .theme-layer.is-visible {
@@ -8711,6 +8727,79 @@
     .countdown-fullscreen-time-row .stopwatch-time {
       font-size: clamp(3.4rem, 8vw, 7.6rem);
     }
+
+    /* ------------------------------------------------------------------
+       Kronometre <-> Sayaç geçişi (768px ve üzeri): telefonda bu geçiş
+       tüm bloğun (başlık + kart + butonlar) tek bir kart gibi 3D
+       döndüğü bir "flip" animasyonuydu (bkz. flipStopwatchViewMode).
+       Geniş ekranda başlık, kart ve butonlar zaten birbirinden görsel
+       olarak koptu (yukarıdaki kurallarla), o yüzden geçiş animasyonu
+       da öyle davranmalı: tek parça halinde dönmek yerine her eleman
+       kendi yönünde, kendi küçük gecikmesiyle ayrı ayrı kaybolup geri
+       gelir (JS: flipStopwatchViewModeDesktop). Sınıflar JS tarafından
+       geçiş anında eklenip kaldırılır; .sw-anim-leave o an ekrandan
+       ayrılan öğeyi, .sw-anim-enter yeni gelen öğenin başlangıç halini
+       tanımlar. ------------------------------------------------------ */
+
+    .stopwatch-title-wrap,
+    .stopwatch-history-btn,
+    .countdown-sound-btn,
+    .stopwatch-display,
+    .stopwatch-controls,
+    .countdown-setup {
+      will-change: transform, opacity;
+    }
+
+    /* Başlık yazısı: yukarı süzülerek kaybolur, aşağıdan süzülerek gelir. */
+    .stopwatch-title-wrap.sw-anim-leave {
+      opacity: 0;
+      transform: translateY(-16px);
+    }
+
+    .stopwatch-title-wrap.sw-anim-enter {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    /* Geçmiş / Hazır Süreler butonu: yazıdan bağımsız olarak yana kayar. */
+    .stopwatch-history-btn.sw-anim-leave,
+    .countdown-sound-btn.sw-anim-leave {
+      opacity: 0;
+      transform: translateX(22px) scale(0.9);
+    }
+
+    .stopwatch-history-btn.sw-anim-enter,
+    .countdown-sound-btn.sw-anim-enter {
+      opacity: 0;
+      transform: translateX(-22px) scale(0.9);
+    }
+
+    /* Rakam kartı: kendi ekseninde hafifçe devrilerek (perspective, üstteki
+       .stopwatch-flip-stage'ten gelir) küçük bir "mini flip" ile kaybolup
+       ters yönde devrilerek geri gelir; diğer öğelerle aynı şekilde
+       hareket etmez. */
+    .stopwatch-display.sw-anim-leave {
+      opacity: 0;
+      transform: scale(0.93) rotateX(14deg);
+    }
+
+    .stopwatch-display.sw-anim-enter {
+      opacity: 0;
+      transform: scale(0.93) rotateX(-14deg);
+    }
+
+    /* Kontrol butonları / sayaç kurulum kartı: aşağıdan girip aşağı çıkar. */
+    .stopwatch-controls.sw-anim-leave,
+    .countdown-setup.sw-anim-leave {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+
+    .stopwatch-controls.sw-anim-enter,
+    .countdown-setup.sw-anim-enter {
+      opacity: 0;
+      transform: translateY(-22px);
+    }
   }
 </style>
 </head>
@@ -11961,11 +12050,104 @@
     }, FLIP_HALF_MS);
   };
 
+  // ---- Geniş ekran (>=768px): "tek parça" 3D flip yerine, her öğe kendi
+  // başına ayrılıp geri gelen kademeli geçiş ----
+  // Telefonda yukarıdaki flipStopwatchViewMode tüm bloğu (başlık + kart +
+  // butonlar) tek bir kart gibi döndürüyordu. Geniş ekranda bu öğeler
+  // görsel olarak zaten birbirinden koptuğu için (bkz. 768px medya
+  // sorgusu), geçiş de öyle hissettirmeli: başlık, Geçmiş/Hazır Süreler
+  // butonu, rakam kartı ve kontrol butonları/kurulum kartı — dördü de
+  // kendi yönünde, kendi küçük gecikmesiyle ayrı ayrı kaybolup gelir.
+  const STOPWATCH_DESKTOP_MQ = window.matchMedia('(min-width: 768px)');
+  const SW_SWITCH_STAGGER_MS = 55;
+  const SW_SWITCH_LEAVE_MS = 200;
+  const SW_SWITCH_ENTER_MS = 260;
+
+  // Bir sayfanın (Kronometre ya da Sayaç) kendi başına animasyonlanacak
+  // dört alt öğesini, ekranda göründükleri sırayla döndürür.
+  const collectStopwatchSwitchGroups = (pageEl) => {
+    if (!pageEl) return [];
+    const selectors = [
+      '.stopwatch-title-wrap',
+      '.stopwatch-history-btn, .countdown-sound-btn',
+      '.stopwatch-display',
+      '.stopwatch-controls, .countdown-setup',
+    ];
+    return selectors
+      .map((sel) => pageEl.querySelector(sel))
+      .filter(Boolean);
+  };
+
+  const flipStopwatchViewModeDesktop = (mode) => {
+    if (stopwatchFlipAnimating || stopwatchViewMode === mode) return;
+    if (swRunning || cdRunning) return;
+    stopwatchFlipAnimating = true;
+
+    const outgoingPage = stopwatchViewMode === 'stopwatch' ? stopwatchPageEl : countdownPageEl;
+    const outGroups = collectStopwatchSwitchGroups(outgoingPage);
+
+    // Her öğe kendi gecikmesiyle (i * stagger) ayrılmaya başlar; hepsi
+    // aynı anda değil, art arda "dağılır".
+    outGroups.forEach((el, i) => {
+      el.style.transition = `opacity ${SW_SWITCH_LEAVE_MS}ms ease, transform ${SW_SWITCH_LEAVE_MS}ms ease`;
+      el.style.transitionDelay = `${i * SW_SWITCH_STAGGER_MS}ms`;
+      el.classList.add('sw-anim-leave');
+    });
+
+    const totalLeaveMs = SW_SWITCH_LEAVE_MS + (outGroups.length - 1) * SW_SWITCH_STAGGER_MS;
+
+    setTimeout(() => {
+      outGroups.forEach((el) => {
+        el.classList.remove('sw-anim-leave');
+        el.style.transition = '';
+        el.style.transitionDelay = '';
+      });
+
+      setStopwatchViewMode(mode);
+
+      const incomingPage = mode === 'stopwatch' ? stopwatchPageEl : countdownPageEl;
+      const inGroups = collectStopwatchSwitchGroups(incomingPage);
+
+      // Yeni öğeler önce görünmez/kaymış başlangıç konumuna anında
+      // sabitlenir (transition kapalı), sonra reflow zorlanıp geçiş
+      // tekrar açılarak her biri kendi gecikmesiyle normal konumuna gelir.
+      inGroups.forEach((el) => {
+        el.style.transition = 'none';
+        el.classList.add('sw-anim-enter');
+      });
+      void incomingPage.offsetWidth; // reflow'u zorla
+
+      inGroups.forEach((el, i) => {
+        el.style.transition = `opacity ${SW_SWITCH_ENTER_MS}ms ease, transform ${SW_SWITCH_ENTER_MS}ms ease`;
+        el.style.transitionDelay = `${i * SW_SWITCH_STAGGER_MS}ms`;
+        el.classList.remove('sw-anim-enter');
+      });
+
+      const totalEnterMs = SW_SWITCH_ENTER_MS + (inGroups.length - 1) * SW_SWITCH_STAGGER_MS;
+      setTimeout(() => {
+        inGroups.forEach((el) => {
+          el.style.transition = '';
+          el.style.transitionDelay = '';
+        });
+        stopwatchFlipAnimating = false;
+      }, totalEnterMs + 30);
+    }, totalLeaveMs);
+  };
+
+  // Geniş ekranda kademeli geçişi, telefonda mevcut 3D flip'i kullan.
+  const switchStopwatchViewMode = (mode) => {
+    if (STOPWATCH_DESKTOP_MQ.matches) {
+      flipStopwatchViewModeDesktop(mode);
+    } else {
+      flipStopwatchViewMode(mode);
+    }
+  };
+
   if (stopwatchTitleSecretBtn) {
-    stopwatchTitleSecretBtn.addEventListener('click', () => flipStopwatchViewMode('countdown'));
+    stopwatchTitleSecretBtn.addEventListener('click', () => switchStopwatchViewMode('countdown'));
   }
   if (countdownTitleSecretBtn) {
-    countdownTitleSecretBtn.addEventListener('click', () => flipStopwatchViewMode('stopwatch'));
+    countdownTitleSecretBtn.addEventListener('click', () => switchStopwatchViewMode('stopwatch'));
   }
 
   // ---------- Sayaç (Geri Sayım) ----------
