@@ -5,6 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Takvimim</title>
 
+<script>
+  // ---------- Gerçek ekran yüksekliğini CSS'e ver ----------
+  // iOS'ta "Ana Ekrana Ekle" ile açılan standalone PWA modunda vh/dvh
+  // birimleri bazı sürümlerde tam ekranı (özellikle alt safe area/home
+  // indicator kısmını) doğru raporlamıyor; tarayıcı sekmesinde sorun
+  // yokken standalone modda alt kısımda boş bir şerit kalmasının asıl
+  // sebebi buydu. En güvenilir çözüm: JS'den `window.innerHeight`'ı
+  // (gerçek görünür viewport, standalone dahil her modda doğru) alıp
+  // bir CSS custom property'sine yazmak ve layout'u ona bağlamak.
+  // Bunu CSS boyanmadan önce, head'in en başında çalıştırıyoruz ki
+  // açılışta bir "zıplama/flaş" olmasın.
+  const setRealVH = () => {
+    document.documentElement.style.setProperty('--real-vh', window.innerHeight + 'px');
+  };
+  setRealVH();
+  window.addEventListener('resize', setRealVH);
+  window.addEventListener('orientationchange', setRealVH);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', setRealVH);
+  }
+</script>
+
 <!-- PWA: manifest ve tema rengi -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2b2f4a" id="themeColorMeta">
@@ -30,6 +52,7 @@
 
   html, body {
     height: 100%;
+    min-height: -webkit-fill-available;
     width: 100%;
     /* Pinch/iki parmakla yakınlaştırmayı ve çift dokunma zoom'unu engelle */
     touch-action: pan-x pan-y;
@@ -143,7 +166,18 @@
 
   .app {
     position: relative;
-    min-height: 100dvh;
+    /* NOT: Önceden burada `min-height: 100dvh` kullanılıyordu. iOS'ta
+       "Ana Ekrana Ekle" ile açılan standalone PWA modunda `dvh` birimi
+       bazı sürümlerde safe-area (home indicator) alanını hesaba katmadan
+       raporlanabiliyor; bu da tarayıcı sekmesinde sorun yokken standalone
+       modda alt kısımda boş bir şerit kalmasına yol açan asıl sebepti.
+       html/body zaten `height: 100%` ile gerçek tam ekranı güvenilir
+       şekilde kaplıyor, o yüzden .app'i dvh yerine aynı yüzde zincirine
+       bağlıyoruz; -webkit-fill-available de eski standalone modlar için
+       ekstra güvence. */
+    height: 100%;
+    height: var(--real-vh, 100%);
+    min-height: -webkit-fill-available;
     display: flex;
     flex-direction: column;
   }
