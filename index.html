@@ -97,15 +97,21 @@
      ve bu boyama tarayıcının KENDİ animasyonuyla (bizim kontrolümüz
      dışında) yapılır. Bizim tarafımızda ayarlayabildiğimiz tek şey, arka
      plan katmanının (aşağıdaki .theme-layer) solma süresi/eğrisi — o
-     yüzden tek bir değişkende topladık: iOS'un güvenli alanı boyama
-     hızına göre BURADAKİ süreyi/eğriyi ayarlayınca, ikisi birlikte "tek
-     bir bütün" gibi aynı anda değişir. Şu an iOS'ta gözlemlenen hıza
-     yakın bir tahmin olarak 300ms / linear kullanıyoruz; cihazda hâlâ
-     ton farkı görülürse SADECE bu iki değeri (süre ve eğri) küçük
-     adımlarla deneyerek eşleştirmek yeterli olacak. */
+     yüzden tek bir değişkende topladık.
+     ÖLÇÜM (kullanıcının attığı ekran kaydından, 60fps kare kare analiz
+     edilerek): ilk denemede tahmin TERSİYMİŞ — güvenli alan bizim arka
+     planımızdan DAHA YAVAŞ değişiyor, daha hızlı değil. Aynı anda
+     tetiklenen iki geçiş karşılaştırıldığında güvenli alan şeridi
+     ~480-500ms sürüyor ve eğrisi başta çok hızlı, sonda uzun bir kuyruk
+     halinde yavaşlıyor (üstel/"ease-out" tarzı); bizim eski 300ms/linear
+     ayarımız ise ~230ms'de bitip güvenli alanı geride bırakıyordu. Süre
+     480ms'e çıkarıldı, eğri de bu hızlı-başlangıç/yavaş-kuyruk şeklini
+     taklit eden bir cubic-bezier ile değiştirildi. Cihazda hâlâ ton farkı
+     görülürse SADECE bu iki değeri (süre ve eğri) küçük adımlarla
+     deneyerek eşleştirmek yeterli olacak. */
   :root {
-    --theme-transition-duration: 300ms;
-    --theme-transition-easing: linear;
+    --theme-transition-duration: 480ms;
+    --theme-transition-easing: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* İki katman üst üste durur; tema değişince biri solup kaybolurken
