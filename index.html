@@ -2306,19 +2306,39 @@
   .page8-item-list {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.55rem;
     padding: 0 0.8rem 0.8rem;
   }
 
   .page8-item-row {
     display: flex;
-    align-items: center;
+    /* flex-start: kutu artık satırın dikey ortasına değil, metnin İLK
+       satırına hizalanıyor. Metin birden çok satıra yayıldığında
+       (satır atlamalı içerik) hangi kutunun hangi metne ait olduğu
+       böylece belirsizleşmiyor. */
+    align-items: flex-start;
     gap: 0.6rem;
+    /* Ayrı görevler arasında, aynı görevin kendi satırları arasındaki
+       boşluktan (satır yüksekliği) belirgin şekilde daha geniş bir
+       ayraç: alttan ince kesikli bir çizgi + dolgu. Bu sayede çok
+       satırlı bir görev tek bir kutuya ait gibi görünürken, bir
+       sonraki görev görsel olarak net şekilde ayrılıyor. */
+    padding-bottom: 0.7rem;
+    border-bottom: 1.5px dashed rgba(18, 18, 18, 0.14);
+  }
+
+  .page8-item-row:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  body.is-anthracite .page8-item-row {
+    border-bottom-color: rgba(242, 242, 244, 0.14);
   }
 
   .page8-item-check-label {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.6rem;
     flex: 1 1 auto;
     min-width: 0;
@@ -2332,6 +2352,7 @@
   .page8-item-box {
     width: 1.3rem;
     height: 1.3rem;
+    margin-top: 0.05rem;
     border: 2.5px solid #000;
     border-radius: 0.4rem;
     background: #fff;
@@ -2410,7 +2431,12 @@
     text-decoration-thickness: 2px;
     text-decoration-color: transparent;
     transition: opacity 0.2s ease, text-decoration-color 0.2s ease;
-    white-space: normal;
+    /* pre-wrap: yazarken (textarea'da) atılan satırlar kaydedildikten
+       sonra da aynen korunsun — normal, \n karakterlerini yok sayıp
+       her şeyi tek satıra topluyordu. Uzun kelimeler yine de sarmalanır
+       (overflow-wrap/word-break sayesinde), sadece kasıtlı satır
+       atlamaları artık kayboluyor. */
+    white-space: pre-wrap;
     overflow-wrap: break-word;
     word-break: break-word;
   }
@@ -2536,7 +2562,8 @@
     border-bottom: none;
   }
 
-  .page8-copy-bubble-item:active {
+  .page8-copy-bubble-item:active,
+  .page8-copy-bubble-item.is-drag-hover {
     background: rgba(255, 255, 255, 0.12);
   }
 
@@ -3662,6 +3689,46 @@
     color: #0d3d20;
   }
 
+  /* Açık uçlu (yazılı cevaplı) sorularda şık sırası yerine girilen
+     cevap metni gösterilir; aynı beyaz şerit zemini paylaşır. */
+  .qhavuz-lightbox-open-answer {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    max-width: 100%;
+  }
+
+  .qhavuz-lightbox-open-answer-label {
+    flex-shrink: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.78rem;
+    color: #121212;
+    opacity: 0.55;
+  }
+
+  .qhavuz-lightbox-open-answer-text {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #121212;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .qhavuz-lightbox-open-answer-input {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  body.is-anthracite .qhavuz-lightbox-open-answer-label {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .qhavuz-lightbox-open-answer-text {
+    color: #f2f2f4;
+  }
+
   /* ---- Soru Havuzu: görsel ekleme pop-up'ı (page9-add-card ile aynı
        zemini paylaşır; burada sadece kendine özgü alanlar tanımlanır) ---- */
   .qhavuz-add-card {
@@ -3723,6 +3790,16 @@
   .qhavuz-add-book-row {
     display: flex;
     gap: 0.5rem;
+  }
+
+  /* Açık uçlu sorular için yazılı cevap alanı: şık grid'inin altında,
+     tam genişlikte tek satırlık bir input. Renk/kenarlık dili
+     .page9-add-custom-input ile birebir aynı (o class da element
+     üzerinde birlikte kullanılıyor); burada sadece genişlik/kutu
+     modeli override ediliyor. */
+  .qhavuz-add-answer-text-input {
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .qhavuz-add-book-input {
@@ -3934,8 +4011,105 @@
     width: 100%;
   }
 
+  .qhavuz-test-answer-grid.is-hidden {
+    display: none;
+  }
+
   .qhavuz-test-answer-grid .qhavuz-add-answer-btn {
     font-size: 1.05rem;
+  }
+
+  /* Açık uçlu sorularda şık ızgarası yerine gösterilen serbest metin
+     alanı: aynı brütalist kart dili (kalın kenarlık + katı gölge). */
+  .qhavuz-test-open-answer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .qhavuz-test-open-answer.is-hidden {
+    display: none;
+  }
+
+  .qhavuz-test-open-answer-input {
+    width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    padding: 0.75rem 0.9rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #121212;
+    background-color: #fff;
+    border: 3px solid #000;
+    border-radius: 0.9rem;
+    box-shadow: 4px 4px 0px 0px #000;
+    outline: none;
+  }
+
+  .qhavuz-test-open-answer-input:disabled {
+    opacity: 0.6;
+  }
+
+  body.is-anthracite .qhavuz-test-open-answer-input {
+    background-color: var(--dark-card-color, #32343a);
+    color: #f2f2f4;
+    border-color: #000;
+  }
+
+  .qhavuz-test-open-answer-check-btn:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .qhavuz-test-open-answer-actions {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .qhavuz-test-open-answer-actions.is-hidden {
+    display: none;
+  }
+
+  .qhavuz-test-open-answer-actions .qhavuz-test-open-answer-check-btn,
+  .qhavuz-test-open-answer-actions .qhavuz-test-open-answer-reveal-btn {
+    flex: 1 1 0;
+  }
+
+  /* "Cevabı Gör": Kontrol Et'ten (dolu/vurgu renkli) ayrışsın diye
+     boş/anahat bir buton — settings-confirm-cancel ile aynı nötr dil. */
+  .qhavuz-test-open-answer-reveal-btn {
+    background-color: #fff;
+    color: #000;
+  }
+
+  body.is-anthracite .qhavuz-test-open-answer-reveal-btn {
+    background-color: var(--dark-card-color, #32343a);
+    color: #f2f2f4;
+  }
+
+  .qhavuz-test-open-answer-selfgrade {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .qhavuz-test-open-answer-selfgrade.is-hidden {
+    display: none;
+  }
+
+  .qhavuz-test-selfgrade-btn {
+    flex: 1 1 0;
+  }
+
+  .qhavuz-test-selfgrade-btn.is-correct {
+    background-color: #5cd68a;
+    color: #0d3d20;
+  }
+
+  .qhavuz-test-selfgrade-btn.is-wrong {
+    background-color: #ff8a8a;
+    color: #4a0d0d;
   }
 
   /* Doğru işaretlenen şık (kendi seçimi doğruysa VEYA yanlış
@@ -10705,6 +10879,26 @@
 
         <div class="qhavuz-add-answer-grid qhavuz-test-answer-grid" id="qhavuzTestAnswerGrid"></div>
 
+        <!-- Açık uçlu (yazılı cevaplı) sorularda şık ızgarası yerine
+             gösterilen serbest metin alanı. Varsayılan olarak gizli;
+             renderQhavuzTestQuestion() soruya göre bunu şık ızgarasıyla
+             karşılıklı açıp kapatıyor. -->
+        <div class="qhavuz-test-open-answer is-hidden" id="qhavuzTestOpenAnswer">
+          <textarea class="qhavuz-test-open-answer-input" id="qhavuzTestOpenAnswerInput" placeholder="Cevabını yaz..." rows="2"></textarea>
+          <div class="qhavuz-test-open-answer-actions" id="qhavuzTestOpenAnswerActions">
+            <button type="button" class="add-task-btn qhavuz-test-open-answer-check-btn" id="qhavuzTestOpenAnswerCheckBtn">Kontrol Et</button>
+            <button type="button" class="add-task-btn qhavuz-test-open-answer-reveal-btn" id="qhavuzTestOpenAnswerRevealBtn">Cevabı Gör</button>
+          </div>
+          <!-- "Cevabı Gör"e basınca doğru cevap gösterilir; kullanıcı
+               kendi yazdığıyla karşılaştırıp burada kendi kendini
+               değerlendirir (açık uçlu cevaplarda birebir metin
+               eşleşmesi her zaman anlamlı olmayabileceği için). -->
+          <div class="qhavuz-test-open-answer-selfgrade is-hidden" id="qhavuzTestOpenAnswerSelfGrade">
+            <button type="button" class="add-task-btn qhavuz-test-selfgrade-btn is-correct" id="qhavuzTestSelfGradeCorrectBtn">✓ Bildim</button>
+            <button type="button" class="add-task-btn qhavuz-test-selfgrade-btn is-wrong" id="qhavuzTestSelfGradeWrongBtn">✗ Bilemedim</button>
+          </div>
+        </div>
+
         <div class="qhavuz-test-feedback" id="qhavuzTestFeedback"></div>
 
         <button type="button" class="add-task-btn qhavuz-test-next-btn" id="qhavuzTestNextBtn">Sonraki Soru</button>
@@ -11058,8 +11252,11 @@
     <span class="qhavuz-add-label">Ders</span>
     <div class="qhavuz-add-subject-grid" id="qhavuzAddSubjectGrid"></div>
 
-    <span class="qhavuz-add-label">Doğru Cevap</span>
+    <span class="qhavuz-add-label">Doğru Cevap <span class="qhavuz-add-label-optional">(şık veya yazılı cevaptan biri yeterli)</span></span>
     <div class="qhavuz-add-answer-grid" id="qhavuzAddAnswerGrid"></div>
+
+    <span class="qhavuz-add-label">Yazılı Cevap <span class="qhavuz-add-label-optional">(açık uçlu sorular için)</span></span>
+    <input type="text" class="page9-add-custom-input qhavuz-add-answer-text-input" id="qhavuzAddAnswerTextInput" placeholder="Cevabı yaz..." maxlength="120">
 
     <span class="qhavuz-add-label">Kitap Bilgisi <span class="qhavuz-add-label-optional">(opsiyonel)</span></span>
     <div class="qhavuz-add-book-row">
@@ -14945,13 +15142,20 @@
       if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
     };
 
+    // Balon açıldıktan sonra parmak ekrandan kalkmadan sürüklenirse (iPhone'daki
+    // basılı tutma menülerinde olduğu gibi) üzerinden geçilen seçeneği vurgulayıp
+    // parmak kalkınca o seçeneği uygulayabilmek için bu bayrağı kullanıyoruz.
+    let bubbleOpenForThisPress = false;
+
     const startPress = (e) => {
       pressMoved = false;
+      bubbleOpenForThisPress = false;
       pressStartX = e.clientX;
       pressStartY = e.clientY;
       clearPressTimer();
       pressTimer = setTimeout(() => {
         if (!pressMoved) {
+          bubbleOpenForThisPress = true;
           showPage8CopyBubble(text, item.text, {
             onEdit: () => { if (typeof onEditText === 'function') onEditText(); },
             onDelete
@@ -14967,10 +15171,29 @@
       if (Math.sqrt(dx * dx + dy * dy) > PRESS_MOVE_TOLERANCE) {
         pressMoved = true;
       }
+      if (bubbleOpenForThisPress) {
+        updatePage8CopyBubbleHover(e.clientX, e.clientY);
+      }
     });
-    text.addEventListener('pointerup', clearPressTimer);
-    text.addEventListener('pointerleave', clearPressTimer);
-    text.addEventListener('pointercancel', clearPressTimer);
+    text.addEventListener('pointerup', (e) => {
+      clearPressTimer();
+      if (bubbleOpenForThisPress) {
+        bubbleOpenForThisPress = false;
+        // Balondan bir seçenek seçildiği için parmak kalkınca tarayıcının
+        // ardından "click" olayı üretip metne tıklanmış gibi davranmasını
+        // (düzenleme moduna girmesini/tikini değiştirmesini) engelliyoruz.
+        e.preventDefault();
+        activatePage8CopyBubbleAt(e.clientX, e.clientY);
+      }
+    });
+    text.addEventListener('pointerleave', () => {
+      clearPressTimer();
+      bubbleOpenForThisPress = false;
+    });
+    text.addEventListener('pointercancel', () => {
+      clearPressTimer();
+      bubbleOpenForThisPress = false;
+    });
     // Tarayıcının kendi bağlam menüsünün (sağ tık / uzun basma menüsü)
     // araya girmesini engelle; kendi "Kopyala" balonumuzu gösteriyoruz.
     text.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -15007,6 +15230,30 @@
       document.removeEventListener('pointerdown', page8CopyBubbleCloseHandler, true);
       window.removeEventListener('scroll', page8CopyBubbleCloseHandler, true);
       page8CopyBubbleCloseHandler = null;
+    }
+  };
+
+  // Balon açıkken parmak kaldırılmadan sürüklenince hangi seçeneğin üzerinde
+  // olunduğunu bulup vurgular (iPhone'daki basılı tutma menüleri gibi).
+  const updatePage8CopyBubbleHover = (x, y) => {
+    if (!page8CopyBubbleEl) return;
+    const target = document.elementFromPoint(x, y);
+    const hovered = target ? target.closest('.page8-copy-bubble-item') : null;
+    page8CopyBubbleEl.querySelectorAll('.page8-copy-bubble-item').forEach((el) => {
+      el.classList.toggle('is-drag-hover', el === hovered);
+    });
+  };
+
+  // Parmak, balon üzerindeyken kalkarsa altındaki seçeneği uygular; balonun
+  // dışında kalkarsa (iPhone'da olduğu gibi) hiçbir şey yapmadan balonu kapatır.
+  const activatePage8CopyBubbleAt = (x, y) => {
+    if (!page8CopyBubbleEl) return;
+    const target = document.elementFromPoint(x, y);
+    const hovered = target ? target.closest('.page8-copy-bubble-item') : null;
+    if (hovered) {
+      hovered.click();
+    } else {
+      closePage8CopyBubble();
     }
   };
 
@@ -15232,9 +15479,19 @@
 
       // Yazı uzadıkça kutunun boyunu otomatik büyüterek tüm metnin
       // paragraf halinde, kesilmeden görünmesini sağlar.
+      // Not: odaklı bir textarea'nın yüksekliğini değiştirmek (özellikle
+      // iOS Safari'de) imleç/seçim konumunun sıfırlanmasına, yani yazarken
+      // imlecin kaymasına yol açabiliyor. Bunu önlemek için her boy
+      // güncellemesinden önce seçim konumunu saklayıp hemen sonra geri
+      // koyuyoruz.
       const autoGrow = () => {
+        const selStart = input.selectionStart;
+        const selEnd = input.selectionEnd;
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + 'px';
+        if (document.activeElement === input && selStart !== null && selEnd !== null) {
+          input.setSelectionRange(selStart, selEnd);
+        }
       };
       input.addEventListener('input', autoGrow);
       requestAnimationFrame(autoGrow);
@@ -15254,8 +15511,11 @@
       };
 
       input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); input.blur(); }
-        else if (e.key === 'Escape') { input.value = item.text; input.blur(); }
+        // Enter artık her zaman yeni satır ekliyor (textarea'nın doğal
+        // davranışı) — mobil klavyede Shift tuşu olmadığından "Shift+Enter
+        // ile satır atla" kuralı dokunmatik klavyede uygulanamıyordu.
+        // Yazmayı bitirmek için kutunun dışına dokunmak (blur) yeterli.
+        if (e.key === 'Escape') { input.value = item.text; input.blur(); }
       });
       input.addEventListener('blur', commit, { once: true });
     };
@@ -15294,8 +15554,13 @@
       // Eklerken de tıpkı düzenlemede olduğu gibi metin uzayınca aşağı
       // satıra geçtiğini anlık görebilelim; kutunun boyu yazdıkça büyür.
       const autoGrow = () => {
+        const selStart = input.selectionStart;
+        const selEnd = input.selectionEnd;
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + 'px';
+        if (document.activeElement === input && selStart !== null && selEnd !== null) {
+          input.setSelectionRange(selStart, selEnd);
+        }
       };
       input.addEventListener('input', autoGrow);
       requestAnimationFrame(autoGrow);
@@ -15311,8 +15576,9 @@
       };
 
       input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); input.blur(); }
-        else if (e.key === 'Escape') { input.value = ''; input.blur(); }
+        // Enter artık her zaman yeni satır ekliyor (bkz. yukarıdaki not);
+        // yazmayı bitirmek için kutunun dışına dokunmak (blur) yeterli.
+        if (e.key === 'Escape') { input.value = ''; input.blur(); }
       });
       input.addEventListener('blur', commit, { once: true });
     };
@@ -15846,7 +16112,7 @@
     pinBtn.type = 'button';
     pinBtn.className = 'page9-subject-pin';
     pinBtn.classList.toggle('is-active', !!subject.pinned);
-    pinBtn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="13" x2="12" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    pinBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12 12) rotate(25) scale(0.82) translate(-12 -12)"><path d="M12 17v5"/><path d="M15 9.34V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1v2.34a2 2 0 0 1-1.12 1.8l-1.83.9A2 2 0 0 0 5 14.94V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1.06a2 2 0 0 0-1.05-1.8l-1.83-.9a2 2 0 0 1-1.12-1.8Z"/></g></svg>';
     const page9PinLabel = () => (subject.pinned ? `"${subject.name}" sabitlemesini kaldır` : `"${subject.name}" dersini sabitle`);
     pinBtn.setAttribute('aria-label', page9PinLabel());
     pinBtn.setAttribute('aria-pressed', subject.pinned ? 'true' : 'false');
@@ -18972,6 +19238,7 @@
   const qhavuzAddTrackGrid = document.getElementById('qhavuzAddTrackGrid');
   const qhavuzAddSubjectGrid = document.getElementById('qhavuzAddSubjectGrid');
   const qhavuzAddAnswerGrid = document.getElementById('qhavuzAddAnswerGrid');
+  const qhavuzAddAnswerTextInput = document.getElementById('qhavuzAddAnswerTextInput');
   const qhavuzAddBookInput = document.getElementById('qhavuzAddBookInput');
   const qhavuzAddPageInput = document.getElementById('qhavuzAddPageInput');
   const qhavuzAddConfirm = document.getElementById('qhavuzAddConfirm');
@@ -18992,8 +19259,11 @@
   let qhavuzPendingAnswer = null;
 
   const qhavuzUpdateConfirmState = () => {
-    qhavuzAddConfirm.disabled = !(qhavuzPendingImage && qhavuzPendingTrack && qhavuzPendingSubject && qhavuzPendingAnswer);
+    const hasAnswer = !!qhavuzPendingAnswer || !!qhavuzAddAnswerTextInput.value.trim();
+    qhavuzAddConfirm.disabled = !(qhavuzPendingImage && qhavuzPendingTrack && qhavuzPendingSubject && hasAnswer);
   };
+
+  qhavuzAddAnswerTextInput.addEventListener('input', qhavuzUpdateConfirmState);
 
   const qhavuzBuildTrackGrid = () => {
     qhavuzAddTrackGrid.innerHTML = '';
@@ -19051,7 +19321,10 @@
       btn.setAttribute('aria-label', `Doğru cevap ${letter}`);
       if (qhavuzPendingAnswer === letter) btn.classList.add('is-selected');
       btn.addEventListener('click', () => {
-        qhavuzPendingAnswer = letter;
+        // Zaten seçili olan şıkka tekrar dokununca seçimi kaldır (toggle);
+        // açık uçlu bir soru için şık seçmek artık zorunlu değil, bu
+        // yüzden yanlışlıkla seçilen bir şıktan vazgeçebilmek gerekiyor.
+        qhavuzPendingAnswer = (qhavuzPendingAnswer === letter) ? null : letter;
         qhavuzBuildAnswerGrid();
         qhavuzUpdateConfirmState();
       });
@@ -19067,6 +19340,7 @@
     qhavuzAddPreviewImg.src = imageDataUrl;
     qhavuzAddBookInput.value = '';
     qhavuzAddPageInput.value = '';
+    qhavuzAddAnswerTextInput.value = '';
     qhavuzBuildTrackGrid();
     qhavuzBuildSubjectGrid();
     qhavuzBuildAnswerGrid();
@@ -19082,6 +19356,7 @@
     qhavuzPendingAnswer = null;
     qhavuzAddBookInput.value = '';
     qhavuzAddPageInput.value = '';
+    qhavuzAddAnswerTextInput.value = '';
     qhavuzFileInput.value = '';
   };
 
@@ -19109,7 +19384,8 @@
   });
 
   qhavuzAddConfirm.addEventListener('click', async () => {
-    if (!qhavuzPendingImage || !qhavuzPendingTrack || !qhavuzPendingSubject || !qhavuzPendingAnswer) return;
+    const answerText = qhavuzAddAnswerTextInput.value.trim();
+    if (!qhavuzPendingImage || !qhavuzPendingTrack || !qhavuzPendingSubject || !(qhavuzPendingAnswer || answerText)) return;
     const book = qhavuzAddBookInput.value.trim();
     const page = qhavuzAddPageInput.value.trim();
     // Ham base64 yerine görsel IndexedDB'ye Blob olarak yazılır; APP_STATE
@@ -19120,7 +19396,8 @@
       image: imageRef,
       track: qhavuzPendingTrack,
       subject: qhavuzPendingSubject,
-      answer: qhavuzPendingAnswer,
+      answer: qhavuzPendingAnswer || null,
+      answerText: answerText || null,
       book: book || null,
       page: page || null,
       ts: Date.now()
@@ -19282,6 +19559,52 @@
 
   const renderQhavuzLightboxAnswers = (item) => {
     qhavuzLightboxAnswerRow.innerHTML = '';
+
+    // Açık uçlu (yazılı cevaplı, şıksız) sorularda şık ızgarası yerine
+    // girilen cevap metni gösterilir. Düzenleme modundayken bu metin
+    // tıklanıp yerinde değiştirilebilir; kapalıyken sadece salt-okunur
+    // bir etiket olarak durur.
+    if (!item.answer && item.answerText) {
+      const wrap = document.createElement('div');
+      wrap.className = 'qhavuz-lightbox-open-answer';
+
+      const label = document.createElement('span');
+      label.className = 'qhavuz-lightbox-open-answer-label';
+      label.textContent = 'Cevap:';
+      wrap.appendChild(label);
+
+      if (qhavuzEditMode) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'page9-add-custom-input qhavuz-lightbox-open-answer-input';
+        input.value = item.answerText;
+        input.maxLength = 120;
+
+        const commit = () => {
+          const value = input.value.trim();
+          if (value) {
+            item.answerText = value;
+            saveQhavuzState();
+            qhavuzUpdateCardUI(item);
+          }
+        };
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+          else if (e.key === 'Escape') { input.value = item.answerText; input.blur(); }
+        });
+        input.addEventListener('blur', commit, { once: true });
+        wrap.appendChild(input);
+      } else {
+        const text = document.createElement('span');
+        text.className = 'qhavuz-lightbox-open-answer-text';
+        text.textContent = item.answerText;
+        wrap.appendChild(text);
+      }
+
+      qhavuzLightboxAnswerRow.appendChild(wrap);
+      return;
+    }
+
     QHAVUZ_ANSWERS.forEach((letter) => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -19352,8 +19675,8 @@
     const refs = qhavuzCardEls[item.id];
     if (!refs) { renderQhavuzGrid(); return; }
 
-    refs.answerBadge.textContent = item.answer;
-    refs.answerBadge.setAttribute('aria-label', `Doğru cevap ${item.answer}`);
+    refs.answerBadge.textContent = item.answer || '✎';
+    refs.answerBadge.setAttribute('aria-label', item.answer ? `Doğru cevap ${item.answer}` : 'Açık uçlu / yazılı cevap');
 
     if (item.solved) {
       if (!refs.checkEl) {
@@ -19508,8 +19831,8 @@
 
       const answerBadge = document.createElement('span');
       answerBadge.className = 'qhavuz-card-answer';
-      answerBadge.textContent = item.answer;
-      answerBadge.setAttribute('aria-label', `Doğru cevap ${item.answer}`);
+      answerBadge.textContent = item.answer || '✎';
+      answerBadge.setAttribute('aria-label', item.answer ? `Doğru cevap ${item.answer}` : 'Açık uçlu / yazılı cevap');
 
       info.appendChild(subjectBadge);
       info.appendChild(answerBadge);
@@ -19607,6 +19930,14 @@
   const qhavuzTestSubjectBadge = document.getElementById('qhavuzTestSubjectBadge');
   const qhavuzTestImg = document.getElementById('qhavuzTestImg');
   const qhavuzTestAnswerGrid = document.getElementById('qhavuzTestAnswerGrid');
+  const qhavuzTestOpenAnswer = document.getElementById('qhavuzTestOpenAnswer');
+  const qhavuzTestOpenAnswerInput = document.getElementById('qhavuzTestOpenAnswerInput');
+  const qhavuzTestOpenAnswerCheckBtn = document.getElementById('qhavuzTestOpenAnswerCheckBtn');
+  const qhavuzTestOpenAnswerActions = document.getElementById('qhavuzTestOpenAnswerActions');
+  const qhavuzTestOpenAnswerRevealBtn = document.getElementById('qhavuzTestOpenAnswerRevealBtn');
+  const qhavuzTestOpenAnswerSelfGrade = document.getElementById('qhavuzTestOpenAnswerSelfGrade');
+  const qhavuzTestSelfGradeCorrectBtn = document.getElementById('qhavuzTestSelfGradeCorrectBtn');
+  const qhavuzTestSelfGradeWrongBtn = document.getElementById('qhavuzTestSelfGradeWrongBtn');
   const qhavuzTestFeedback = document.getElementById('qhavuzTestFeedback');
   const qhavuzTestNextBtn = document.getElementById('qhavuzTestNextBtn');
   const qhavuzTestBackBtn = document.getElementById('qhavuzTestBackBtn');
@@ -19738,6 +20069,20 @@
       : 'Sonraki Soru';
 
     qhavuzTestAnswerGrid.innerHTML = '';
+    qhavuzTestOpenAnswerInput.value = '';
+    qhavuzTestOpenAnswerInput.disabled = false;
+    qhavuzTestOpenAnswerCheckBtn.disabled = false;
+    qhavuzTestOpenAnswerActions.classList.remove('is-hidden');
+    qhavuzTestOpenAnswerSelfGrade.classList.add('is-hidden');
+
+    // Soru açık uçlu (yalnızca yazılı cevaplı, şıksız) olarak eklendiyse
+    // şık ızgarası yerine serbest metin alanı gösterilir.
+    const isOpenEnded = !item.answer && !!item.answerText;
+    qhavuzTestAnswerGrid.classList.toggle('is-hidden', isOpenEnded);
+    qhavuzTestOpenAnswer.classList.toggle('is-hidden', !isOpenEnded);
+
+    if (isOpenEnded) return;
+
     QHAVUZ_ANSWERS.forEach((letter) => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -19782,6 +20127,87 @@
 
     qhavuzTestNextBtn.classList.add('is-visible');
   };
+
+  // Açık uçlu (yazılı cevaplı) sorularda kullanıcının yazdığı cevap,
+  // kaydedilen doğru cevap metniyle boşluk/büyük-küçük harf ve Türkçe
+  // karakter farklarını yok sayarak karşılaştırılır. Tam eşleşme
+  // "doğru" sayılır; her durumda doğru cevap metni gösterilir ki
+  // kullanıcı kendi cevabıyla karşılaştırabilsin.
+  const qhavuzNormalizeAnswerText = (str) => str.trim().toLocaleLowerCase('tr-TR').replace(/\s+/g, ' ');
+
+  const qhavuzTestHandleOpenAnswer = () => {
+    if (qhavuzTestAnswered) return;
+    qhavuzTestAnswered = true;
+
+    const item = qhavuzTestQuestions[qhavuzTestIndex];
+    const userAnswer = qhavuzTestOpenAnswerInput.value.trim();
+    const isCorrect = userAnswer.length > 0
+      && qhavuzNormalizeAnswerText(userAnswer) === qhavuzNormalizeAnswerText(item.answerText);
+
+    if (isCorrect) {
+      qhavuzTestScore += 1;
+      if (!item.solved && qhavuzState.items.includes(item)) {
+        item.solved = true;
+        saveQhavuzState();
+      }
+    }
+
+    qhavuzTestOpenAnswerInput.disabled = true;
+    qhavuzTestOpenAnswerCheckBtn.disabled = true;
+    qhavuzTestOpenAnswerActions.classList.add('is-hidden');
+
+    qhavuzTestFeedback.textContent = isCorrect ? 'Doğru! 🎉' : `Yanlış! Doğru cevap: ${item.answerText}`;
+    qhavuzTestFeedback.classList.add('is-visible', isCorrect ? 'is-correct' : 'is-wrong');
+
+    qhavuzTestNextBtn.classList.add('is-visible');
+  };
+
+  // "Cevabı Gör": kendi cevabını yazdın ya da yazmadın fark etmez, doğru
+  // cevabı doğrudan gösterir. Açık uçlu cevaplarda birebir metin
+  // eşleşmesi her zaman doğruyu/yanlışı ayırt edemeyeceğinden, burada
+  // puanlama kullanıcının kendi "Bildim / Bilemedim" seçimine bırakılır.
+  const qhavuzTestHandleOpenReveal = () => {
+    if (qhavuzTestAnswered) return;
+    const item = qhavuzTestQuestions[qhavuzTestIndex];
+
+    qhavuzTestOpenAnswerInput.disabled = true;
+    qhavuzTestOpenAnswerActions.classList.add('is-hidden');
+
+    qhavuzTestFeedback.textContent = `Doğru cevap: ${item.answerText}`;
+    qhavuzTestFeedback.classList.add('is-visible');
+
+    qhavuzTestOpenAnswerSelfGrade.classList.remove('is-hidden');
+  };
+
+  const qhavuzTestFinishOpenSelfGrade = (isCorrect) => {
+    if (qhavuzTestAnswered) return;
+    qhavuzTestAnswered = true;
+
+    const item = qhavuzTestQuestions[qhavuzTestIndex];
+    if (isCorrect) {
+      qhavuzTestScore += 1;
+      if (!item.solved && qhavuzState.items.includes(item)) {
+        item.solved = true;
+        saveQhavuzState();
+      }
+    }
+
+    qhavuzTestOpenAnswerSelfGrade.classList.add('is-hidden');
+    qhavuzTestFeedback.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+    qhavuzTestNextBtn.classList.add('is-visible');
+  };
+
+  qhavuzTestOpenAnswerRevealBtn.addEventListener('click', qhavuzTestHandleOpenReveal);
+  qhavuzTestSelfGradeCorrectBtn.addEventListener('click', () => qhavuzTestFinishOpenSelfGrade(true));
+  qhavuzTestSelfGradeWrongBtn.addEventListener('click', () => qhavuzTestFinishOpenSelfGrade(false));
+
+  qhavuzTestOpenAnswerCheckBtn.addEventListener('click', qhavuzTestHandleOpenAnswer);
+  qhavuzTestOpenAnswerInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      qhavuzTestHandleOpenAnswer();
+    }
+  });
 
   const finishQhavuzTest = () => {
     qhavuzTestQuestionView.classList.add('is-hidden');
