@@ -5,7 +5,7 @@
 // yapılan güncellemeler CACHE_VERSION hiç değişmese bile bir sonraki
 // açılışta görünür.
 
-const CACHE_VERSION = 'pace-v1';
+const CACHE_VERSION = 'pace-v3';
 const CORE_ASSETS = [
   './manifest.json',
   './icons/favicon.ico',
@@ -14,7 +14,17 @@ const CORE_ASSETS = [
   './icons/favicon-48.png',
   './icons/apple-touch-icon.png',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './icons/splash/splash-1290x2796-iphone-15-14pro-max.png',
+  './icons/splash/splash-1179x2556-iphone-15-14pro.png',
+  './icons/splash/splash-1284x2778-iphone-13-14-promax.png',
+  './icons/splash/splash-1170x2532-iphone-13-14.png',
+  './icons/splash/splash-1125x2436-iphone-x-11pro.png',
+  './icons/splash/splash-828x1792-iphone-11-xr.png',
+  './icons/splash/splash-750x1334-iphone-se-8.png',
+  './icons/splash/splash-2048x2732-ipad-pro-12.9.png',
+  './icons/splash/splash-1668x2388-ipad-pro-11.png',
+  './icons/splash/splash-1620x2160-ipad-10.2.png'
 ];
 // index.html, çevrimdışı ilk açılış için ayrıca (install sırasında)
 // önbelleğe alınır, ama runtime'da ASLA cache-first sunulmaz - bkz. fetch.
