@@ -7923,7 +7923,10 @@
     width: 100%;
     flex: 0 0 auto;
     box-sizing: border-box;
-    padding: calc(48px + env(safe-area-inset-top)) 24px 0.6rem;
+    /* Üst boşluk azaltıldı: env(safe-area-inset-top) sayesinde Dynamic
+       Island/çentikli cihazlarda güvenli alanın altında kalmaya devam
+       eder, çentiksiz cihazlarda ise başlık daha yukarıda oturur. */
+    padding: calc(28px + env(safe-area-inset-top)) 24px 0.6rem;
   }
 
   /* Başlığın altındaki her şey kendi kutusunda kayar; böylece liste
