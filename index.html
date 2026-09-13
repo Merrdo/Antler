@@ -2562,8 +2562,7 @@
     border-bottom: none;
   }
 
-  .page8-copy-bubble-item:active,
-  .page8-copy-bubble-item.is-drag-hover {
+  .page8-copy-bubble-item:active {
     background: rgba(255, 255, 255, 0.12);
   }
 
@@ -15142,20 +15141,13 @@
       if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
     };
 
-    // Balon açıldıktan sonra parmak ekrandan kalkmadan sürüklenirse (iPhone'daki
-    // basılı tutma menülerinde olduğu gibi) üzerinden geçilen seçeneği vurgulayıp
-    // parmak kalkınca o seçeneği uygulayabilmek için bu bayrağı kullanıyoruz.
-    let bubbleOpenForThisPress = false;
-
     const startPress = (e) => {
       pressMoved = false;
-      bubbleOpenForThisPress = false;
       pressStartX = e.clientX;
       pressStartY = e.clientY;
       clearPressTimer();
       pressTimer = setTimeout(() => {
         if (!pressMoved) {
-          bubbleOpenForThisPress = true;
           showPage8CopyBubble(text, item.text, {
             onEdit: () => { if (typeof onEditText === 'function') onEditText(); },
             onDelete
@@ -15171,29 +15163,10 @@
       if (Math.sqrt(dx * dx + dy * dy) > PRESS_MOVE_TOLERANCE) {
         pressMoved = true;
       }
-      if (bubbleOpenForThisPress) {
-        updatePage8CopyBubbleHover(e.clientX, e.clientY);
-      }
     });
-    text.addEventListener('pointerup', (e) => {
-      clearPressTimer();
-      if (bubbleOpenForThisPress) {
-        bubbleOpenForThisPress = false;
-        // Balondan bir seçenek seçildiği için parmak kalkınca tarayıcının
-        // ardından "click" olayı üretip metne tıklanmış gibi davranmasını
-        // (düzenleme moduna girmesini/tikini değiştirmesini) engelliyoruz.
-        e.preventDefault();
-        activatePage8CopyBubbleAt(e.clientX, e.clientY);
-      }
-    });
-    text.addEventListener('pointerleave', () => {
-      clearPressTimer();
-      bubbleOpenForThisPress = false;
-    });
-    text.addEventListener('pointercancel', () => {
-      clearPressTimer();
-      bubbleOpenForThisPress = false;
-    });
+    text.addEventListener('pointerup', clearPressTimer);
+    text.addEventListener('pointerleave', clearPressTimer);
+    text.addEventListener('pointercancel', clearPressTimer);
     // Tarayıcının kendi bağlam menüsünün (sağ tık / uzun basma menüsü)
     // araya girmesini engelle; kendi "Kopyala" balonumuzu gösteriyoruz.
     text.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -15230,30 +15203,6 @@
       document.removeEventListener('pointerdown', page8CopyBubbleCloseHandler, true);
       window.removeEventListener('scroll', page8CopyBubbleCloseHandler, true);
       page8CopyBubbleCloseHandler = null;
-    }
-  };
-
-  // Balon açıkken parmak kaldırılmadan sürüklenince hangi seçeneğin üzerinde
-  // olunduğunu bulup vurgular (iPhone'daki basılı tutma menüleri gibi).
-  const updatePage8CopyBubbleHover = (x, y) => {
-    if (!page8CopyBubbleEl) return;
-    const target = document.elementFromPoint(x, y);
-    const hovered = target ? target.closest('.page8-copy-bubble-item') : null;
-    page8CopyBubbleEl.querySelectorAll('.page8-copy-bubble-item').forEach((el) => {
-      el.classList.toggle('is-drag-hover', el === hovered);
-    });
-  };
-
-  // Parmak, balon üzerindeyken kalkarsa altındaki seçeneği uygular; balonun
-  // dışında kalkarsa (iPhone'da olduğu gibi) hiçbir şey yapmadan balonu kapatır.
-  const activatePage8CopyBubbleAt = (x, y) => {
-    if (!page8CopyBubbleEl) return;
-    const target = document.elementFromPoint(x, y);
-    const hovered = target ? target.closest('.page8-copy-bubble-item') : null;
-    if (hovered) {
-      hovered.click();
-    } else {
-      closePage8CopyBubble();
     }
   };
 
@@ -15479,19 +15428,9 @@
 
       // Yazı uzadıkça kutunun boyunu otomatik büyüterek tüm metnin
       // paragraf halinde, kesilmeden görünmesini sağlar.
-      // Not: odaklı bir textarea'nın yüksekliğini değiştirmek (özellikle
-      // iOS Safari'de) imleç/seçim konumunun sıfırlanmasına, yani yazarken
-      // imlecin kaymasına yol açabiliyor. Bunu önlemek için her boy
-      // güncellemesinden önce seçim konumunu saklayıp hemen sonra geri
-      // koyuyoruz.
       const autoGrow = () => {
-        const selStart = input.selectionStart;
-        const selEnd = input.selectionEnd;
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + 'px';
-        if (document.activeElement === input && selStart !== null && selEnd !== null) {
-          input.setSelectionRange(selStart, selEnd);
-        }
       };
       input.addEventListener('input', autoGrow);
       requestAnimationFrame(autoGrow);
@@ -15554,13 +15493,8 @@
       // Eklerken de tıpkı düzenlemede olduğu gibi metin uzayınca aşağı
       // satıra geçtiğini anlık görebilelim; kutunun boyu yazdıkça büyür.
       const autoGrow = () => {
-        const selStart = input.selectionStart;
-        const selEnd = input.selectionEnd;
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + 'px';
-        if (document.activeElement === input && selStart !== null && selEnd !== null) {
-          input.setSelectionRange(selStart, selEnd);
-        }
       };
       input.addEventListener('input', autoGrow);
       requestAnimationFrame(autoGrow);
