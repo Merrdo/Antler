@@ -3521,7 +3521,11 @@
     z-index: 2;
   }
 
-  /* ---- Soru Havuzu: soru görselini büyük gösteren lightbox ---- */
+  /* ---- Ortak lightbox iskeleti: artık Soru Havuzu'nda kullanılmıyor
+       (bkz. #page-qhavuz-detail, tam sayfa sürümü), ama Kaynaklar
+       sekmesindeki çoklu-görsel galerisi (bkz. #examResGalleryBackdrop,
+       .exam-res-gallery-*) hâlâ bu temel pop-up/kart/kapat sınıflarını
+       kullanıyor; o yüzden burada korunuyor. ---- */
   .qhavuz-lightbox-backdrop {
     position: fixed;
     inset: 0;
@@ -3574,47 +3578,6 @@
     z-index: 2;
   }
 
-  /* Kapat butonuyla aynı yuvarlak tasarımı paylaşan, onun hemen
-     solunda duran manuel "çözüldü" işaretleme butonu. İşaretliyken
-     kart listesindeki yeşil tik rozetiyle (.qhavuz-card-check) aynı
-     yeşile döner. */
-  .qhavuz-lightbox-solve {
-    position: absolute;
-    top: 0.5rem;
-    right: 2.9rem;
-    z-index: 2;
-    color: transparent;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
-  }
-
-  .qhavuz-lightbox-solve svg {
-    display: block;
-  }
-
-  .qhavuz-lightbox-solve.is-checked {
-    background-color: #3ddc84;
-    color: #0d3d20;
-  }
-
-  .qhavuz-lightbox-solve:hover,
-  .qhavuz-lightbox-solve:active {
-    background-color: #f2f2f2;
-  }
-
-  .qhavuz-lightbox-solve.is-checked:hover,
-  .qhavuz-lightbox-solve.is-checked:active {
-    background-color: #3ddc84;
-  }
-
-  body.is-anthracite .qhavuz-lightbox-solve.is-checked {
-    background-color: #3ddc84;
-    color: #0d3d20;
-  }
-
-  /* Fotoğraf lightbox'ının kartı ve içindeki resmin boşluk zemini
-     (görsel şeffaf/kenarları oransız olduğunda görünen dolgu) karanlık
-     modda hâlâ beyaz kalıyordu; diğer kartlarla aynı antresit tona
-     çekiyoruz ki koyu temada göz alıcı bir beyaz çerçeve oluşmasın. */
   body.is-anthracite .qhavuz-lightbox-card {
     background: var(--dark-card-color, #32343a);
   }
@@ -3623,17 +3586,148 @@
     background: #2a2c2f;
   }
 
-  /* Lightbox altında, kapat (×) butonuyla aynı yuvarlak brutalist
-     tasarımı paylaşan doğru cevap şıkları. Sadece işaretlenen şık
-     .is-correct alır ve yeşile döner; diğerleri nötr kalır. */
-  .qhavuz-lightbox-answer-row {
-    display: flex;
-    justify-content: center;
-    gap: 0.6rem;
-    padding: 0.9rem 1rem 1.1rem;
-    background: #fff;
+  /* ---- Soru Havuzu: soru detay sayfası (#page-qhavuz-detail) ----
+     Daha önce bir lightbox pop-up'tı; artık #page-qhavuz-add ile aynı
+     tam sayfa iskeletini (üstte geri butonlu calendar-topbar, altında
+     kaydırmalı dikey akış) kullanıyor. ---- */
+  #page-qhavuz-detail {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding: calc(44px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
+  #page-qhavuz-detail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .qhavuz-detail-page-wrap {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .qhavuz-detail-preview {
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 3px solid #000;
+    border-radius: 0.9rem;
+    box-shadow: 4px 4px 0px 0px #000;
+    background: #f2f2f2;
+  }
+
+  .qhavuz-detail-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    touch-action: none;
+  }
+
+  body.is-anthracite .qhavuz-detail-preview {
+    background: #2a2c2f;
+  }
+
+  body.is-anthracite .qhavuz-detail-preview img {
+    background: #2a2c2f;
+  }
+
+  /* Üst çubuktaki geri butonuyla aynı yuvarlak tasarımı paylaşan,
+     onun sağında duran manuel "çözüldü" işaretleme butonu. İşaretliyken
+     kart listesindeki yeşil tik rozetiyle (.qhavuz-card-check) aynı
+     yeşile döner. */
+  .qhavuz-detail-solve {
+    color: transparent;
+  }
+
+  .qhavuz-detail-solve svg {
+    display: block;
+  }
+
+  .qhavuz-detail-solve.is-checked {
+    background-color: #3ddc84;
+    color: #0d3d20;
+  }
+
+  .qhavuz-detail-solve:hover,
+  .qhavuz-detail-solve:active {
+    background-color: #f2f2f2;
+  }
+
+  .qhavuz-detail-solve.is-checked:hover,
+  .qhavuz-detail-solve.is-checked:active {
+    background-color: #3ddc84;
+  }
+
+  body.is-anthracite .qhavuz-detail-solve.is-checked {
+    background-color: #3ddc84;
+    color: #0d3d20;
+  }
+
+  /* Üst çubuktaki, kalem ikonuyla cevabı düzenleme moduna alan buton;
+     Soru Havuzu grid'indeki .edit-task-btn.is-active ile aynı vurgu
+     rengini paylaşır. */
+  #qhavuzDetailEditBtn.is-active {
+    background-color: var(--accent-color, #ff90e8);
+  }
+
+  /* Sayfadaki doğru cevap şıkları, "Soru Ekle" sayfasındaki bölüm
+     kartlarıyla (.qhavuz-add-section) aynı brutalist kart dilini
+     paylaşır. Sadece işaretlenen şık .is-correct alır ve yeşile döner;
+     diğerleri nötr kalır. */
+  .qhavuz-detail-answer-row {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    background: #fff;
+    border: 3px solid #000;
+    border-radius: 1em;
+    box-shadow: 4px 4px 0px 0px #000;
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  body.is-anthracite .qhavuz-detail-answer-row {
+    background: var(--dark-card-color, #32343a);
+  }
+
+  /* Açıklama girilmiş sorularda, cevap kartıyla aynı dilde ayrı bir
+     bölüm kartı olarak gösterilir; girilmemişse tamamen gizlenir. */
+  .qhavuz-detail-desc {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    background: #fff;
+    border: 3px solid #000;
+    border-radius: 1em;
+    box-shadow: 4px 4px 0px 0px #000;
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  .qhavuz-detail-desc.is-hidden {
+    display: none;
+  }
+
+  body.is-anthracite .qhavuz-detail-desc {
+    background: var(--dark-card-color, #32343a);
+  }
+
+  /* Şıkların kendisi (eski lightbox ile aynı sınıf adını paylaşır;
+     JS tarafından dinamik olarak üretilip .qhavuz-detail-answer-row
+     içine eklenir). */
   .qhavuz-lightbox-answer-btn {
     flex-shrink: 0;
     width: 2.1rem;
@@ -3671,10 +3765,6 @@
   .qhavuz-lightbox-answer-btn.is-correct {
     background-color: #5cd68a;
     color: #0d3d20;
-  }
-
-  body.is-anthracite .qhavuz-lightbox-answer-row {
-    background: var(--dark-card-color, #32343a);
   }
 
   body.is-anthracite .qhavuz-lightbox-answer-btn {
@@ -3728,29 +3818,158 @@
     color: #f2f2f4;
   }
 
-  /* ---- Soru Havuzu: görsel ekleme pop-up'ı (page9-add-card ile aynı
-       zemini paylaşır; burada sadece kendine özgü alanlar tanımlanır) ---- */
+  /* ---- Soru Havuzu: detay sayfasında soruya eklenmiş "Açıklama"
+       metninin etiket/metin stilleri (kutunun kendisi .qhavuz-detail-desc
+       ile tanımlanır, bkz. yukarıda). ---- */
+  .qhavuz-lightbox-desc-label {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.78rem;
+    color: #121212;
+    opacity: 0.55;
+  }
+
+  .qhavuz-lightbox-desc-text {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: #121212;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+
+  body.is-anthracite .qhavuz-lightbox-desc-label {
+    color: #f2f2f4;
+    opacity: 0.7;
+  }
+
+  body.is-anthracite .qhavuz-lightbox-desc-text {
+    color: #f2f2f4;
+  }
+
+  /* ---- Soru Havuzu: "Soru Ekle" tam sayfası (#page-qhavuz-add) için
+       önizleme ve ortak alan stilleri. Artık pop-up değil; bkz. aşağıda
+       "Soru Havuzu: Soru Ekle (tam ekran)" bloğu. .qhavuz-add-card
+       sınıfı sadece hâlâ pop-up olarak kalan iki farklı ekranda
+       (qhavuzTestSetupBackdrop, page11QuestionBackdrop) dar genişliği
+       korumak için kullanılıyor. ---- */
   .qhavuz-add-card {
     max-width: 380px;
   }
 
   .qhavuz-add-preview {
     width: 100%;
-    max-height: 55vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    border: 2.5px solid #000;
-    border-radius: 0.8rem;
-    margin-bottom: 0.9rem;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 3px solid #000;
+    border-radius: 0.9rem;
+    box-shadow: 4px 4px 0px 0px #000;
     background: #f2f2f2;
   }
 
   .qhavuz-add-preview img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
     display: block;
+  }
+
+  /* ---- Soru Havuzu: görsel ekleme öncesi sabit kare çerçeveyle kırpma
+       pop-up'ı. Kart ızgarasındaki kare kadrajla (.qhavuz-thumb,
+       aspect-ratio:1) birebir aynı oranı kullanır; böylece kullanıcının
+       kırparken gördüğü kare ile kayıttan sonra kartta görünen kare her
+       zaman birebir aynıdır, görsele göre asla değişmez. ---- */
+  .qhavuz-crop-card {
+    max-width: 380px;
+  }
+
+  .qhavuz-crop-viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 2.5px solid #000;
+    border-radius: 0.8rem;
+    background: #111;
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .qhavuz-crop-viewport:active {
+    cursor: grabbing;
+  }
+
+  .qhavuz-crop-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    max-width: none;
+    max-height: none;
+    transform-origin: center center;
+    will-change: transform;
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+
+  /* İnce çerçeve, kırpılacak karenin sınırını görsel olarak vurgular
+     (kırpma zaten tüm viewport'u kapsadığı için karartma maskesine
+     gerek yok, sadece kenar çizgisi yeterli). */
+  .qhavuz-crop-frame {
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    border-radius: 0.6rem;
+    pointer-events: none;
+  }
+
+  .qhavuz-crop-zoom-row {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0.9rem 0 0.2rem;
+    color: #121212;
+  }
+
+  .qhavuz-crop-zoom-icon {
+    flex: 0 0 auto;
+    opacity: 0.5;
+  }
+
+  .qhavuz-crop-zoom-icon.is-large {
+    opacity: 0.85;
+  }
+
+  .qhavuz-crop-zoom-slider {
+    flex: 1 1 auto;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 999px;
+    background: #000;
+    outline: none;
+    margin: 0;
+  }
+
+  .qhavuz-crop-zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ff90e8;
+    border: 2.5px solid #000;
+    cursor: pointer;
+  }
+
+  .qhavuz-crop-zoom-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ff90e8;
+    border: 2.5px solid #000;
+    cursor: pointer;
   }
 
   .qhavuz-add-label {
@@ -3873,6 +4092,95 @@
   .qhavuz-add-answer-btn.is-selected {
     background-color: #5cd68a;
     color: #0d3d20;
+  }
+
+  /* ---------- Soru Havuzu: "Soru Ekle" (tam ekran) ----------
+     Fotoğraf kırpıldıktan sonra açılan ekran; artık pop-up değil,
+     #page-camera-test ile birebir aynı tam sayfa iskeletini kullanır
+     (üstte geri butonlu calendar-topbar, altında kaydırmalı dikey
+     akış). Alanlar artık dar bir modal karta sıkışmak yerine kendi
+     beyaz/koyu "bölüm kartları" (.qhavuz-add-section) içinde gruplanır,
+     böylece geniş sayfa alanında daha ferah ve okunaklı bir düzen
+     oluşur. */
+  #page-qhavuz-add {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding: calc(44px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  #page-qhavuz-add::-webkit-scrollbar {
+    display: none;
+  }
+
+  .qhavuz-add-page-wrap {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .qhavuz-add-page-subtitle {
+    margin-top: -0.4rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--theme-text, #f2f2f7);
+    opacity: 0.75;
+    transition: color 0.5s ease;
+  }
+
+  /* Sayfadaki her bir alan grubu (Sınav Türü, Ders, Doğru Cevap +
+     Yazılı Cevap, Açıklama, Kitap Bilgisi) uygulamanın genel brutalist
+     kart dilini (kalın kenarlık + katı gölge) paylaşan kendi kutusunda
+     durur; böylece sayfa uzun olsa da alanlar birbirinden net şekilde
+     ayrılır. */
+  .qhavuz-add-section {
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    border: 3px solid #000;
+    border-radius: 1em;
+    box-shadow: 4px 4px 0px 0px #000;
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  .qhavuz-add-section .qhavuz-add-label:first-child {
+    margin-top: 0;
+  }
+
+  .qhavuz-add-page-confirm {
+    display: block;
+    width: 100%;
+    margin-top: 0.1rem;
+    text-align: center;
+  }
+
+  /* Açıklama alanı: tek satırlık input'lardan farklı olarak birden
+     fazla satırlık serbest metin girilebilsin diye textarea; dikeyde
+     kullanıcı isterse büyütebilir, yatayda kartın dışına taşmaz. */
+  .qhavuz-add-desc-input {
+    display: block;
+    width: 100%;
+    min-height: 5.5rem;
+    box-sizing: border-box;
+    resize: vertical;
+    line-height: 1.45;
+  }
+
+  body.is-anthracite .qhavuz-add-section {
+    background: var(--dark-card-color, #32343a);
+  }
+
+  body.is-anthracite .qhavuz-add-page-subtitle {
+    color: #f2f2f4;
   }
 
   /* ---------- Soru Havuzu: anahtar aktifken (antresit/koyu mod) ---------- */
@@ -7670,6 +7978,8 @@
   body.is-wheel-open .navbar,
   body.is-calendar-open .navbar,
   body.is-qhavuz-test-open .navbar,
+  body.is-qhavuz-add-open .navbar,
+  body.is-qhavuz-detail-open .navbar,
   body.is-page10-open .navbar,
   body.is-analytics-open .navbar,
   body.is-zero-error-open .navbar {
@@ -7685,6 +7995,8 @@
   body.is-wheel-open .navbar .wrapper,
   body.is-calendar-open .navbar .wrapper,
   body.is-qhavuz-test-open .navbar .wrapper,
+  body.is-qhavuz-add-open .navbar .wrapper,
+  body.is-qhavuz-detail-open .navbar .wrapper,
   body.is-page10-open .navbar .wrapper,
   body.is-analytics-open .navbar .wrapper,
   body.is-zero-error-open .navbar .wrapper {
@@ -11178,6 +11490,117 @@
     </div>
   </section>
 
+  <!-- Soru Havuzu: fotoğraf kırpıldıktan hemen sonra açılan, sınav türü,
+       ders, doğru cevap ve açıklama gibi bilgilerin girildiği tam sayfa
+       ekran. Daha önce bir pop-up'tı; artık #page-camera-test ile aynı
+       tam sayfa dilini (üstte geri butonlu calendar-topbar, ortada
+       max-width'li dikey akış) kullanıyor — girilecek bilgi arttıkça
+       pop-up'ta sıkışıyordu, artık geniş sayfa alanında rahatça
+       yerleşiyor. Kapanınca (Kapat ya da Kaydet) her zaman Soru
+       Havuzu'na (page-camera) döner. -->
+  <section class="page" id="page-qhavuz-add">
+    <div class="qhavuz-add-page-wrap">
+      <div class="calendar-topbar">
+        <button type="button" class="calendar-back-btn" id="qhavuzAddClose" aria-label="Kapat">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <span class="calendar-topbar-title">Soru Ekle</span>
+        <span class="calendar-topbar-spacer" aria-hidden="true"></span>
+      </div>
+      <span class="qhavuz-add-page-subtitle">Sınav türünü, dersi ve doğru cevabı işaretle</span>
+
+      <div class="qhavuz-add-preview">
+        <img id="qhavuzAddPreviewImg" alt="Soru görseli">
+      </div>
+
+      <div class="qhavuz-add-section">
+        <span class="qhavuz-add-label">Sınav Türü</span>
+        <div class="qhavuz-add-subject-grid" id="qhavuzAddTrackGrid"></div>
+      </div>
+
+      <div class="qhavuz-add-section">
+        <span class="qhavuz-add-label">Ders</span>
+        <div class="qhavuz-add-subject-grid" id="qhavuzAddSubjectGrid"></div>
+      </div>
+
+      <div class="qhavuz-add-section">
+        <span class="qhavuz-add-label">Doğru Cevap <span class="qhavuz-add-label-optional">(şık veya yazılı cevaptan biri yeterli)</span></span>
+        <div class="qhavuz-add-answer-grid" id="qhavuzAddAnswerGrid"></div>
+
+        <span class="qhavuz-add-label">Yazılı Cevap <span class="qhavuz-add-label-optional">(açık uçlu sorular için)</span></span>
+        <input type="text" class="page9-add-custom-input qhavuz-add-answer-text-input" id="qhavuzAddAnswerTextInput" placeholder="Cevabı yaz..." maxlength="120">
+      </div>
+
+      <!-- Yeni: artık pop-up değil, geniş bir sayfa olduğu için soruya
+           çözüm notu / ipucu / hatırlatma gibi serbest metinli bir
+           açıklama da eklenebiliyor. -->
+      <div class="qhavuz-add-section">
+        <span class="qhavuz-add-label">Açıklama <span class="qhavuz-add-label-optional">(opsiyonel — çözüm notu, ipucu vb.)</span></span>
+        <textarea class="page9-add-custom-input qhavuz-add-desc-input" id="qhavuzAddDescInput" placeholder="Soruyla ilgili notunu, çözüm mantığını ya da hatırlatmanı yaz…" maxlength="600" rows="4"></textarea>
+      </div>
+
+      <div class="qhavuz-add-section">
+        <span class="qhavuz-add-label">Kitap Bilgisi <span class="qhavuz-add-label-optional">(opsiyonel)</span></span>
+        <div class="qhavuz-add-book-row">
+          <input type="text" class="page9-add-custom-input qhavuz-add-book-input" id="qhavuzAddBookInput" placeholder="Kitap adı" maxlength="60">
+          <input type="text" inputmode="numeric" class="page9-add-custom-input qhavuz-add-page-input" id="qhavuzAddPageInput" placeholder="Sayfa" maxlength="6">
+        </div>
+      </div>
+
+      <button type="button" class="add-task-btn page9-add-confirm qhavuz-add-page-confirm" id="qhavuzAddConfirm" disabled>Kaydet</button>
+    </div>
+  </section>
+
+  <!-- Soru Havuzu: bir soru kartına dokununca açılan, görseli, doğru
+       cevabı/yazılı cevabı ve varsa açıklamayı gösteren tam sayfa detay
+       ekranı. Daha önce bir lightbox pop-up'tı; artık #page-qhavuz-add
+       ile aynı tam sayfa dilini (üstte geri butonlu calendar-topbar,
+       ortada max-width'li dikey akış) kullanıyor. Kapanınca (geri
+       butonu) her zaman Soru Havuzu'na (page-camera) döner. -->
+  <section class="page" id="page-qhavuz-detail">
+    <div class="qhavuz-detail-page-wrap">
+      <div class="calendar-topbar">
+        <div class="calendar-topbar-left-group">
+          <button type="button" class="calendar-back-btn" id="qhavuzDetailBack" aria-label="Geri dön">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <!-- Sağdaki iki butonlu grupla dengelemek için görünmez bir
+               boşluk butonu; başlığın gerçekten ortalanmasını sağlar. -->
+          <button type="button" class="calendar-back-btn is-hidden" tabindex="-1" aria-hidden="true"></button>
+        </div>
+        <span class="calendar-topbar-title">Soru</span>
+        <div class="calendar-topbar-right-group">
+          <button type="button" class="calendar-back-btn" id="qhavuzDetailEditBtn" aria-label="Cevabı düzenle" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="15" height="15">
+              <path d="M4 20l4.5-1 10.2-10.2-3.5-3.5L5 15.5 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13.3 6.8l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <button type="button" class="calendar-back-btn qhavuz-detail-solve" id="qhavuzLightboxSolveBtn" aria-label="Manuel çözüldü olarak işaretle" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="qhavuz-detail-preview">
+        <img id="qhavuzLightboxImg" alt="Soru görseli">
+      </div>
+
+      <div class="qhavuz-detail-answer-row" id="qhavuzLightboxAnswerRow"></div>
+
+      <!-- Soruya "Soru Ekle" ekranında bir açıklama girildiyse burada
+           gösterilir; girilmediyse boş bırakılıp JS ile gizlenir. -->
+      <div class="qhavuz-detail-desc is-hidden" id="qhavuzLightboxDesc">
+        <span class="qhavuz-lightbox-desc-label">Açıklama</span>
+        <span class="qhavuz-lightbox-desc-text" id="qhavuzLightboxDescText"></span>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <!-- Sayfa 4: seçenek rengini değiştirmek için açılan pop-up. -->
@@ -11263,44 +11686,39 @@
   </div>
 </div>
 
-<!-- Soru Havuzu: bir görsel seçilince açılan pop-up. Branş ve doğru
-     cevap şıkkı seçilmeden "Kaydet" butonu pasif kalır. wheel-color /
-     page9-add pop-up'larıyla aynı brutalist dili paylaşır. -->
-<div class="page9-add-backdrop" id="qhavuzAddBackdrop">
-  <div class="page9-add-card qhavuz-add-card">
+<!-- Soru Havuzu: fotoğraf seçildikten hemen sonra, "Soru Ekle" pop-up'ı
+     açılmadan önce gösterilen sabit-kare kırpma ekranı. Kullanıcı iki
+     parmakla yakınlaştırıp sürükleyerek fotoğrafı kareye TAM oturtur;
+     onayladığında bu kare, doğrudan soru kartı görseli olarak kaydedilir. -->
+<div class="page9-add-backdrop" id="qhavuzCropBackdrop">
+  <div class="page9-add-card qhavuz-crop-card">
     <div class="page9-add-header">
       <div class="page9-add-heading">
-        <span class="page9-add-title">Soru Ekle</span>
-        <span class="page9-add-subtitle">Sınav türünü, dersi ve doğru cevabı işaretle</span>
+        <span class="page9-add-title">Görseli Kırp</span>
+        <span class="page9-add-subtitle">Kareyi doldurmak için yakınlaştır ve sürükle</span>
       </div>
-      <button type="button" class="delete-btn page9-add-close" id="qhavuzAddClose" aria-label="Kapat">×</button>
+      <button type="button" class="delete-btn page9-add-close" id="qhavuzCropClose" aria-label="Kapat">×</button>
     </div>
 
-    <div class="qhavuz-add-preview">
-      <img id="qhavuzAddPreviewImg" alt="Soru görseli">
+    <div class="qhavuz-crop-viewport" id="qhavuzCropViewport">
+      <img class="qhavuz-crop-img" id="qhavuzCropImg" alt="Kırpılacak görsel" draggable="false">
+      <div class="qhavuz-crop-frame"></div>
     </div>
 
-    <span class="qhavuz-add-label">Sınav Türü</span>
-    <div class="qhavuz-add-subject-grid" id="qhavuzAddTrackGrid"></div>
-
-    <span class="qhavuz-add-label">Ders</span>
-    <div class="qhavuz-add-subject-grid" id="qhavuzAddSubjectGrid"></div>
-
-    <span class="qhavuz-add-label">Doğru Cevap <span class="qhavuz-add-label-optional">(şık veya yazılı cevaptan biri yeterli)</span></span>
-    <div class="qhavuz-add-answer-grid" id="qhavuzAddAnswerGrid"></div>
-
-    <span class="qhavuz-add-label">Yazılı Cevap <span class="qhavuz-add-label-optional">(açık uçlu sorular için)</span></span>
-    <input type="text" class="page9-add-custom-input qhavuz-add-answer-text-input" id="qhavuzAddAnswerTextInput" placeholder="Cevabı yaz..." maxlength="120">
-
-    <span class="qhavuz-add-label">Kitap Bilgisi <span class="qhavuz-add-label-optional">(opsiyonel)</span></span>
-    <div class="qhavuz-add-book-row">
-      <input type="text" class="page9-add-custom-input qhavuz-add-book-input" id="qhavuzAddBookInput" placeholder="Kitap adı" maxlength="60">
-      <input type="text" inputmode="numeric" class="page9-add-custom-input qhavuz-add-page-input" id="qhavuzAddPageInput" placeholder="Sayfa" maxlength="6">
+    <div class="qhavuz-crop-zoom-row">
+      <svg class="qhavuz-crop-zoom-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <input type="range" id="qhavuzCropZoomSlider" class="qhavuz-crop-zoom-slider" min="0" max="1" step="0.001" value="0" aria-label="Yakınlaştırma">
+      <svg class="qhavuz-crop-zoom-icon is-large" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7.5v5M7.5 10h5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     </div>
 
-    <button type="button" class="add-task-btn page9-add-confirm" id="qhavuzAddConfirm" disabled>Kaydet</button>
+    <button type="button" class="add-task-btn page9-add-confirm" id="qhavuzCropConfirm">Kırp ve Devam Et</button>
   </div>
 </div>
+
+<!-- Soru Havuzu: bir görsel seçilince açılan "Soru Ekle" ekranı artık
+     pop-up değil, #page-camera-test ile aynı tam sayfa dilini kullanan
+     ayrı bir sayfadır (bkz. #page-qhavuz-add, yukarıdaki .page
+     bölümleri arasında, #page-camera'nın hemen altında). -->
 
 <!-- Soru Havuzu: Test Modu kurulum pop-up'ı. Hangi branştan test
      oluşturulacağını seçtirir; page9-add-chip ile aynı listeleme dilini
@@ -11322,18 +11740,12 @@
   </div>
 </div>
 
-<!-- Soru Havuzu: bir soru kartına dokununca görseli tam ekrana yakın,
-     büyük boyutta gösteren basit bir lightbox. -->
-<div class="qhavuz-lightbox-backdrop" id="qhavuzLightboxBackdrop">
-  <div class="qhavuz-lightbox-card">
-    <button type="button" class="delete-btn qhavuz-lightbox-solve" id="qhavuzLightboxSolveBtn" aria-label="Manuel çözüldü olarak işaretle" aria-pressed="false">
-      <svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
-    <button type="button" class="delete-btn qhavuz-lightbox-close" id="qhavuzLightboxClose" aria-label="Kapat">×</button>
-    <img id="qhavuzLightboxImg" alt="Soru görseli">
-    <div class="qhavuz-lightbox-answer-row" id="qhavuzLightboxAnswerRow"></div>
-  </div>
-</div>
+<!-- Soru Havuzu: bir soru kartına dokununca görseli artık pop-up/lightbox
+     olarak değil, #page-qhavuz-add ile aynı tam sayfa dilini kullanan
+     ayrı bir sayfada (bkz. #page-qhavuz-detail, yukarıda #page-camera'nın
+     hemen altındaki .page bölümleri arasında) gösterir. Kapanınca her
+     zaman Soru Havuzu'na (page-camera) döner. -->
+
 
 <!-- Sayfa 11: bir denemede yanlış/boş bırakılan soruya görsel eklemek
      (veya eklenmiş görseli düzenlemek) için açılan pop-up. Soru
@@ -19196,21 +19608,30 @@
 
   const qhavuzGrid = document.getElementById('qhavuzGrid');
   const qhavuzEditBtn = document.getElementById('qhavuzEditBtn');
-  const qhavuzLightboxBackdrop = document.getElementById('qhavuzLightboxBackdrop');
   const qhavuzLightboxImg = document.getElementById('qhavuzLightboxImg');
-  const qhavuzLightboxClose = document.getElementById('qhavuzLightboxClose');
+  const qhavuzDetailBack = document.getElementById('qhavuzDetailBack');
+  // Soru kartına dokununca artık pop-up/lightbox değil, ayrı bir tam
+  // sayfa (#page-qhavuz-detail) açılır; kapanışta her zaman Soru
+  // Havuzu'na (page-camera) dönülür, "Soru Ekle" sayfasındaki
+  // QHAVUZ_ADD_RETURN_PAGE deseniyle aynı mantık.
+  const QHAVUZ_DETAIL_RETURN_PAGE = 'page-camera';
   const qhavuzAddBtn = document.getElementById('qhavuzAddBtn');
   const qhavuzFileInput = document.getElementById('qhavuzFileInput');
-  const qhavuzAddBackdrop = document.getElementById('qhavuzAddBackdrop');
   const qhavuzAddClose = document.getElementById('qhavuzAddClose');
   const qhavuzAddPreviewImg = document.getElementById('qhavuzAddPreviewImg');
   const qhavuzAddTrackGrid = document.getElementById('qhavuzAddTrackGrid');
   const qhavuzAddSubjectGrid = document.getElementById('qhavuzAddSubjectGrid');
   const qhavuzAddAnswerGrid = document.getElementById('qhavuzAddAnswerGrid');
   const qhavuzAddAnswerTextInput = document.getElementById('qhavuzAddAnswerTextInput');
+  const qhavuzAddDescInput = document.getElementById('qhavuzAddDescInput');
   const qhavuzAddBookInput = document.getElementById('qhavuzAddBookInput');
   const qhavuzAddPageInput = document.getElementById('qhavuzAddPageInput');
   const qhavuzAddConfirm = document.getElementById('qhavuzAddConfirm');
+  // "Soru Ekle" artık pop-up değil, ayrı bir tam sayfa (#page-qhavuz-add);
+  // açılışta/kapanışta hangi sayfadan gelindiği (her zaman Soru Havuzu)
+  // burada sabitlenmiştir, page-camera-test'teki qhavuzTestReturnPage
+  // deseniyle aynı mantık.
+  const QHAVUZ_ADD_RETURN_PAGE = 'page-camera';
   const qhavuzFilterTrackSegmented = document.getElementById('qhavuzFilterTrackSegmented');
   const qhavuzFilterTrackSlider = document.getElementById('qhavuzFilterTrackSlider');
   const qhavuzFilterTrackOptions = qhavuzFilterTrackSegmented
@@ -19310,15 +19731,22 @@
     qhavuzAddBookInput.value = '';
     qhavuzAddPageInput.value = '';
     qhavuzAddAnswerTextInput.value = '';
+    qhavuzAddDescInput.value = '';
     qhavuzBuildTrackGrid();
     qhavuzBuildSubjectGrid();
     qhavuzBuildAnswerGrid();
     qhavuzUpdateConfirmState();
-    qhavuzAddBackdrop.classList.add('is-open');
+    // Artık pop-up değil; Soru Havuzu'ndan (page-camera) ayrı, tam
+    // sayfa bir ekrana (page-qhavuz-add) geçiyoruz, page-camera-test'in
+    // test moduna girişiyle birebir aynı desen (nav bar da aynı şekilde
+    // gizlenir).
+    document.body.classList.add('is-qhavuz-add-open');
+    goToPage('page-qhavuz-add');
   };
 
   const closeQhavuzAddModal = () => {
-    qhavuzAddBackdrop.classList.remove('is-open');
+    document.body.classList.remove('is-qhavuz-add-open');
+    goToPage(QHAVUZ_ADD_RETURN_PAGE);
     qhavuzPendingImage = null;
     qhavuzPendingTrack = null;
     qhavuzPendingSubject = null;
@@ -19326,12 +19754,209 @@
     qhavuzAddBookInput.value = '';
     qhavuzAddPageInput.value = '';
     qhavuzAddAnswerTextInput.value = '';
+    qhavuzAddDescInput.value = '';
     qhavuzFileInput.value = '';
   };
 
+  // ---- Soru Havuzu: görsel ekleme öncesi sabit kare çerçeveyle kırpma ----
+  // Fotoğraf seçildiği an, henüz sıkıştırılmamış orijinal çözünürlükle bu
+  // ekran açılır (yakınlaştırırken kalite kaybı olmasın diye); kullanıcı
+  // iki parmakla yakınlaştırıp tek parmakla/fare ile sürükleyerek kareyi
+  // doldurur. Onaylanan kare, ızgaradaki kart kadrajıyla (.qhavuz-thumb,
+  // aspect-ratio:1) birebir aynıdır — böylece önizlemede görülen kare ile
+  // kartta sonradan görünen kare her zaman aynı kalır.
+  const qhavuzCropBackdrop = document.getElementById('qhavuzCropBackdrop');
+  const qhavuzCropClose = document.getElementById('qhavuzCropClose');
+  const qhavuzCropViewport = document.getElementById('qhavuzCropViewport');
+  const qhavuzCropImg = document.getElementById('qhavuzCropImg');
+  const qhavuzCropZoomSlider = document.getElementById('qhavuzCropZoomSlider');
+  const qhavuzCropConfirm = document.getElementById('qhavuzCropConfirm');
+
+  const QHAVUZ_CROP_OUTPUT_MAX = 1080; // Kırpılmış karenin üst çözünürlük sınırı
+  const QHAVUZ_CROP_OUTPUT_MIN = 320;  // Aşırı küçük/bulanık çıktı olmasın diye alt sınır
+  const QHAVUZ_CROP_MAX_ZOOM_FACTOR = 3; // Çerçeveyi kaplayan ölçeğin kaç katına kadar yakınlaşılabilir
+
+  let qhavuzCropNaturalW = 0;
+  let qhavuzCropNaturalH = 0;
+  let qhavuzCropCoverScale = 1; // Görselin kareyi boşluksuz kaplaması için gereken minimum ölçek
+  let qhavuzCropScale = 1;
+  let qhavuzCropPanX = 0;
+  let qhavuzCropPanY = 0;
+  let qhavuzCropResolve = null; // Kırpma tamamlanınca (ya da iptalde) sonucu döndüren Promise resolve'u
+
+  // Görsel, çerçeveyi her zaman tam kaplasın diye pan değerlerini
+  // (kenarlarda boşluk kalmayacak şekilde) sınırlar.
+  const qhavuzCropClampPan = () => {
+    const viewportSize = qhavuzCropViewport.clientWidth || 1;
+    const displayedW = qhavuzCropNaturalW * qhavuzCropScale;
+    const displayedH = qhavuzCropNaturalH * qhavuzCropScale;
+    const maxPanX = Math.max(0, (displayedW - viewportSize) / 2);
+    const maxPanY = Math.max(0, (displayedH - viewportSize) / 2);
+    qhavuzCropPanX = Math.min(maxPanX, Math.max(-maxPanX, qhavuzCropPanX));
+    qhavuzCropPanY = Math.min(maxPanY, Math.max(-maxPanY, qhavuzCropPanY));
+  };
+
+  const qhavuzCropApply = () => {
+    qhavuzCropClampPan();
+    qhavuzCropImg.style.width = `${qhavuzCropNaturalW * qhavuzCropScale}px`;
+    qhavuzCropImg.style.height = `${qhavuzCropNaturalH * qhavuzCropScale}px`;
+    qhavuzCropImg.style.transform = `translate(-50%, -50%) translate(${qhavuzCropPanX}px, ${qhavuzCropPanY}px)`;
+  };
+
+  // Yakınlaştırma çubuğu (0..1) ile gerçek ölçek (coverScale..maxScale)
+  // arasında dönüşüm; çubuğun sol ucu her zaman "çerçeveyi tam kaplar"
+  // haline denk gelir.
+  const qhavuzCropMaxScale = () => qhavuzCropCoverScale * QHAVUZ_CROP_MAX_ZOOM_FACTOR;
+  const qhavuzCropScaleFromSlider = (t) => qhavuzCropCoverScale + t * (qhavuzCropMaxScale() - qhavuzCropCoverScale);
+  const qhavuzCropSliderFromScale = (s) => {
+    const range = qhavuzCropMaxScale() - qhavuzCropCoverScale;
+    return range > 0 ? (s - qhavuzCropCoverScale) / range : 0;
+  };
+
+  const qhavuzCropSetScale = (newScale, syncSlider = true) => {
+    qhavuzCropScale = Math.min(qhavuzCropMaxScale(), Math.max(qhavuzCropCoverScale, newScale));
+    if (syncSlider) qhavuzCropZoomSlider.value = String(qhavuzCropSliderFromScale(qhavuzCropScale));
+    qhavuzCropApply();
+  };
+
+  qhavuzCropZoomSlider.addEventListener('input', () => {
+    qhavuzCropSetScale(qhavuzCropScaleFromSlider(parseFloat(qhavuzCropZoomSlider.value)), false);
+  });
+
+  // Ham (henüz sıkıştırılmamış) görseli kırpma ekranında açar; kullanıcı
+  // onaylayınca kırpılmış kare data URL ile, iptal ederse null ile
+  // resolve olan bir Promise döner.
+  const qhavuzOpenCropModal = (rawDataUrl) => new Promise((resolve) => {
+    qhavuzCropResolve = resolve;
+    const img = new Image();
+    img.onload = () => {
+      qhavuzCropNaturalW = img.naturalWidth;
+      qhavuzCropNaturalH = img.naturalHeight;
+      qhavuzCropImg.src = rawDataUrl;
+      qhavuzCropBackdrop.classList.add('is-open');
+      // Çerçevenin gerçek piksel genişliği ancak layout oturduktan sonra
+      // doğru ölçülebildiği için ilk kare yerleşimi bir sonraki frame'e
+      // bırakılır.
+      requestAnimationFrame(() => {
+        const viewportSize = qhavuzCropViewport.clientWidth || 1;
+        qhavuzCropCoverScale = Math.max(
+          viewportSize / qhavuzCropNaturalW,
+          viewportSize / qhavuzCropNaturalH
+        ) || 1;
+        qhavuzCropPanX = 0;
+        qhavuzCropPanY = 0;
+        qhavuzCropZoomSlider.value = '0';
+        qhavuzCropSetScale(qhavuzCropCoverScale, false);
+      });
+    };
+    img.onerror = () => resolve(null);
+    img.src = rawDataUrl;
+  });
+
+  const qhavuzCloseCropModal = (result) => {
+    qhavuzCropBackdrop.classList.remove('is-open');
+    qhavuzCropImg.src = '';
+    const resolve = qhavuzCropResolve;
+    qhavuzCropResolve = null;
+    if (resolve) resolve(result);
+  };
+
+  qhavuzCropClose.addEventListener('click', () => qhavuzCloseCropModal(null));
+  qhavuzCropBackdrop.addEventListener('click', (e) => {
+    if (e.target === qhavuzCropBackdrop) qhavuzCloseCropModal(null);
+  });
+
+  // Tek parmakla/fare ile sürükleyerek kaydırma, iki parmakla yakınlaştırma.
+  (() => {
+    let isPanning = false;
+    let panStartX = 0, panStartY = 0, startPanX = 0, startPanY = 0;
+    let pinchStartDist = 0, pinchStartScale = 1;
+
+    const touchDist = (t0, t1) => Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+
+    qhavuzCropViewport.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        isPanning = true;
+        panStartX = e.touches[0].clientX;
+        panStartY = e.touches[0].clientY;
+        startPanX = qhavuzCropPanX;
+        startPanY = qhavuzCropPanY;
+      } else if (e.touches.length === 2) {
+        isPanning = false;
+        pinchStartDist = touchDist(e.touches[0], e.touches[1]);
+        pinchStartScale = qhavuzCropScale;
+      }
+    }, { passive: true });
+
+    qhavuzCropViewport.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const newDist = touchDist(e.touches[0], e.touches[1]);
+        if (pinchStartDist > 0) {
+          qhavuzCropSetScale(pinchStartScale * (newDist / pinchStartDist));
+        }
+      } else if (e.touches.length === 1 && isPanning) {
+        e.preventDefault();
+        qhavuzCropPanX = startPanX + (e.touches[0].clientX - panStartX);
+        qhavuzCropPanY = startPanY + (e.touches[0].clientY - panStartY);
+        qhavuzCropApply();
+      }
+    }, { passive: false });
+
+    const endTouch = () => { isPanning = false; pinchStartDist = 0; };
+    qhavuzCropViewport.addEventListener('touchend', endTouch);
+    qhavuzCropViewport.addEventListener('touchcancel', endTouch);
+
+    // Masaüstü (fare) ile sürükleme desteği.
+    qhavuzCropViewport.addEventListener('mousedown', (e) => {
+      isPanning = true;
+      panStartX = e.clientX;
+      panStartY = e.clientY;
+      startPanX = qhavuzCropPanX;
+      startPanY = qhavuzCropPanY;
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      qhavuzCropPanX = startPanX + (e.clientX - panStartX);
+      qhavuzCropPanY = startPanY + (e.clientY - panStartY);
+      qhavuzCropApply();
+    });
+    window.addEventListener('mouseup', () => { isPanning = false; });
+  })();
+
+  // O an çerçevede görünen kareyi, sabit çözünürlüklü bir canvas'a
+  // çizip JPEG data URL olarak döndürür.
+  const qhavuzRenderCroppedDataUrl = () => {
+    const viewportSize = qhavuzCropViewport.clientWidth || 1;
+    const cropSizeNatural = viewportSize / qhavuzCropScale;
+    const centerNaturalX = (qhavuzCropNaturalW / 2) - (qhavuzCropPanX / qhavuzCropScale);
+    const centerNaturalY = (qhavuzCropNaturalH / 2) - (qhavuzCropPanY / qhavuzCropScale);
+    let sx = centerNaturalX - cropSizeNatural / 2;
+    let sy = centerNaturalY - cropSizeNatural / 2;
+    // Yuvarlama hatalarına karşı emniyet: kaynak dikdörtgen her zaman
+    // görselin sınırları içinde kalsın.
+    sx = Math.min(Math.max(sx, 0), Math.max(0, qhavuzCropNaturalW - cropSizeNatural));
+    sy = Math.min(Math.max(sy, 0), Math.max(0, qhavuzCropNaturalH - cropSizeNatural));
+
+    const outputSize = Math.round(
+      Math.min(QHAVUZ_CROP_OUTPUT_MAX, Math.max(QHAVUZ_CROP_OUTPUT_MIN, cropSizeNatural))
+    );
+    const canvas = document.createElement('canvas');
+    canvas.width = outputSize;
+    canvas.height = outputSize;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(qhavuzCropImg, sx, sy, cropSizeNatural, cropSizeNatural, 0, 0, outputSize, outputSize);
+    return canvas.toDataURL('image/jpeg', 0.9);
+  };
+
+  qhavuzCropConfirm.addEventListener('click', () => {
+    qhavuzCloseCropModal(qhavuzRenderCroppedDataUrl());
+  });
+
   // "+ Görsel Yükle" butonu, görünmez dosya seçiciyi tetikler (galeri
   // veya kamera arasında seçim, tarayıcının/telefonun kendi arayüzüyle
-  // sunulur).
+  // sunulur). Seçilen fotoğraf önce kırpma ekranında karesi alınır,
+  // ardından sıkıştırılıp "Soru Ekle" pop-up'ına önizleme olarak konur.
   qhavuzAddBtn.addEventListener('click', () => qhavuzFileInput.click());
 
   qhavuzFileInput.addEventListener('change', () => {
@@ -19339,24 +19964,29 @@
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async () => {
+      const croppedDataUrl = await qhavuzOpenCropModal(reader.result);
+      if (!croppedDataUrl) {
+        // Kullanıcı kırpmayı iptal etti; aynı dosyayı tekrar seçebilsin
+        // diye input'u sıfırlıyoruz.
+        qhavuzFileInput.value = '';
+        return;
+      }
       const compressed = typeof compressImageDataUrl === 'function'
-        ? await compressImageDataUrl(reader.result)
-        : reader.result;
+        ? await compressImageDataUrl(croppedDataUrl)
+        : croppedDataUrl;
       openQhavuzAddModal(compressed);
     };
     reader.readAsDataURL(file);
   });
 
   qhavuzAddClose.addEventListener('click', closeQhavuzAddModal);
-  qhavuzAddBackdrop.addEventListener('click', (e) => {
-    if (e.target === qhavuzAddBackdrop) closeQhavuzAddModal();
-  });
 
   qhavuzAddConfirm.addEventListener('click', async () => {
     const answerText = qhavuzAddAnswerTextInput.value.trim();
     if (!qhavuzPendingImage || !qhavuzPendingTrack || !qhavuzPendingSubject || !(qhavuzPendingAnswer || answerText)) return;
     const book = qhavuzAddBookInput.value.trim();
     const page = qhavuzAddPageInput.value.trim();
+    const description = qhavuzAddDescInput.value.trim();
     // Ham base64 yerine görsel IndexedDB'ye Blob olarak yazılır; APP_STATE
     // (ve dolayısıyla localStorage) içinde sadece küçük bir referans kalır.
     const imageRef = await storeImageAndGetRef(qhavuzPendingImage);
@@ -19367,6 +19997,7 @@
       subject: qhavuzPendingSubject,
       answer: qhavuzPendingAnswer || null,
       answerText: answerText || null,
+      description: description || null,
       book: book || null,
       page: page || null,
       ts: Date.now()
@@ -19517,6 +20148,8 @@
   // ---- Soru Havuzu: soru görselini büyük gösteren lightbox ----
   const qhavuzLightboxZoom = attachPinchZoomPan(qhavuzLightboxImg);
   const qhavuzLightboxAnswerRow = document.getElementById('qhavuzLightboxAnswerRow');
+  const qhavuzLightboxDesc = document.getElementById('qhavuzLightboxDesc');
+  const qhavuzLightboxDescText = document.getElementById('qhavuzLightboxDescText');
   const qhavuzLightboxSolveBtn = document.getElementById('qhavuzLightboxSolveBtn');
   let qhavuzLightboxItem = null;
 
@@ -19526,13 +20159,30 @@
     qhavuzLightboxSolveBtn.setAttribute('aria-pressed', String(isSolved));
   };
 
+  // "Soru Ekle" ekranında girilen açıklama varsa lightbox'ta şık/cevap
+  // şeridinin altında ayrı bir şerit olarak gösterilir; girilmemişse
+  // şerit tamamen gizlenir (boş bir başlık göstermemek için).
+  const renderQhavuzLightboxDesc = (item) => {
+    const description = item && item.description ? item.description.trim() : '';
+    if (!description) {
+      qhavuzLightboxDesc.classList.add('is-hidden');
+      qhavuzLightboxDescText.textContent = '';
+      return;
+    }
+    qhavuzLightboxDescText.textContent = description;
+    qhavuzLightboxDesc.classList.remove('is-hidden');
+  };
+
   const renderQhavuzLightboxAnswers = (item) => {
     qhavuzLightboxAnswerRow.innerHTML = '';
 
     // Açık uçlu (yazılı cevaplı, şıksız) sorularda şık ızgarası yerine
-    // girilen cevap metni gösterilir. Düzenleme modundayken bu metin
-    // tıklanıp yerinde değiştirilebilir; kapalıyken sadece salt-okunur
-    // bir etiket olarak durur.
+    // girilen cevap metni gösterilir. Düzenleme modundayken (Soru
+    // Havuzu grid'indeki genel düzenleme modu YA DA bu sayfadaki kalem
+    // butonu) bu metin tıklanıp yerinde değiştirilebilir; kapalıyken
+    // sadece salt-okunur bir etiket olarak durur.
+    const canEditAnswer = qhavuzEditMode || qhavuzDetailEditMode;
+
     if (!item.answer && item.answerText) {
       const wrap = document.createElement('div');
       wrap.className = 'qhavuz-lightbox-open-answer';
@@ -19542,7 +20192,7 @@
       label.textContent = 'Cevap:';
       wrap.appendChild(label);
 
-      if (qhavuzEditMode) {
+      if (canEditAnswer) {
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'page9-add-custom-input qhavuz-lightbox-open-answer-input';
@@ -19584,7 +20234,7 @@
 
       // Düzenleme modu aktifken şıklar tıklanabilir olur; kapalıyken
       // sadece mevcut doğru cevabı gösteren pasif bir gösterge kalır.
-      if (qhavuzEditMode) {
+      if (canEditAnswer) {
         btn.classList.add('is-editable');
         btn.addEventListener('click', () => {
           if (item.answer === letter) return;
@@ -19601,20 +20251,45 @@
     });
   };
 
+  // ---- Soru Havuzu: detay sayfasında cevabı düzenleme (kalem butonu) ----
+  // Soru Havuzu grid'indeki genel düzenleme modundan bağımsız, sadece bu
+  // sayfaya özel bir anahtar; her soru açılışında sıfırlanır ki bir
+  // önceki soruda açık kalmış düzenleme yanlışlıkla yeni soruya taşınmasın.
+  let qhavuzDetailEditMode = false;
+  const qhavuzDetailEditBtn = document.getElementById('qhavuzDetailEditBtn');
+
+  const setQhavuzDetailEditMode = (on) => {
+    qhavuzDetailEditMode = on;
+    qhavuzDetailEditBtn.classList.toggle('is-active', on);
+    qhavuzDetailEditBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    qhavuzDetailEditBtn.setAttribute('aria-label', on ? 'Düzenlemeyi bitir' : 'Cevabı düzenle');
+    if (qhavuzLightboxItem) renderQhavuzLightboxAnswers(qhavuzLightboxItem);
+  };
+
+  qhavuzDetailEditBtn.addEventListener('click', () => setQhavuzDetailEditMode(!qhavuzDetailEditMode));
+
   const openQhavuzLightbox = (item) => {
     qhavuzLightboxZoom.reset();
     qhavuzLightboxItem = item;
     qhavuzLightboxImg.src = '';
     resolveImageSrc(item.image).then((url) => { qhavuzLightboxImg.src = url; });
     qhavuzSyncLightboxSolveBtn();
-    renderQhavuzLightboxAnswers(item);
+    renderQhavuzLightboxDesc(item);
+    // setQhavuzDetailEditMode(false) zaten renderQhavuzLightboxAnswers'ı
+    // çağırıp şıkları/cevap alanını çizer; ayrıca tekrar çağırmaya gerek yok.
+    setQhavuzDetailEditMode(false);
 
-    qhavuzLightboxBackdrop.classList.add('is-open');
+    // Artık pop-up değil; Soru Havuzu'ndan (page-camera) ayrı, tam
+    // ekran bir sayfaya (page-qhavuz-detail) geçiyoruz; "Soru Ekle"
+    // sayfasıyla aynı desen (nav bar da aynı şekilde gizlenir).
+    document.body.classList.add('is-qhavuz-detail-open');
+    goToPage('page-qhavuz-detail');
   };
 
-  // Lightbox'taki yuvarlak checkbox, sorunun görselini açmadan doğrudan
-  // "manuel olarak çözüldü" durumunu değiştirir; test modundan bağımsız
-  // olarak kart üzerindeki yeşil tik rozetini de günceller.
+  // Detay sayfasındaki yuvarlak checkbox, sorunun görselini açmadan
+  // doğrudan "manuel olarak çözüldü" durumunu değiştirir; test
+  // modundan bağımsız olarak kart üzerindeki yeşil tik rozetini de
+  // günceller.
   qhavuzLightboxSolveBtn.addEventListener('click', () => {
     if (!qhavuzLightboxItem) return;
     qhavuzLightboxItem.solved = !qhavuzLightboxItem.solved;
@@ -19624,14 +20299,12 @@
   });
 
   const closeQhavuzLightbox = () => {
-    qhavuzLightboxBackdrop.classList.remove('is-open');
     qhavuzLightboxZoom.reset();
+    document.body.classList.remove('is-qhavuz-detail-open');
+    goToPage(QHAVUZ_DETAIL_RETURN_PAGE);
   };
 
-  qhavuzLightboxClose.addEventListener('click', closeQhavuzLightbox);
-  qhavuzLightboxBackdrop.addEventListener('click', (e) => {
-    if (e.target === qhavuzLightboxBackdrop) closeQhavuzLightbox();
-  });
+  qhavuzDetailBack.addEventListener('click', closeQhavuzLightbox);
 
   // Lightbox içinden doğru cevabı değiştirmek veya "çözüldü" durumunu
   // işaretlemek her seferinde tüm ızgarayı (tüm görseller dahil) baştan
