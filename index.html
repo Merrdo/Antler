@@ -20304,6 +20304,30 @@
       if (!el) return;
       const tag = el.tagName;
       if (tag !== 'INPUT' && tag !== 'TEXTAREA') return;
+
+      // Sadece gerçekten kaydırılabilir bir üst kapsayıcı varsa (ör.
+      // .settings-scroll gibi overflow-y:auto olan ve taşan bir alan)
+      // scrollIntoView çağırıyoruz. "İsim gir" gibi ekranın ortasında
+      // sabit duran (position:fixed) pop-up'ların içindeki inputlarda
+      // kaydırılacak gerçek bir alan yok; buna rağmen scrollIntoView
+      // çağrılırsa tarayıcı (özellikle iOS Safari) kaydırmayı sayfa/
+      // pencere seviyesinde yapmaya çalışıyor ve klavye kapandığında bunu
+      // tam geri almayıp altta bir taşma/boşluk bırakabiliyor.
+      let node = el.parentElement;
+      let scrollableAncestor = null;
+      while (node && node !== document.body) {
+        const style = window.getComputedStyle(node);
+        if (
+          (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+          node.scrollHeight > node.clientHeight
+        ) {
+          scrollableAncestor = node;
+          break;
+        }
+        node = node.parentElement;
+      }
+      if (!scrollableAncestor) return;
+
       el.scrollIntoView({ block: 'center', behavior: 'smooth' });
     };
 
@@ -20314,6 +20338,14 @@
         // Yükseklik belirgin şekilde küçüldüyse klavye açılmış demektir.
         if (vv.height < lastHeight - 80) {
           setTimeout(scrollFocusedIntoView, 60);
+        } else if (vv.height > lastHeight + 80) {
+          // Yükseklik belirgin şekilde büyüdüyse klavye kapanmış demektir.
+          // iOS Safari bazen sayfayı eski konumuna tam geri kaydırmıyor ve
+          // altta boş bir şerit / taşma bırakıyor; emniyet için kaydırma
+          // konumunu sıfırlıyoruz.
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
         }
         lastHeight = vv.height;
       });
