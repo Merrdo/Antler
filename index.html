@@ -12191,6 +12191,80 @@
 </script>
 
 <script>
+  // ---------- Pop-up'lar açıkken üst/alt güvenli alanın da solması ----------
+  // Bir pop-up açıldığında arka planı rgba(18,18,28,0.55) + blur(2px) bir
+  // overlay ile karartıyoruz, ama bu overlay yalnızca web içeriğini kaplar;
+  // çentik/Dynamic Island ve alt home-indicator şeridi tarayıcı tarafından
+  // AYRICA <meta name="theme-color"> rengiyle boyanır (yukarıdaki tema
+  // script'inde açıklandığı gibi). Bu yüzden pop-up açıkken o şerit
+  // karartılmadan parlak/asıl tema rengiyle kalıyor ve bütünlük bozuluyordu.
+  // Çözüm: sayfadaki tüm pop-up backdrop'larını izleyip, en az biri
+  // "is-open" olduğunda theme-color meta'sını da overlay ile aynı
+  // (rgba(18,18,28,0.55) karıştırılmış) karartılmış renge, hiçbiri açık
+  // değilken asıl tema rengine geri çeviriyoruz. Böylece güvenli alan da
+  // pop-up'ın arkasındaki içerikle aynı anda ve aynı tona soluklaşır.
+  (function () {
+    const OVERLAY_RGB = [18, 18, 28];
+    const OVERLAY_ALPHA = 0.55;
+
+    const hexToRgb = (hex) => {
+      const clean = hex.replace('#', '');
+      const full = clean.length === 3
+        ? clean.split('').map((c) => c + c).join('')
+        : clean;
+      const num = parseInt(full, 16);
+      return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+    };
+
+    const rgbToHex = ([r, g, b]) =>
+      '#' + [r, g, b]
+        .map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0'))
+        .join('');
+
+    // Overlay'in kendi CSS'iyle (rgba(18,18,28,0.55) üstte) birebir aynı
+    // "normal" alpha-blend formülü.
+    const blendWithOverlay = (baseHex) => {
+      const [br, bg, bb] = hexToRgb(baseHex);
+      const [or_, og, ob] = OVERLAY_RGB;
+      const mix = (base, overlay) => overlay * OVERLAY_ALPHA + base * (1 - OVERLAY_ALPHA);
+      return rgbToHex([mix(br, or_), mix(bg, og), mix(bb, ob)]);
+    };
+
+    // O an aktif olan (karartılmamış) asıl tema rengi; themes/themeIndex
+    // bir önceki <script> bloğunda tanımlı ve aynı global kapsamda.
+    const getBaseThemeColor = () =>
+      (typeof themes !== 'undefined' && typeof themeIndex === 'number' && themes[themeIndex])
+        ? themes[themeIndex].color
+        : (themeColorMeta ? themeColorMeta.getAttribute('content') : '#272727');
+
+    // Uygulamadaki tüm pop-up backdrop'ları bu 4 temel sınıftan birini
+    // kullanıyor (bkz. .wheel-color-backdrop / .page9-add-backdrop /
+    // .settings-confirm-backdrop / .qhavuz-lightbox-backdrop) ve hepsi
+    // açılışta kendine "is-open" sınıfı ekliyor.
+    const BACKDROP_BASE_SELECTOR =
+      '.wheel-color-backdrop, .page9-add-backdrop, .settings-confirm-backdrop, .qhavuz-lightbox-backdrop';
+    const OPEN_BACKDROP_SELECTOR = BACKDROP_BASE_SELECTOR
+      .split(', ')
+      .map((sel) => sel + '.is-open')
+      .join(', ');
+
+    const refreshSafeAreaDim = () => {
+      if (!themeColorMeta) return;
+      const anyOpen = document.querySelector(OPEN_BACKDROP_SELECTOR);
+      const base = getBaseThemeColor();
+      themeColorMeta.setAttribute('content', anyOpen ? blendWithOverlay(base) : base);
+    };
+
+    document.querySelectorAll(BACKDROP_BASE_SELECTOR).forEach((el) => {
+      new MutationObserver(refreshSafeAreaDim).observe(el, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    });
+  })();
+</script>
+
+<script>
   // Ortak tema yardımcı fonksiyonları: Ayarlar sayfasındaki mini tema
   // seçici ve Desenler alt sayfasındaki önizlemeler tarafından kullanılır.
 
