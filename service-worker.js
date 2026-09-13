@@ -1,11 +1,11 @@
-// Takvimim - Service Worker
+// Pace - Service Worker
 // Uygulamayı "Ana Ekrana Ekle" ile açıldığında çevrimdışı da çalışır hale
 // getirir. Statik ikon/manifest dosyaları cache-first sunulur; HTML sayfası
 // ise network-first sunulur (bkz. aşağıdaki not) böylece index.html'e
 // yapılan güncellemeler CACHE_VERSION hiç değişmese bile bir sonraki
 // açılışta görünür.
 
-const CACHE_VERSION = 'takvimim-v1';
+const CACHE_VERSION = 'pace-v1';
 const CORE_ASSETS = [
   './manifest.json',
   './icons/favicon.ico',

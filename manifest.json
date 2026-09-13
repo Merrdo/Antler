@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Takvimim",
-  "short_name": "Takvimim",
+  "name": "Pace",
+  "short_name": "Pace",
   "description": "Takvim, yapılacaklar listesi, karar çarkı ve kronometre bir arada.",
   "start_url": "./index.html",
   "scope": "./",
