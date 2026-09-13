@@ -5,7 +5,7 @@
 // yapılan güncellemeler CACHE_VERSION hiç değişmese bile bir sonraki
 // açılışta görünür.
 
-const CACHE_VERSION = 'pace-v3';
+const CACHE_VERSION = 'pace-v4';
 const CORE_ASSETS = [
   './manifest.json',
   './icons/favicon.ico',
