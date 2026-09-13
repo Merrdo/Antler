@@ -4,8 +4,14 @@
 // ise network-first sunulur (bkz. aşağıdaki not) böylece index.html'e
 // yapılan güncellemeler CACHE_VERSION hiç değişmese bile bir sonraki
 // açılışta görünür.
+//
+// NOT: CACHE_VERSION bilerek 'pace-v5' yapıldı (önceki: pace-v4). manifest.json
+// ve ikon dosyaları (icon-192-any.png, icon-512-any.png, icon-192-maskable.png,
+// icon-512-maskable.png) değiştiği için, versiyon numarası artmazsa tarayıcı
+// eski cache'teki (artık var olmayan beyaz kutulu) ikonları göstermeye devam
+// eder. Her ikon/manifest güncellemesinde bu numarayı bir artırmayı unutmayın.
 
-const CACHE_VERSION = 'pace-v4';
+const CACHE_VERSION = 'pace-v5';
 const CORE_ASSETS = [
   './manifest.json',
   './icons/favicon.ico',
@@ -13,8 +19,10 @@ const CORE_ASSETS = [
   './icons/favicon-32.png',
   './icons/favicon-48.png',
   './icons/apple-touch-icon.png',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
+  './icons/icon-192-any.png',
+  './icons/icon-512-any.png',
+  './icons/icon-192-maskable.png',
+  './icons/icon-512-maskable.png',
   './icons/splash/splash-1290x2796-iphone-15-14pro-max.png',
   './icons/splash/splash-1179x2556-iphone-15-14pro.png',
   './icons/splash/splash-1284x2778-iphone-13-14-promax.png',
