@@ -9,6 +9,31 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#272727">
 
+<!-- Splash ekranının arka plan rengini, sabit antresit tonu yerine
+     kullanıcının daha önce seçtiği tema rengiyle boyamak için mümkün
+     olan en erken noktada (henüz hiçbir şey çizilmeden) çalışır.
+     "themes" dizisiyle (bkz. tema değiştirme script'i) aynı sıradaki
+     renkleri burada küçük bir kopya olarak tutuyoruz; çünkü asıl "themes"
+     dizisi çok daha aşağıda tanımlanıyor ve o zamana kadar splash zaten
+     ekranda görünmüş olur. -->
+<script>
+  (function () {
+    try {
+      var SPLASH_THEME_COLORS = ['#272727', '#121212', '#000000', '#f2e8d5', '#F6F4EF', '#A8D8FF', '#2B2F4A'];
+      var raw = localStorage.getItem('takvimim_app_state_v1');
+      var idx = raw ? JSON.parse(raw).theme : 0;
+      var color = (typeof idx === 'number' && SPLASH_THEME_COLORS[idx]) ? SPLASH_THEME_COLORS[idx] : SPLASH_THEME_COLORS[0];
+      document.documentElement.style.setProperty('--splash-bg', color);
+      // Üst güvenli alan (çentik/Dynamic Island) şeridi de ilk karede
+      // doğru renkte boyansın diye meta etiketini hemen güncelliyoruz.
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', color);
+    } catch (err) {
+      // localStorage okunamazsa veya kayıt bozuksa varsayılan (antresit) renkte kalınır.
+    }
+  })();
+</script>
+
 <!-- Favicon ve uygulama ikonları -->
 <link rel="icon" href="icons/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
@@ -9732,7 +9757,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #272727;
+    /* Antresit yerine, seçili tema rengi (bkz. </head> içindeki erken
+       script); değişken herhangi bir sebeple ayarlanamazsa antresite düşer. */
+    background: var(--splash-bg, #272727);
     transition: opacity 0.45s ease, visibility 0.45s ease;
   }
   #app-splash-icon {
