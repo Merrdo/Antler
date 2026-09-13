@@ -11835,7 +11835,7 @@
 
 <script>
   // Sayfa 1'deki butona her tıklandığında tema (arka plan + yazı rengi) değişir.
-  // Toplam 5 tema: orijinal (antresit gri), koyu, saf siyah, krem ve fildişi.
+  // Toplam 7 tema: orijinal (antresit gri), koyu, saf siyah, krem, fildişi, bebek mavisi ve lacivert.
   // "Orijinal" artık referans görseldeki antresit (#272727) tonu; uygulama
   // ilk açılışta (daha önce kaydedilmiş bir tema tercihi yoksa) bu renkle açılır.
   const themes = [
@@ -11868,6 +11868,18 @@
       gradient: 'linear-gradient(135deg, #F6F4EF 0%, #F6F4EF 50%, #F6F4EF 100%)',
       color: '#F6F4EF',
       text: '#000000'
+    },
+    {
+      name: 'Bebek Mavisi',
+      gradient: 'linear-gradient(135deg, #A8D8FF 0%, #A8D8FF 50%, #A8D8FF 100%)',
+      color: '#A8D8FF',
+      text: '#000000'
+    },
+    {
+      name: 'Lacivert',
+      gradient: 'linear-gradient(135deg, #2B2F4A 0%, #2B2F4A 50%, #2B2F4A 100%)',
+      color: '#2B2F4A',
+      text: '#f5f5f5'
     }
   ];
 
@@ -11976,8 +11988,13 @@
     getGradientLuminance(gradient) < 0.4 ? '#ffffff' : '#000000';
 
   // Sayfa 1'deki arka planla eşleşen, o an "seçili" olan tema; başlangıçta
-  // themeIndex (0) ile aynı temadır.
-  let selectedSwatchIndex = 0;
+  // gerçekte uygulanmış olan temayla (themeIndex, APP_STATE.theme'den okunur)
+  // aynı olmalı. Daha önce burada sabit olarak 0 kullanılıyordu; bu da
+  // kaydedilmiş tema 0'dan farklıysa (örn. "Krem" kayıtlıyken sayfa yeniden
+  // açıldığında) "seçili" göstergesinin gerçek temayla senkron olmamasına ve
+  // Orijinal'e (index 0) tıklandığında selectTheme'in "zaten seçili" sanıp
+  // hiçbir şey yapmamasına yol açıyordu.
+  let selectedSwatchIndex = themeIndex;
 
   // Tema seçimini duyurur (Ayarlar sayfasındaki mini tema seçici bu kancaya
   // bağlanır); böylece tema Sayfa 1'in butonu veya Ayarlar'dan değiştirilse
