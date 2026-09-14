@@ -3864,6 +3864,14 @@
     overflow: hidden;
   }
 
+  /* "Soru Ekle" pop-up'ı gerçek cihazlarda sağ kenara fazla yakın/kesik
+     görünüyordu; backdrop'un sağ iç boşluğunu sol boşluktan daha geniş
+     tutarak panelin ortalama merkezini hafifçe sola kaydırıyoruz. */
+  #qhavuzAddBackdrop {
+    padding-left: 12px;
+    padding-right: 40px;
+  }
+
   .qhavuz-add-body {
     flex: 1 1 auto;
     min-height: 0;
