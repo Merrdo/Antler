@@ -4103,82 +4103,6 @@
     background-color: var(--qhavuz-chip-color);
   }
 
-  /* Adım 3 (Doğru Cevap) en üstte, o ana kadar seçilenleri hatırlatan
-     küçük bir özet kartı gösterir: kırpılmış soru görseli + sınav
-     türü/ders rozeti. Hem adımı boş göstermemesi hem de kullanıcının
-     "hangi soru için işaretliyordum" diye geri dönmesine gerek
-     kalmaması için eklendi. */
-  .qhavuz-add-answer-summary {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    padding: 0.5rem;
-    margin-bottom: 1.1rem;
-    background: #f2f2f2;
-    border: 2.5px solid #000;
-    border-radius: 0.8rem;
-  }
-
-  .qhavuz-add-answer-summary-thumb {
-    flex: 0 0 auto;
-    width: 3.4rem;
-    height: 3.4rem;
-    border-radius: 0.55rem;
-    overflow: hidden;
-    border: 2px solid #000;
-    background: #fff;
-  }
-
-  .qhavuz-add-answer-summary-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .qhavuz-add-answer-summary-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    min-width: 0;
-  }
-
-  .qhavuz-add-answer-summary-label {
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 700;
-    font-size: 0.66rem;
-    color: #121212;
-    opacity: 0.5;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-
-  .qhavuz-add-answer-summary-chip {
-    --qh-summary-color: #ff90e8;
-    display: inline-flex;
-    align-self: flex-start;
-    max-width: 100%;
-    padding: 0.22rem 0.55rem;
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 800;
-    font-size: 0.78rem;
-    color: #121212;
-    background-color: var(--qh-summary-color);
-    border: 2px solid #000;
-    border-radius: 0.5rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* Şık/yazılı cevap alanlarının altındaki kısa ipucu satırı; kırpma
-     adımındaki ipucuyla (.qhavuz-crop-hint) aynı sessiz üslubu
-     paylaşır, sadece burada sola hizalı ve biraz daha boşluklu. */
-  .qhavuz-add-answer-hint {
-    text-align: left;
-    margin: 0.7rem 0 0;
-  }
-
   .qhavuz-add-answer-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -4258,27 +4182,6 @@
   body.is-anthracite .qhavuz-add-subject-chip.is-selected {
     background-color: var(--qhavuz-chip-color);
     color: #121212;
-  }
-
-  body.is-anthracite .qhavuz-add-answer-summary {
-    background: #2a2c2f;
-  }
-
-  body.is-anthracite .qhavuz-add-answer-summary-thumb {
-    background: #1f2124;
-    border-color: #000;
-  }
-
-  body.is-anthracite .qhavuz-add-answer-summary-label {
-    color: #f2f2f4;
-  }
-
-  body.is-anthracite .qhavuz-add-answer-summary-chip {
-    color: #121212;
-  }
-
-  body.is-anthracite .qhavuz-add-answer-hint {
-    color: #f2f2f4;
   }
 
   body.is-anthracite .qhavuz-add-answer-btn {
@@ -11696,16 +11599,6 @@
 
     <!-- Adım 3: Doğru cevap -->
     <div class="qhavuz-add-step is-hidden" id="qhavuzStepAnswer">
-      <div class="qhavuz-add-answer-summary" id="qhavuzAnswerSummary">
-        <div class="qhavuz-add-answer-summary-thumb">
-          <img id="qhavuzAnswerSummaryImg" alt="Soru önizleme">
-        </div>
-        <div class="qhavuz-add-answer-summary-info">
-          <span class="qhavuz-add-answer-summary-label">Bu Soru İçin</span>
-          <span class="qhavuz-add-answer-summary-chip" id="qhavuzAnswerSummaryChip">Ders seçilmedi</span>
-        </div>
-      </div>
-
       <span class="qhavuz-add-label">Cevap Türü</span>
       <div class="settings-segmented page9-segmented qhavuz-answer-type-segmented" id="qhavuzAnswerTypeSegmented">
         <div class="settings-segmented-slider" id="qhavuzAnswerTypeSlider"></div>
@@ -11716,13 +11609,11 @@
       <div class="qhavuz-add-answer-mode" id="qhavuzAnswerModeChoice">
         <span class="qhavuz-add-label">Doğru Cevap</span>
         <div class="qhavuz-add-answer-grid" id="qhavuzAddAnswerGrid"></div>
-        <span class="qhavuz-crop-hint qhavuz-add-answer-hint">İşaretlediğin şık, test modunda öğrenciye yeşille gösterilecek.</span>
       </div>
 
       <div class="qhavuz-add-answer-mode is-hidden" id="qhavuzAnswerModeOpen">
         <span class="qhavuz-add-label">Yazılı Cevap</span>
         <input type="text" class="page9-add-custom-input qhavuz-add-answer-text-input" id="qhavuzAddAnswerTextInput" placeholder="Cevabı yaz..." maxlength="120">
-        <span class="qhavuz-crop-hint qhavuz-add-answer-hint">Kısa ve net yaz; öğrencinin cevabı bununla karşılaştırılır.</span>
       </div>
     </div>
 
@@ -19705,8 +19596,6 @@
   const qhavuzAddTrackGrid = document.getElementById('qhavuzAddTrackGrid');
   const qhavuzAddSubjectGrid = document.getElementById('qhavuzAddSubjectGrid');
   const qhavuzAddAnswerGrid = document.getElementById('qhavuzAddAnswerGrid');
-  const qhavuzAnswerSummaryImg = document.getElementById('qhavuzAnswerSummaryImg');
-  const qhavuzAnswerSummaryChip = document.getElementById('qhavuzAnswerSummaryChip');
   const qhavuzAddAnswerTextInput = document.getElementById('qhavuzAddAnswerTextInput');
   const qhavuzAnswerTypeSegmented = document.getElementById('qhavuzAnswerTypeSegmented');
   const qhavuzAnswerTypeSlider = document.getElementById('qhavuzAnswerTypeSlider');
@@ -19765,32 +19654,12 @@
     });
   });
 
-  // Adım 3'ün tepesindeki küçük özet kartını (görsel + ders rozeti)
-  // o ana kadar seçilenlere göre günceller. Kırpılmış görsel henüz
-  // hazır değilse (ör. kullanıcı Geri ile adım 1'e dönüp tekrar ileri
-  // gitmeden bu adım senkronize olduysa) ham görsele düşer, böylece
-  // kutu hiçbir zaman boş kalmaz.
-  const updateQhavuzAnswerSummary = () => {
-    if (!qhavuzAnswerSummaryImg || !qhavuzAnswerSummaryChip) return;
-    const src = qhavuzPendingImage || qhavuzRawImage;
-    if (src) qhavuzAnswerSummaryImg.src = src;
-    if (qhavuzPendingSubject) {
-      const trackLabel = qhavuzPendingTrack ? PAGE9_TRACK_LABELS[qhavuzPendingTrack] : '';
-      qhavuzAnswerSummaryChip.textContent = trackLabel ? `${trackLabel} · ${qhavuzPendingSubject}` : qhavuzPendingSubject;
-      qhavuzAnswerSummaryChip.style.setProperty('--qh-summary-color', qhavuzSubjectColor(qhavuzPendingSubject));
-    } else {
-      qhavuzAnswerSummaryChip.textContent = 'Ders seçilmedi';
-      qhavuzAnswerSummaryChip.style.setProperty('--qh-summary-color', '#f2f2f2');
-    }
-  };
-
   const qhavuzAddSyncNav = () => {
     qhavuzAddSteps.forEach((el, i) => el.classList.toggle('is-hidden', i !== qhavuzAddStep));
     qhavuzAddStepDots.forEach((dot, i) => {
       dot.classList.toggle('is-active', i === qhavuzAddStep);
       dot.classList.toggle('is-done', i < qhavuzAddStep);
     });
-    if (qhavuzAddStep === 2) updateQhavuzAnswerSummary();
     qhavuzAddStepSubtitle.textContent = QHAVUZ_STEP_SUBTITLES[qhavuzAddStep];
     qhavuzAddBack.classList.toggle('is-hidden', qhavuzAddStep === 0);
     qhavuzAddConfirm.textContent = QHAVUZ_STEP_LABELS[qhavuzAddStep];
