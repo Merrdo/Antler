@@ -3969,6 +3969,10 @@
     flex: 0 0 auto;
   }
 
+  .qhavuz-add-nav .qhavuz-add-back.is-hidden {
+    display: none;
+  }
+
   .qhavuz-add-nav .page9-add-confirm {
     flex: 1 1 auto;
     margin-top: 0;
@@ -12463,6 +12467,44 @@
     if (themeColorMeta) themeColorMeta.setAttribute('content', hex);
   };
 
+  // ---------- Pop-up backdrop'ları açıkken üst güvenli alanı da boya ----------
+  // "Soru Ekle" gibi pop-up'lar (.page9-add-backdrop) açıldığında arka planı
+  // koyu/blur'lu bir katmanla (rgba(18,18,28,0.55)) örtüyor; ama üstteki
+  // çentik/Dynamic Island şeridi sadece <meta name="theme-color"> rengine
+  // göre boyandığı için hâlâ eski (aktif temanın) rengiyle kalıp, blur'lanmış
+  // arka planla uyumsuz duruyordu. Backdrop'un kendi tonunu o an aktif tema
+  // rengiyle harmanlayıp üst şeride de uyguluyoruz; pop-up kapanınca (ya da
+  // hiç açık backdrop kalmayınca) şerit eski tema rengine geri dönüyor.
+  const BACKDROP_TINT = { r: 18, g: 18, b: 28, alpha: 0.55 };
+  const blendWithBackdropTint = (hex) => {
+    const clean = hex.replace('#', '');
+    const r = parseInt(clean.substring(0, 2), 16);
+    const g = parseInt(clean.substring(2, 4), 16);
+    const b = parseInt(clean.substring(4, 6), 16);
+    const mix = (base, overlay) => Math.round(overlay * BACKDROP_TINT.alpha + base * (1 - BACKDROP_TINT.alpha));
+    const toHex = (n) => n.toString(16).padStart(2, '0');
+    return `#${toHex(mix(r, BACKDROP_TINT.r))}${toHex(mix(g, BACKDROP_TINT.g))}${toHex(mix(b, BACKDROP_TINT.b))}`;
+  };
+
+  const openThemeBackdrops = new Set();
+  const refreshThemeColorMeta = () => {
+    const baseColor = themes[themeIndex].color;
+    updateThemeColorMeta(openThemeBackdrops.size > 0 ? blendWithBackdropTint(baseColor) : baseColor);
+  };
+
+  const watchBackdropForThemeColor = (backdrop) => {
+    if (!backdrop || backdrop.dataset.themeColorWatched) return;
+    backdrop.dataset.themeColorWatched = '1';
+    const observer = new MutationObserver(() => {
+      const isOpen = backdrop.classList.contains('is-open');
+      if (isOpen) openThemeBackdrops.add(backdrop);
+      else openThemeBackdrops.delete(backdrop);
+      refreshThemeColorMeta();
+    });
+    observer.observe(backdrop, { attributes: true, attributeFilter: ['class'] });
+  };
+  document.querySelectorAll('.page9-add-backdrop').forEach(watchBackdropForThemeColor);
+
   const layerA = document.getElementById('themeLayerA');
   const layerB = document.getElementById('themeLayerB');
   // Daha önce seçilmiş bir tema kaydedilmişse (localStorage), uygulama onunla açılır.
@@ -12473,7 +12515,7 @@
 
   layerA.style.background = themes[themeIndex].gradient;
   document.documentElement.style.setProperty('--theme-text', themes[themeIndex].text);
-  updateThemeColorMeta(themes[themeIndex].color);
+  refreshThemeColorMeta();
 
   const applyNextTheme = () => {
     themeIndex = (themeIndex + 1) % themes.length;
@@ -12484,7 +12526,7 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
-    updateThemeColorMeta(theme.color);
+    refreshThemeColorMeta();
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
@@ -12515,7 +12557,7 @@
     visibleLayer.classList.remove('is-visible');
 
     document.documentElement.style.setProperty('--theme-text', theme.text);
-    updateThemeColorMeta(theme.color);
+    refreshThemeColorMeta();
 
     const temp = visibleLayer;
     visibleLayer = hiddenLayer;
