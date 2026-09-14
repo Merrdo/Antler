@@ -19888,10 +19888,7 @@
   const openQhavuzAddModal = (imageDataUrl) => {
     qhavuzRawImage = imageDataUrl;
     qhavuzPendingImage = null;
-    // Ders listesi "önce sınav türünü seç" boş durumuyla açılmasın diye
-    // sınav türü baştan TYT olarak varsayılıyor; kullanıcı isterse AYT'ye
-    // geçebilir, ama Ders grid'i modal açılır açılmaz dolu görünüyor.
-    qhavuzPendingTrack = 'tyt';
+    qhavuzPendingTrack = null;
     qhavuzPendingSubject = null;
     qhavuzPendingAnswer = null;
     qhavuzAddStep = 0;
