@@ -3176,25 +3176,29 @@
      Sayfa 11 ile aynı üstte hizalı, kaydırmalı düzen. Yüklenen her
      görsel; branş ve doğru cevap şıkkıyla birlikte 2 sütunlu bir kart
      ızgarasında birikir. */
-  /* Başlık (.qhavuz-header, kesim çizgisi dahil) artık Ayarlar
-     sayfasındaki (#page-settings) gibi sabit duruyor: sayfa kendisi
-     kaymıyor (overflow:hidden), yalnızca başlığın altındaki
-     .qhavuz-scroll kutusu kayıyor. */
   #page-camera {
-    flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
-    padding: 0;
-    overflow: hidden;
+    padding-top: calc(48px + env(safe-area-inset-top));
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  #page-camera::-webkit-scrollbar {
+    display: none;
   }
 
   .qhavuz-wrap {
     width: 100%;
     max-width: 380px;
-    height: 100%;
-    min-height: 0;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
+    gap: 1rem;
   }
 
   .qhavuz-header {
@@ -3202,9 +3206,6 @@
     flex-direction: column;
     gap: 0.6rem;
     width: 100%;
-    flex: 0 0 auto;
-    box-sizing: border-box;
-    padding: calc(48px + env(safe-area-inset-top)) 24px 0.4rem;
   }
 
   /* Başlık artık Ayarlar sayfasındaki (.settings-title) ile birebir aynı
@@ -3288,29 +3289,6 @@
     opacity: 1;
     color: #000;
     background-color: var(--accent-color, #ff90e8);
-  }
-
-  /* Başlığın altındaki her şey (yükle/test butonları, filtre çubuğu,
-     kart ızgarası) burada kayar; .settings-scroll ile aynı desen. */
-  .qhavuz-scroll {
-    width: 100%;
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    box-sizing: border-box;
-    padding: 0.6rem 24px calc(96px + env(safe-area-inset-bottom));
-  }
-
-  .qhavuz-scroll::-webkit-scrollbar {
-    display: none;
   }
 
   .qhavuz-add-btn {
@@ -3458,51 +3436,40 @@
     overflow: hidden;
   }
 
-  /* Sınav türü (TYT/AYT) etiketi: eskiden görselin köşesinde çaprazlama
-     duran bir "corner ribbon" iken, artık çok daha sade, küçük bir
-     kapsül (pill) rozete dönüştürüldü. Buzlu-cam (frosted glass) etkili,
-     yarı saydam koyu bir zemin üzerinde, sadece rengi TYT/AYT'ye göre
-     değişen küçük bir nokta ile metinden oluşuyor; silme butonuyla
-     çakışmaması için görselin sol üst köşesine yerleşiyor. */
-  .qhavuz-card-track-badge {
+  /* Sınav türü (TYT/AYT) etiketi: görselin sağ üst köşesinde, klasik
+     "corner ribbon" tekniğiyle çaprazlamasına duran bir şerit. Şeridin
+     sağ/sol uçları .qhavuz-thumb'ın overflow:hidden'ı sayesinde kutunun
+     dışına taşmadan kırpılıyor, böylece köşeye "yapıştırılmış" bir etiket
+     görünümü oluşuyor. */
+  .qhavuz-card-track-ribbon {
     position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    background: rgba(18, 18, 18, 0.55);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    border-radius: 999px;
-    padding: 0.22rem 0.5rem 0.22rem 0.4rem;
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 700;
-    font-size: 0.56rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    top: 13px;
+    right: -33px;
+    width: 118px;
+    transform: rotate(45deg);
+    background: #000;
     color: #fff;
+    text-align: center;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    padding: 0.24rem 0;
     z-index: 2;
     pointer-events: none;
   }
 
-  .qhavuz-card-track-badge-dot {
-    width: 0.34rem;
-    height: 0.34rem;
-    border-radius: 50%;
-    background: #fff;
-    flex-shrink: 0;
+  /* TYT/AYT şeritleri artık tek tip siyah değil; sade ve göz yormayan iki
+     ayrı, olgun tonla ayrışıyor. Renkler Sayfa 11 (Denemelerim) TYT/AYT
+     ayrımıyla aynı aileden seçildi (lacivert/mor) ve genel renk paneline
+     (WHEEL_PALETTE) de eklendi, böylece uygulama genelinde tutarlı bir
+     renk dili kuruluyor. */
+  .qhavuz-card-track-ribbon.is-tyt {
+    background: #3f5aa8;
   }
 
-  /* TYT/AYT ayrımı artık zeminde değil, sadece bu küçük noktanın
-     renginde; sade ama Sayfa 11 (Denemelerim) ile aynı renk dilini
-     (lacivert/mor) koruyor. */
-  .qhavuz-card-track-badge.is-tyt .qhavuz-card-track-badge-dot {
-    background: #6c8ce0;
-  }
-
-  .qhavuz-card-track-badge.is-ayt .qhavuz-card-track-badge-dot {
-    background: #b48ce0;
+  .qhavuz-card-track-ribbon.is-ayt {
+    background: #7452a8;
   }
 
   .qhavuz-thumb img {
@@ -11568,25 +11535,23 @@
         </div>
       </div>
 
-      <div class="qhavuz-scroll" id="qhavuzScroll">
-        <div class="qhavuz-actions">
-          <button type="button" class="add-task-btn qhavuz-add-btn" id="qhavuzAddBtn">+ Görsel Yükle</button>
-          <button type="button" class="add-task-btn qhavuz-test-start-btn" id="qhavuzTestBtn">Test Modu</button>
-        </div>
-        <input type="file" accept="image/*" id="qhavuzFileInput" class="qhavuz-file-input">
-
-        <div class="qhavuz-filter-bar" id="qhavuzFilterBar">
-          <div class="settings-segmented qhavuz-filter-track-segmented" id="qhavuzFilterTrackSegmented">
-            <div class="settings-segmented-slider" id="qhavuzFilterTrackSlider"></div>
-            <button type="button" class="settings-segmented-option is-active" data-value="all">Tümü</button>
-            <button type="button" class="settings-segmented-option" data-value="tyt">TYT</button>
-            <button type="button" class="settings-segmented-option" data-value="ayt">AYT</button>
-          </div>
-          <div class="qhavuz-filter-subjects" id="qhavuzFilterSubjects"></div>
-        </div>
-
-        <div class="qhavuz-grid" id="qhavuzGrid"></div>
+      <div class="qhavuz-actions">
+        <button type="button" class="add-task-btn qhavuz-add-btn" id="qhavuzAddBtn">+ Görsel Yükle</button>
+        <button type="button" class="add-task-btn qhavuz-test-start-btn" id="qhavuzTestBtn">Test Modu</button>
       </div>
+      <input type="file" accept="image/*" id="qhavuzFileInput" class="qhavuz-file-input">
+
+      <div class="qhavuz-filter-bar" id="qhavuzFilterBar">
+        <div class="settings-segmented qhavuz-filter-track-segmented" id="qhavuzFilterTrackSegmented">
+          <div class="settings-segmented-slider" id="qhavuzFilterTrackSlider"></div>
+          <button type="button" class="settings-segmented-option is-active" data-value="all">Tümü</button>
+          <button type="button" class="settings-segmented-option" data-value="tyt">TYT</button>
+          <button type="button" class="settings-segmented-option" data-value="ayt">AYT</button>
+        </div>
+        <div class="qhavuz-filter-subjects" id="qhavuzFilterSubjects"></div>
+      </div>
+
+      <div class="qhavuz-grid" id="qhavuzGrid"></div>
     </div>
   </section>
 
@@ -11800,20 +11765,6 @@
     <div class="page9-add-grid" id="qhavuzTestSetupGrid"></div>
 
     <button type="button" class="add-task-btn page9-add-confirm" id="qhavuzTestSetupConfirm" disabled>Testi Başlat</button>
-  </div>
-</div>
-
-<!-- Soru Havuzu: Düzenleme Modu açıkken kart üzerindeki çarpı (×) butonuyla
-     bir soru silinmeye çalışılırsa, geri alınamayan bu işlemden önce
-     sorulan onay pop-up'ı (diğer "Emin misin?" pop-up'larıyla aynı dil). -->
-<div class="settings-confirm-backdrop" id="qhavuzDeleteConfirmBackdrop">
-  <div class="settings-confirm-card">
-    <span class="settings-confirm-title">Emin misin?</span>
-    <span class="settings-confirm-desc">Bu soru kalıcı olarak silinecek.</span>
-    <div class="settings-confirm-actions">
-      <button type="button" class="settings-confirm-cancel" id="qhavuzDeleteConfirmCancel">Vazgeç</button>
-      <button type="button" class="settings-confirm-confirm" id="qhavuzDeleteConfirmConfirm">Evet, sil</button>
-    </div>
   </div>
 </div>
 
@@ -19731,107 +19682,6 @@
 
   const saveQhavuzState = () => saveAppState({ questionPool: qhavuzState });
 
-  // ---- Soru kartına basılı tutunca beliren "Sil" menüsü ----
-  // Sayfa 8'deki basılı tutma balonuyla (.page8-copy-bubble) aynı görsel
-  // stili kullanır; burada kopyalanacak bir metin olmadığı için sadece
-  // tek bir "Sil" seçeneği gösterilir.
-  let qhavuzActionMenuEl = null;
-  let qhavuzActionMenuCloseHandler = null;
-
-  const closeQhavuzActionMenu = () => {
-    if (qhavuzActionMenuEl) {
-      qhavuzActionMenuEl.remove();
-      qhavuzActionMenuEl = null;
-    }
-    if (qhavuzActionMenuCloseHandler) {
-      document.removeEventListener('pointerdown', qhavuzActionMenuCloseHandler, true);
-      window.removeEventListener('scroll', qhavuzActionMenuCloseHandler, true);
-      qhavuzActionMenuCloseHandler = null;
-    }
-  };
-
-  const showQhavuzActionMenu = (anchorEl, onDelete) => {
-    closeQhavuzActionMenu();
-
-    const menu = document.createElement('div');
-    menu.className = 'page8-copy-bubble';
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.type = 'button';
-    deleteBtn.className = 'page8-copy-bubble-item page8-copy-bubble-item-danger';
-    deleteBtn.textContent = 'Sil';
-    deleteBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      closeQhavuzActionMenu();
-      onDelete();
-    });
-    menu.appendChild(deleteBtn);
-
-    document.body.appendChild(menu);
-
-    const rect = anchorEl.getBoundingClientRect();
-    const bubbleRect = menu.getBoundingClientRect();
-    let left = rect.left + rect.width / 2 - bubbleRect.width / 2;
-    left = Math.max(8, Math.min(left, window.innerWidth - bubbleRect.width - 8));
-    let top = rect.top - bubbleRect.height - 10;
-    if (top < 8) top = rect.bottom + 10;
-    menu.style.left = `${left}px`;
-    menu.style.top = `${top}px`;
-
-    requestAnimationFrame(() => menu.classList.add('is-visible'));
-
-    qhavuzActionMenuEl = menu;
-    qhavuzActionMenuCloseHandler = (e) => {
-      if (menu.contains(e.target)) return;
-      closeQhavuzActionMenu();
-    };
-    // Aynı dokunuşla açılıp hemen kapanmasını önlemek için dinleyiciyi
-    // bir sonraki karede ekliyoruz.
-    setTimeout(() => {
-      document.addEventListener('pointerdown', qhavuzActionMenuCloseHandler, true);
-      window.addEventListener('scroll', qhavuzActionMenuCloseHandler, true);
-    }, 0);
-  };
-
-  // ---- Düzenleme Modu açıkken çarpı (×) ile silme onayı ----
-  // Kart üzerinde beliren çarpı butonuna basılınca soru eskiden anında
-  // siliniyordu; artık geri alınamayan bu işlemden önce (diğer "Emin
-  // misin?" pop-up'larıyla aynı dilde) bir onay isteniyor. Onaylanmazsa
-  // hiçbir şey silinmez.
-  const qhavuzDeleteConfirmBackdrop = document.getElementById('qhavuzDeleteConfirmBackdrop');
-  const qhavuzDeleteConfirmCancel = document.getElementById('qhavuzDeleteConfirmCancel');
-  const qhavuzDeleteConfirmConfirm = document.getElementById('qhavuzDeleteConfirmConfirm');
-  let qhavuzPendingDelete = null;
-
-  const closeQhavuzDeleteConfirm = () => {
-    if (qhavuzDeleteConfirmBackdrop) qhavuzDeleteConfirmBackdrop.classList.remove('is-open');
-    qhavuzPendingDelete = null;
-  };
-
-  const openQhavuzDeleteConfirm = (onDelete) => {
-    qhavuzPendingDelete = onDelete;
-    if (qhavuzDeleteConfirmBackdrop) qhavuzDeleteConfirmBackdrop.classList.add('is-open');
-  };
-
-  if (qhavuzDeleteConfirmCancel) qhavuzDeleteConfirmCancel.addEventListener('click', closeQhavuzDeleteConfirm);
-  if (qhavuzDeleteConfirmBackdrop) {
-    qhavuzDeleteConfirmBackdrop.addEventListener('click', (e) => {
-      if (e.target === qhavuzDeleteConfirmBackdrop) closeQhavuzDeleteConfirm();
-    });
-  }
-  if (qhavuzDeleteConfirmConfirm) {
-    qhavuzDeleteConfirmConfirm.addEventListener('click', () => {
-      const onDelete = qhavuzPendingDelete;
-      closeQhavuzDeleteConfirm();
-      if (onDelete) onDelete();
-    });
-  }
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && qhavuzDeleteConfirmBackdrop && qhavuzDeleteConfirmBackdrop.classList.contains('is-open')) {
-      closeQhavuzDeleteConfirm();
-    }
-  });
-
   const qhavuzGrid = document.getElementById('qhavuzGrid');
   const qhavuzEditBtn = document.getElementById('qhavuzEditBtn');
   const qhavuzLightboxBackdrop = document.getElementById('qhavuzLightboxBackdrop');
@@ -20729,18 +20579,14 @@
       thumb.appendChild(img);
       resolveImageSrc(item.image).then((url) => { if (url) img.src = url; });
 
-      // Sınav türü (TYT/AYT) artık çaprazlamasına duran bir köşe
-      // şeridiyle değil, görselin sol üst köşesinde duran küçük, buzlu-cam
-      // etkili bir kapsül (pill) rozetle gösteriliyor; TYT/AYT ayrımı
-      // sadece rozetin içindeki noktanın renginde.
+      // Sınav türü (TYT/AYT) artık alttaki rozette değil, görselin sağ üst
+      // köşesinde çaprazlamasına duran bir "etiket" şeridinde gösteriliyor;
+      // alttaki rozette sadece ders adı kalıyor.
       if (item.track && PAGE9_TRACK_LABELS[item.track]) {
-        const badge = document.createElement('span');
-        badge.className = 'qhavuz-card-track-badge is-' + item.track;
-        const dot = document.createElement('span');
-        dot.className = 'qhavuz-card-track-badge-dot';
-        badge.appendChild(dot);
-        badge.appendChild(document.createTextNode(PAGE9_TRACK_LABELS[item.track]));
-        thumb.appendChild(badge);
+        const ribbon = document.createElement('span');
+        ribbon.className = 'qhavuz-card-track-ribbon is-' + item.track;
+        ribbon.textContent = PAGE9_TRACK_LABELS[item.track];
+        thumb.appendChild(ribbon);
       }
 
       const info = document.createElement('div');
@@ -20756,65 +20602,19 @@
       card.appendChild(thumb);
       card.appendChild(info);
 
-      const deleteQhavuzItem = async () => {
-        await deleteImageRef(item.image);
-        qhavuzState.items = qhavuzState.items.filter((it) => it.id !== item.id);
-        saveQhavuzState();
-        renderQhavuzGrid();
-      };
-
       const delBtn = document.createElement('button');
       delBtn.type = 'button';
       delBtn.className = 'delete-btn qhavuz-card-delete';
       delBtn.setAttribute('aria-label', 'Soruyu sil');
       delBtn.textContent = '×';
-      delBtn.addEventListener('click', () => openQhavuzDeleteConfirm(deleteQhavuzItem));
+      delBtn.addEventListener('click', async () => {
+        await deleteImageRef(item.image);
+        qhavuzState.items = qhavuzState.items.filter((it) => it.id !== item.id);
+        saveQhavuzState();
+        renderQhavuzGrid();
+      });
 
       card.appendChild(delBtn);
-
-      // ---- Basılı tutunca "Sil" menüsü ----
-      // Kalem ikonuyla açılan düzenleme moduna girmeden de, karta basılı
-      // tutularak tek bir soru silinebilsin diye eklendi.
-      let qhavuzPressTimer = null;
-      let qhavuzPressMoved = false;
-      let qhavuzPressTriggered = false;
-      let qhavuzPressStartX = 0;
-      let qhavuzPressStartY = 0;
-      const QHAVUZ_LONG_PRESS_MS = 450;
-      const QHAVUZ_PRESS_MOVE_TOLERANCE = 10;
-
-      const clearQhavuzPressTimer = () => {
-        if (qhavuzPressTimer) { clearTimeout(qhavuzPressTimer); qhavuzPressTimer = null; }
-      };
-
-      card.addEventListener('pointerdown', (e) => {
-        if (e.target.closest('.qhavuz-card-delete')) return;
-        qhavuzPressMoved = false;
-        qhavuzPressTriggered = false;
-        qhavuzPressStartX = e.clientX;
-        qhavuzPressStartY = e.clientY;
-        clearQhavuzPressTimer();
-        qhavuzPressTimer = setTimeout(() => {
-          if (!qhavuzPressMoved) {
-            qhavuzPressTriggered = true;
-            showQhavuzActionMenu(card, deleteQhavuzItem);
-          }
-        }, QHAVUZ_LONG_PRESS_MS);
-      });
-      card.addEventListener('pointermove', (e) => {
-        const dx = e.clientX - qhavuzPressStartX;
-        const dy = e.clientY - qhavuzPressStartY;
-        if (Math.sqrt(dx * dx + dy * dy) > QHAVUZ_PRESS_MOVE_TOLERANCE) {
-          qhavuzPressMoved = true;
-          clearQhavuzPressTimer();
-        }
-      });
-      card.addEventListener('pointerup', clearQhavuzPressTimer);
-      card.addEventListener('pointerleave', clearQhavuzPressTimer);
-      card.addEventListener('pointercancel', clearQhavuzPressTimer);
-      // Tarayıcının kendi bağlam menüsünün (sağ tık / uzun basma menüsü)
-      // araya girmesini engelle; kendi "Sil" balonumuzu gösteriyoruz.
-      card.addEventListener('contextmenu', (e) => e.preventDefault());
 
       let checkEl = null;
       if (item.solved) {
@@ -20828,11 +20628,8 @@
       qhavuzCardEls[item.id] = { card, checkEl };
 
       // Silme butonu haricinde karta dokununca soru görseli büyük açılır.
-      // Basılı tutma menüsü tetiklendiyse (uzun basış), bırakılınca gelen
-      // click olayı görseli açmasın diye burada engelleniyor.
       card.addEventListener('click', (e) => {
         if (e.target.closest('.qhavuz-card-delete')) return;
-        if (qhavuzPressTriggered) { qhavuzPressTriggered = false; return; }
         openQhavuzLightbox(item);
       });
 
