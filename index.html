@@ -3177,18 +3177,99 @@
      görsel; branş ve doğru cevap şıkkıyla birlikte 2 sütunlu bir kart
      ızgarasında birikir. */
   #page-camera {
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
     justify-content: flex-start;
-    padding-top: calc(48px + env(safe-area-inset-top));
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* Ayarlar sayfasındaki gibi: başlık üstte sabit durur, altındaki liste
+     kendi kutusunda kayar ve başlığın alt kenarındaki kesik çizginin
+     hemen altında düzgünce "kesilerek" kaybolur. */
+  .qhavuz-hero {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    padding: calc(28px + env(safe-area-inset-top)) 24px 0.6rem;
+  }
+
+  .qhavuz-hero .qhavuz-title {
+    font-family: "Playfair Display", "Archivo Expanded", "Space Grotesk", serif;
+    font-weight: 800;
+    font-size: clamp(2.1rem, 9.5vw, 2.8rem);
+    letter-spacing: 0.015em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--theme-text, #f2f2f7);
+    transition: color 0.5s ease;
+  }
+
+  /* Başlık ile kayan liste arasındaki ayraç: Ayarlar'daki bilet-kuponu
+     çizgisiyle aynı ruhta ama makas yerine, sağ ucunda küçük bir ikon
+     olarak "Düzenle" butonunu taşıyor. */
+  .qhavuz-tear {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+    padding: 0.3rem 24px 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--theme-text, #000);
+    transition: color 0.5s ease;
+  }
+
+  .qhavuz-tear-line {
+    flex: 1 1 auto;
+    height: 0;
+    border-top: 2.5px dashed currentColor;
+    opacity: 0.4;
+  }
+
+  .qhavuz-tear-edit-btn {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: currentColor;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .qhavuz-tear-edit-btn.is-active {
+    background-color: var(--accent-color, #ff90e8);
+    color: #000;
+  }
+
+  .qhavuz-scroll {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     overflow-y: auto;
-    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    box-sizing: border-box;
+    padding: 1.4rem 24px calc(96px + env(safe-area-inset-bottom));
   }
 
-  #page-camera::-webkit-scrollbar {
+  .qhavuz-scroll::-webkit-scrollbar {
     display: none;
   }
 
@@ -3199,21 +3280,6 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
-  }
-
-  .qhavuz-header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    width: 100%;
-  }
-
-  .qhavuz-header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    width: 100%;
   }
 
   .qhavuz-subtitle {
@@ -3567,6 +3633,31 @@
     touch-action: none;
   }
 
+  /* Soru Havuzu lightbox'ında görseli iki parmakla büyütürken, ölçeklenen
+     içeriğin kendi kutusunun dışına -altındaki cevap şıkları panelinin
+     üzerine- taşıp orada "birleşmesini" engelleyen kırpma çerçevesi.
+     Görselin kendi asıl boyutunu / object-fit hesaplarını değiştirmez
+     (bozulma olmaz); sadece o kutunun sınırının dışına taşan kısmı
+     gizler, tıpkı Test Modu'ndaki kendi çerçeveli görsel kutusu gibi. */
+  .qhavuz-lightbox-img-frame {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    max-height: 80vh;
+  }
+
+  .qhavuz-lightbox-info {
+    position: absolute;
+    top: 0.5rem;
+    right: 5.3rem;
+    z-index: 2;
+  }
+
+  .qhavuz-lightbox-info:hover,
+  .qhavuz-lightbox-info:active {
+    background-color: #f2f2f2;
+  }
+
   .qhavuz-lightbox-close {
     position: absolute;
     top: 0.5rem;
@@ -3632,6 +3723,43 @@
     gap: 0.6rem;
     padding: 0.9rem 1rem 1.1rem;
     background: #fff;
+  }
+
+  /* Düzenleme modunda üstte görünen şıklı/açık uçlu geçiş seçicisi ve
+     altındaki cevap içeriğini dikeyde ortalayarak dizen sarmalayıcı. */
+  .qhavuz-lightbox-answer-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+  }
+
+  .qhavuz-lightbox-answer-content {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .qhavuz-lightbox-answer-mode-segmented {
+    width: 100%;
+    max-width: 220px;
+    height: 36px;
+  }
+
+  .qhavuz-lightbox-answer-mode-segmented .settings-segmented-option {
+    font-size: 0.76rem;
+  }
+
+  body.is-anthracite .qhavuz-lightbox-answer-mode-segmented {
+    background: #2a2c2f;
+  }
+
+  body.is-anthracite .qhavuz-lightbox-answer-mode-segmented .settings-segmented-option:not(.is-active) {
+    color: #f2f2f4;
   }
 
   .qhavuz-lightbox-answer-btn {
@@ -3728,6 +3856,129 @@
     color: #f2f2f4;
   }
 
+  /* ---- Soru Havuzu: lightbox'taki "i" (Bilgi) butonuyla açılan küçük
+       bilgi pop-up'ı. Kendi backdrop'unda, fotoğraf lightbox'ının
+       (z-index 200) ÜZERİNDE durması için daha yüksek bir z-index
+       (260) kullanır; böylece fotoğraf lightbox'ı açıkken üstüne
+       binse de her zaman ön planda kalır ve arkada kaybolmaz. */
+  .qhavuz-info-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 260;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.4rem;
+    background: rgba(12, 12, 16, 0.88);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .qhavuz-info-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .qhavuz-info-card {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    background: #fff;
+    border: 4px solid #000;
+    border-radius: 1.1em;
+    box-shadow: 8px 8px 0px 0px #000;
+    padding: 1.1rem 1.1rem 1.2rem;
+    transform: scale(0.92);
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .qhavuz-info-backdrop.is-open .qhavuz-info-card {
+    transform: scale(1);
+  }
+
+  .qhavuz-info-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2;
+  }
+
+  .qhavuz-info-close:hover,
+  .qhavuz-info-close:active {
+    background-color: #f2f2f2;
+  }
+
+  .qhavuz-info-title {
+    display: block;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #121212;
+    margin: 0 1.9rem 0.75rem 0;
+  }
+
+  .qhavuz-info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.5rem 0;
+    border-top: 2px dashed #d8d8de;
+  }
+
+  .qhavuz-info-row:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .qhavuz-info-row.is-hidden {
+    display: none;
+  }
+
+  .qhavuz-info-label {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.66rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #121212;
+    opacity: 0.5;
+  }
+
+  .qhavuz-info-subject-badge {
+    align-self: flex-start;
+    margin-top: 0.1rem;
+    font-size: 0.78rem;
+  }
+
+  .qhavuz-info-value {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: #121212;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: pre-line;
+  }
+
+  body.is-anthracite .qhavuz-info-card {
+    background: var(--dark-card-color, #32343a);
+  }
+
+  body.is-anthracite .qhavuz-info-title,
+  body.is-anthracite .qhavuz-info-value {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .qhavuz-info-label {
+    color: #f2f2f4;
+    opacity: 0.55;
+  }
+
+  body.is-anthracite .qhavuz-info-row {
+    border-top-color: #46484f;
+  }
+
   /* ---- Soru Havuzu: görsel ekleme pop-up'ı (page9-add-card ile aynı
        zemini paylaşır; burada sadece kendine özgü alanlar tanımlanır) ---- */
   .qhavuz-add-card {
@@ -3736,11 +3987,8 @@
 
   .qhavuz-add-preview {
     width: 100%;
-    max-height: 55vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+    aspect-ratio: 1;
+    overflow: hidden;
     border: 2.5px solid #000;
     border-radius: 0.8rem;
     margin-bottom: 0.9rem;
@@ -3749,8 +3997,153 @@
 
   .qhavuz-add-preview img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
     display: block;
+  }
+
+  /* ---- Soru Havuzu: görsel ekleme öncesi sabit kare çerçeveyle kırpma
+       pop-up'ı. Kart ızgarasındaki kare kadrajla (.qhavuz-thumb,
+       aspect-ratio:1) birebir aynı oranı kullanır; böylece kullanıcının
+       kırparken gördüğü kare ile kayıttan sonra kartta görünen kare her
+       zaman birebir aynıdır, görsele göre asla değişmez. ---- */
+  .qhavuz-crop-card {
+    max-width: 380px;
+  }
+
+  .qhavuz-crop-viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 2.5px solid #000;
+    border-radius: 0.8rem;
+    background: #111;
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .qhavuz-crop-viewport:active {
+    cursor: grabbing;
+  }
+
+  .qhavuz-crop-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    max-width: none;
+    max-height: none;
+    transform-origin: center center;
+    will-change: transform;
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+
+  /* İnce çerçeve, kırpılacak karenin sınırını görsel olarak vurgular
+     (kırpma zaten tüm viewport'u kapsadığı için karartma maskesine
+     gerek yok, sadece kenar çizgisi yeterli). */
+  .qhavuz-crop-frame {
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    border-radius: 0.6rem;
+    pointer-events: none;
+  }
+
+  .qhavuz-crop-zoom-row {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0.9rem 0 0.2rem;
+    color: #121212;
+  }
+
+  .qhavuz-crop-zoom-icon {
+    flex: 0 0 auto;
+    opacity: 0.5;
+  }
+
+  .qhavuz-crop-zoom-icon.is-large {
+    opacity: 0.85;
+  }
+
+  /* Slider'ı saran kapsayıcı; yakınlaştırma değerini gösteren küçük
+     etiketin (badge) slider'ın üstünde, thumb konumunu takip ederek
+     konumlanabilmesi için position:relative referans noktası sağlar. */
+  .qhavuz-crop-zoom-slider-wrap {
+    position: relative;
+    flex: 1 1 auto;
+  }
+
+  .qhavuz-crop-zoom-slider {
+    display: block;
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 999px;
+    background: #000;
+    outline: none;
+    margin: 0;
+  }
+
+  /* Yakınlaştırma seviyesini (ör. "1.4×") gösteren küçük bilgi etiketi.
+     Slider'ın üstünde, thumb'ın yatay konumunu izleyerek durur; sadece
+     kullanıcı slider ile etkileşimdeyken (veya pinch-zoom sırasında)
+     belirir, aksi halde gözden kaybolur ki arayüz sakin kalsın. */
+  .qhavuz-crop-zoom-value {
+    position: absolute;
+    bottom: calc(100% + 9px);
+    left: 0;
+    transform: translate(-50%, 4px);
+    background: #121212;
+    color: #fff;
+    font-family: "Archivo Expanded", "Space Grotesk", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    padding: 0.22rem 0.5rem;
+    border-radius: 0.45rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.16s ease, transform 0.16s ease;
+    z-index: 2;
+  }
+
+  .qhavuz-crop-zoom-value::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #121212;
+  }
+
+  .qhavuz-crop-zoom-value.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .qhavuz-crop-zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ff90e8;
+    border: 2.5px solid #000;
+    cursor: pointer;
+  }
+
+  .qhavuz-crop-zoom-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ff90e8;
+    border: 2.5px solid #000;
+    cursor: pointer;
   }
 
   .qhavuz-add-label {
@@ -3839,6 +4232,120 @@
 
   .qhavuz-add-subject-chip.is-selected {
     background-color: var(--qhavuz-chip-color);
+  }
+
+  /* ---- Soru Havuzu: "Soru Ekle" artık tek panelde değil, adım adım
+     (branş&ders -> cevap anahtarı -> ek bilgiler) ilerleyen bir sihirbaz.
+     Üç .qhavuz-wizard-step yan yana dizilip %300 genişlikte bir "track"
+     oluşturur; .qhavuz-wizard-viewport bunu kırpar, track'in translateX'i
+     kaydırılarak adımlar arasında kayan bir geçiş animasyonu sağlanır.
+     Görünmeyen adımlar opacity ile soluklaşır ve pointer-events:none olur
+     ki klavye/dokunma odağı yanlışlıkla arkadaki adıma gitmesin. ---- */
+  .qhavuz-wizard-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    margin: 0.2rem 0 0.9rem;
+  }
+
+  .qhavuz-wizard-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #000;
+    opacity: 0.18;
+    transition: opacity 0.25s ease, transform 0.25s ease, background-color 0.25s ease;
+  }
+
+  .qhavuz-wizard-dot.is-active {
+    opacity: 1;
+    transform: scale(1.4);
+    background: var(--accent-color, #ff90e8);
+  }
+
+  .qhavuz-wizard-dot.is-done {
+    opacity: 0.55;
+  }
+
+  .qhavuz-wizard-viewport {
+    overflow: hidden;
+  }
+
+  .qhavuz-wizard-track {
+    display: flex;
+    align-items: flex-start;
+    width: 300%;
+    transition: transform 0.42s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .qhavuz-wizard-step {
+    flex: 0 0 33.3334%;
+    width: 33.3334%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0 0.15rem;
+    opacity: 0.35;
+    transition: opacity 0.32s ease;
+    pointer-events: none;
+  }
+
+  .qhavuz-wizard-step.is-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .qhavuz-wizard-substep.is-hidden {
+    display: none;
+  }
+
+  .qhavuz-add-desc-input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    font-family: "Space Grotesk", sans-serif;
+  }
+
+  .qhavuz-wizard-nav {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.1rem;
+  }
+
+  .qhavuz-wizard-nav .page9-add-confirm {
+    margin-top: 0;
+    flex: 1 1 auto;
+  }
+
+  .qhavuz-wizard-back-btn {
+    flex: 0 0 auto;
+    padding: 0 1.1rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #121212;
+    background-color: #f2f2f2;
+    border: 2.5px solid #000;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .qhavuz-wizard-back-btn:active {
+    transform: translate(1px, 1px);
+  }
+
+  .qhavuz-wizard-back-btn.is-hidden {
+    display: none;
+  }
+
+  body.is-anthracite .qhavuz-wizard-dot {
+    background: #f2f2f4;
+  }
+
+  body.is-anthracite .qhavuz-wizard-back-btn {
+    background-color: #2a2c2f;
+    color: #f2f2f4;
   }
 
   .qhavuz-add-answer-grid {
@@ -3988,20 +4495,21 @@
 
   .qhavuz-test-image {
     width: 100%;
-    max-height: 48vh;
+    max-width: 48vh;
+    aspect-ratio: 1;
     overflow: hidden;
     background: #fff;
     border: 4px solid #000;
     border-radius: 1.1em;
     box-shadow: 6px 6px 0px 0px #000;
     touch-action: none;
+    margin: 0 auto;
   }
 
   .qhavuz-test-image img {
     width: 100%;
-    height: auto;
-    max-height: 48vh;
-    object-fit: contain;
+    height: 100%;
+    object-fit: cover;
     display: block;
     touch-action: none;
   }
@@ -11144,37 +11652,43 @@
        soruların görseli yüklenir, açılan pop-up'ta branş ve doğru cevap
        şıkkı işaretlenir, kart olarak listede birikir. -->
   <section class="page" id="page-camera">
-    <div class="qhavuz-wrap">
-      <div class="qhavuz-header">
-        <div class="qhavuz-header-top">
-          <h1>Soru Havuzu</h1>
-          <button type="button" class="add-task-btn edit-task-btn" id="qhavuzEditBtn" aria-label="Soruları düzenle" aria-pressed="false">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-              <path d="M4 20l4.5-1 10.2-10.2-3.5-3.5L5 15.5 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M13.3 6.8l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </button>
-        </div>
+    <div class="qhavuz-hero">
+      <h1 class="qhavuz-title">Soru Havuzu</h1>
+    </div>
+
+    <div class="qhavuz-tear" aria-hidden="false">
+      <span class="qhavuz-tear-line"></span>
+      <button type="button" class="qhavuz-tear-edit-btn" id="qhavuzEditBtn" aria-label="Soruları düzenle" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="15" height="15">
+          <path d="M4 20l4.5-1 10.2-10.2-3.5-3.5L5 15.5 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M13.3 6.8l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <span class="qhavuz-tear-line"></span>
+    </div>
+
+    <div class="qhavuz-scroll" id="qhavuzScroll">
+      <div class="qhavuz-wrap">
         <span class="qhavuz-subtitle">Çözemediğin soruların görselini yükle, branşını ve doğru cevabını işaretle</span>
-      </div>
 
-      <div class="qhavuz-actions">
-        <button type="button" class="add-task-btn qhavuz-add-btn" id="qhavuzAddBtn">+ Görsel Yükle</button>
-        <button type="button" class="add-task-btn qhavuz-test-start-btn" id="qhavuzTestBtn">Test Modu</button>
-      </div>
-      <input type="file" accept="image/*" id="qhavuzFileInput" class="qhavuz-file-input">
-
-      <div class="qhavuz-filter-bar" id="qhavuzFilterBar">
-        <div class="settings-segmented qhavuz-filter-track-segmented" id="qhavuzFilterTrackSegmented">
-          <div class="settings-segmented-slider" id="qhavuzFilterTrackSlider"></div>
-          <button type="button" class="settings-segmented-option is-active" data-value="all">Tümü</button>
-          <button type="button" class="settings-segmented-option" data-value="tyt">TYT</button>
-          <button type="button" class="settings-segmented-option" data-value="ayt">AYT</button>
+        <div class="qhavuz-actions">
+          <button type="button" class="add-task-btn qhavuz-add-btn" id="qhavuzAddBtn">+ Görsel Yükle</button>
+          <button type="button" class="add-task-btn qhavuz-test-start-btn" id="qhavuzTestBtn">Test Modu</button>
         </div>
-        <div class="qhavuz-filter-subjects" id="qhavuzFilterSubjects"></div>
-      </div>
+        <input type="file" accept="image/*" id="qhavuzFileInput" class="qhavuz-file-input">
 
-      <div class="qhavuz-grid" id="qhavuzGrid"></div>
+        <div class="qhavuz-filter-bar" id="qhavuzFilterBar">
+          <div class="settings-segmented qhavuz-filter-track-segmented" id="qhavuzFilterTrackSegmented">
+            <div class="settings-segmented-slider" id="qhavuzFilterTrackSlider"></div>
+            <button type="button" class="settings-segmented-option is-active" data-value="all">Tümü</button>
+            <button type="button" class="settings-segmented-option" data-value="tyt">TYT</button>
+            <button type="button" class="settings-segmented-option" data-value="ayt">AYT</button>
+          </div>
+          <div class="qhavuz-filter-subjects" id="qhavuzFilterSubjects"></div>
+        </div>
+
+        <div class="qhavuz-grid" id="qhavuzGrid"></div>
+      </div>
     </div>
   </section>
 
@@ -11263,15 +11777,51 @@
   </div>
 </div>
 
-<!-- Soru Havuzu: bir görsel seçilince açılan pop-up. Branş ve doğru
-     cevap şıkkı seçilmeden "Kaydet" butonu pasif kalır. wheel-color /
-     page9-add pop-up'larıyla aynı brutalist dili paylaşır. -->
+<!-- Soru Havuzu: fotoğraf seçildikten hemen sonra, "Soru Ekle" pop-up'ı
+     açılmadan önce gösterilen sabit-kare kırpma ekranı. Kullanıcı iki
+     parmakla yakınlaştırıp sürükleyerek fotoğrafı kareye TAM oturtur;
+     onayladığında bu kare, doğrudan soru kartı görseli olarak kaydedilir. -->
+<div class="page9-add-backdrop" id="qhavuzCropBackdrop">
+  <div class="page9-add-card qhavuz-crop-card">
+    <div class="page9-add-header">
+      <div class="page9-add-heading">
+        <span class="page9-add-title">Görseli Kırp</span>
+        <span class="page9-add-subtitle">Kareyi doldurmak için yakınlaştır ve sürükle</span>
+      </div>
+      <button type="button" class="delete-btn page9-add-close" id="qhavuzCropClose" aria-label="Kapat">×</button>
+    </div>
+
+    <div class="qhavuz-crop-viewport" id="qhavuzCropViewport">
+      <img class="qhavuz-crop-img" id="qhavuzCropImg" alt="Kırpılacak görsel" draggable="false">
+      <div class="qhavuz-crop-frame"></div>
+    </div>
+
+    <div class="qhavuz-crop-zoom-row">
+      <svg class="qhavuz-crop-zoom-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <div class="qhavuz-crop-zoom-slider-wrap">
+        <span class="qhavuz-crop-zoom-value" id="qhavuzCropZoomValue">1.0×</span>
+        <input type="range" id="qhavuzCropZoomSlider" class="qhavuz-crop-zoom-slider" min="0" max="1" step="0.001" value="0" aria-label="Yakınlaştırma">
+      </div>
+      <svg class="qhavuz-crop-zoom-icon is-large" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7.5v5M7.5 10h5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </div>
+
+    <button type="button" class="add-task-btn page9-add-confirm" id="qhavuzCropConfirm">Kırp ve Devam Et</button>
+  </div>
+</div>
+
+<!-- Soru Havuzu: bir görsel kırpıldıktan sonra açılan, adım adım ilerleyen
+     sihirbaz pop-up'ı. Üç adımı vardır (branş&ders / cevap anahtarı / ek
+     bilgiler); her adım .qhavuz-wizard-step olarak yan yana dizilir ve
+     .qhavuz-wizard-track'in translateX'i kaydırılarak aralarında kayan
+     bir geçiş animasyonuyla ilerlenir. Görsel önizleme tüm adımlarda
+     sabit kalır (track'in dışında). "İleri" butonu geçerli adım
+     tamamlanmadan pasif kalır; son adımda "Kaydet"e dönüşür. -->
 <div class="page9-add-backdrop" id="qhavuzAddBackdrop">
   <div class="page9-add-card qhavuz-add-card">
     <div class="page9-add-header">
       <div class="page9-add-heading">
         <span class="page9-add-title">Soru Ekle</span>
-        <span class="page9-add-subtitle">Sınav türünü, dersi ve doğru cevabı işaretle</span>
+        <span class="page9-add-subtitle" id="qhavuzAddSubtitle">Sınav türünü ve dersini seç</span>
       </div>
       <button type="button" class="delete-btn page9-add-close" id="qhavuzAddClose" aria-label="Kapat">×</button>
     </div>
@@ -11280,25 +11830,63 @@
       <img id="qhavuzAddPreviewImg" alt="Soru görseli">
     </div>
 
-    <span class="qhavuz-add-label">Sınav Türü</span>
-    <div class="qhavuz-add-subject-grid" id="qhavuzAddTrackGrid"></div>
-
-    <span class="qhavuz-add-label">Ders</span>
-    <div class="qhavuz-add-subject-grid" id="qhavuzAddSubjectGrid"></div>
-
-    <span class="qhavuz-add-label">Doğru Cevap <span class="qhavuz-add-label-optional">(şık veya yazılı cevaptan biri yeterli)</span></span>
-    <div class="qhavuz-add-answer-grid" id="qhavuzAddAnswerGrid"></div>
-
-    <span class="qhavuz-add-label">Yazılı Cevap <span class="qhavuz-add-label-optional">(açık uçlu sorular için)</span></span>
-    <input type="text" class="page9-add-custom-input qhavuz-add-answer-text-input" id="qhavuzAddAnswerTextInput" placeholder="Cevabı yaz..." maxlength="120">
-
-    <span class="qhavuz-add-label">Kitap Bilgisi <span class="qhavuz-add-label-optional">(opsiyonel)</span></span>
-    <div class="qhavuz-add-book-row">
-      <input type="text" class="page9-add-custom-input qhavuz-add-book-input" id="qhavuzAddBookInput" placeholder="Kitap adı" maxlength="60">
-      <input type="text" inputmode="numeric" class="page9-add-custom-input qhavuz-add-page-input" id="qhavuzAddPageInput" placeholder="Sayfa" maxlength="6">
+    <div class="qhavuz-wizard-dots" id="qhavuzWizardDots">
+      <span class="qhavuz-wizard-dot" data-step="0"></span>
+      <span class="qhavuz-wizard-dot" data-step="1"></span>
+      <span class="qhavuz-wizard-dot" data-step="2"></span>
     </div>
 
-    <button type="button" class="add-task-btn page9-add-confirm" id="qhavuzAddConfirm" disabled>Kaydet</button>
+    <div class="qhavuz-wizard-viewport">
+      <div class="qhavuz-wizard-track" id="qhavuzWizardTrack">
+
+        <!-- Adım 1: Sınav Türü + Ders -->
+        <div class="qhavuz-wizard-step" id="qhavuzStepSubject">
+          <span class="qhavuz-add-label">Sınav Türü</span>
+          <div class="qhavuz-add-subject-grid" id="qhavuzAddTrackGrid"></div>
+
+          <span class="qhavuz-add-label">Ders</span>
+          <div class="qhavuz-add-subject-grid" id="qhavuzAddSubjectGrid"></div>
+        </div>
+
+        <!-- Adım 2: Cevap Anahtarı (şıklı / açık uçlu) -->
+        <div class="qhavuz-wizard-step" id="qhavuzStepAnswer">
+          <span class="qhavuz-add-label">Cevap Türü</span>
+          <div class="settings-segmented qhavuz-answer-type-segmented" id="qhavuzAnswerTypeSegmented">
+            <div class="settings-segmented-slider" id="qhavuzAnswerTypeSlider"></div>
+            <button type="button" class="settings-segmented-option is-active" data-value="mc">Şıklı</button>
+            <button type="button" class="settings-segmented-option" data-value="open">Açık Uçlu</button>
+          </div>
+
+          <div class="qhavuz-wizard-substep" id="qhavuzAnswerMcWrap">
+            <span class="qhavuz-add-label">Doğru Cevap</span>
+            <div class="qhavuz-add-answer-grid" id="qhavuzAddAnswerGrid"></div>
+          </div>
+
+          <div class="qhavuz-wizard-substep is-hidden" id="qhavuzAnswerOpenWrap">
+            <span class="qhavuz-add-label">Yazılı Cevap</span>
+            <input type="text" class="page9-add-custom-input qhavuz-add-answer-text-input" id="qhavuzAddAnswerTextInput" placeholder="Cevabı yaz..." maxlength="120">
+          </div>
+        </div>
+
+        <!-- Adım 3: Ek bilgiler (hepsi opsiyonel) -->
+        <div class="qhavuz-wizard-step" id="qhavuzStepExtra">
+          <span class="qhavuz-add-label">Açıklama <span class="qhavuz-add-label-optional">(opsiyonel)</span></span>
+          <textarea class="page9-add-custom-input qhavuz-add-desc-input" id="qhavuzAddDescInput" placeholder="İstersen kısa bir not ekle..." maxlength="240" rows="3"></textarea>
+
+          <span class="qhavuz-add-label">Kitap Bilgisi <span class="qhavuz-add-label-optional">(opsiyonel)</span></span>
+          <div class="qhavuz-add-book-row">
+            <input type="text" class="page9-add-custom-input qhavuz-add-book-input" id="qhavuzAddBookInput" placeholder="Kitap adı" maxlength="60">
+            <input type="text" inputmode="numeric" class="page9-add-custom-input qhavuz-add-page-input" id="qhavuzAddPageInput" placeholder="Sayfa" maxlength="6">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="qhavuz-wizard-nav">
+      <button type="button" class="qhavuz-wizard-back-btn is-hidden" id="qhavuzWizardBack">Geri</button>
+      <button type="button" class="add-task-btn page9-add-confirm" id="qhavuzAddConfirm" disabled>İleri</button>
+    </div>
   </div>
 </div>
 
@@ -11329,9 +11917,50 @@
     <button type="button" class="delete-btn qhavuz-lightbox-solve" id="qhavuzLightboxSolveBtn" aria-label="Manuel çözüldü olarak işaretle" aria-pressed="false">
       <svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
+    <button type="button" class="delete-btn qhavuz-lightbox-info" id="qhavuzLightboxInfoBtn" aria-label="Bilgi">
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/>
+        <line x1="12" y1="11" x2="12" y2="16.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="12" cy="7.6" r="1.15" fill="currentColor"/>
+      </svg>
+    </button>
     <button type="button" class="delete-btn qhavuz-lightbox-close" id="qhavuzLightboxClose" aria-label="Kapat">×</button>
-    <img id="qhavuzLightboxImg" alt="Soru görseli">
+    <div class="qhavuz-lightbox-img-frame">
+      <img id="qhavuzLightboxImg" alt="Soru görseli">
+    </div>
     <div class="qhavuz-lightbox-answer-row" id="qhavuzLightboxAnswerRow"></div>
+  </div>
+</div>
+
+<!-- Soru Havuzu: fotoğraf lightbox'ındaki "i" butonuyla açılan, sorunun
+     branşını, dersini, açıklamasını ve kaynak (kitap adı + sayfa)
+     bilgisini gösteren küçük bilgi pop-up'ı. Kendi backdrop'unu
+     kullandığı ve z-index'i lightbox'tan yüksek olduğu için her zaman
+     ön planda açılır, arkada kalmaz. -->
+<div class="qhavuz-info-backdrop" id="qhavuzInfoBackdrop">
+  <div class="qhavuz-info-card">
+    <button type="button" class="delete-btn qhavuz-info-close" id="qhavuzInfoClose" aria-label="Kapat">×</button>
+    <span class="qhavuz-info-title">Soru Bilgisi</span>
+
+    <div class="qhavuz-info-row" id="qhavuzInfoSubjectRow">
+      <span class="qhavuz-info-label">Branş / Ders</span>
+      <span class="qhavuz-card-subject qhavuz-info-subject-badge" id="qhavuzInfoSubjectBadge"></span>
+    </div>
+
+    <div class="qhavuz-info-row is-hidden" id="qhavuzInfoBookRow">
+      <span class="qhavuz-info-label">Kaynak</span>
+      <span class="qhavuz-info-value" id="qhavuzInfoBookValue">—</span>
+    </div>
+
+    <div class="qhavuz-info-row is-hidden" id="qhavuzInfoPageRow">
+      <span class="qhavuz-info-label">Sayfa</span>
+      <span class="qhavuz-info-value" id="qhavuzInfoPageValue">—</span>
+    </div>
+
+    <div class="qhavuz-info-row is-hidden" id="qhavuzInfoDescRow">
+      <span class="qhavuz-info-label">Açıklama</span>
+      <span class="qhavuz-info-value" id="qhavuzInfoDescValue">—</span>
+    </div>
   </div>
 </div>
 
@@ -19204,13 +19833,44 @@
   const qhavuzAddBackdrop = document.getElementById('qhavuzAddBackdrop');
   const qhavuzAddClose = document.getElementById('qhavuzAddClose');
   const qhavuzAddPreviewImg = document.getElementById('qhavuzAddPreviewImg');
+  const qhavuzAddSubtitle = document.getElementById('qhavuzAddSubtitle');
   const qhavuzAddTrackGrid = document.getElementById('qhavuzAddTrackGrid');
   const qhavuzAddSubjectGrid = document.getElementById('qhavuzAddSubjectGrid');
   const qhavuzAddAnswerGrid = document.getElementById('qhavuzAddAnswerGrid');
   const qhavuzAddAnswerTextInput = document.getElementById('qhavuzAddAnswerTextInput');
+  const qhavuzAddDescInput = document.getElementById('qhavuzAddDescInput');
   const qhavuzAddBookInput = document.getElementById('qhavuzAddBookInput');
   const qhavuzAddPageInput = document.getElementById('qhavuzAddPageInput');
   const qhavuzAddConfirm = document.getElementById('qhavuzAddConfirm');
+
+  // ---- Soru Havuzu: "Soru Ekle" sihirbazının adım altyapısı ----
+  const qhavuzWizardDots = document.getElementById('qhavuzWizardDots');
+  const qhavuzWizardDotEls = qhavuzWizardDots
+    ? Array.from(qhavuzWizardDots.querySelectorAll('.qhavuz-wizard-dot'))
+    : [];
+  const qhavuzWizardTrack = document.getElementById('qhavuzWizardTrack');
+  const qhavuzWizardBack = document.getElementById('qhavuzWizardBack');
+  const qhavuzStepSubjectEl = document.getElementById('qhavuzStepSubject');
+  const qhavuzStepAnswerEl = document.getElementById('qhavuzStepAnswer');
+  const qhavuzStepExtraEl = document.getElementById('qhavuzStepExtra');
+  const qhavuzWizardStepEls = [qhavuzStepSubjectEl, qhavuzStepAnswerEl, qhavuzStepExtraEl];
+  const qhavuzAnswerTypeSegmented = document.getElementById('qhavuzAnswerTypeSegmented');
+  const qhavuzAnswerTypeOptions = qhavuzAnswerTypeSegmented
+    ? Array.from(qhavuzAnswerTypeSegmented.querySelectorAll('.settings-segmented-option'))
+    : [];
+  const qhavuzAnswerTypeSlider = document.getElementById('qhavuzAnswerTypeSlider');
+  const qhavuzAnswerMcWrap = document.getElementById('qhavuzAnswerMcWrap');
+  const qhavuzAnswerOpenWrap = document.getElementById('qhavuzAnswerOpenWrap');
+
+  const QHAVUZ_WIZARD_SUBTITLES = [
+    'Sınav türünü ve dersini seç',
+    'Doğru cevabı işaretle',
+    'İstersen açıklama, kitap adı veya sayfa ekle'
+  ];
+
+  let qhavuzWizardStep = 0;
+  let qhavuzPendingAnswerMode = 'mc'; // 'mc' (şıklı) | 'open' (açık uçlu)
+  let qhavuzPendingDescription = '';
   const qhavuzFilterTrackSegmented = document.getElementById('qhavuzFilterTrackSegmented');
   const qhavuzFilterTrackSlider = document.getElementById('qhavuzFilterTrackSlider');
   const qhavuzFilterTrackOptions = qhavuzFilterTrackSegmented
@@ -19227,12 +19887,74 @@
   let qhavuzPendingSubject = null;
   let qhavuzPendingAnswer = null;
 
+  // Sihirbazın hangi adımda olduğuna göre "İleri/Kaydet" butonunun aktif
+  // olup olmadığını belirler: adım 0'da branş+ders, adım 1'de seçili
+  // cevap türüne göre şık ya da yazılı cevap, adım 2'de her şey opsiyonel
+  // olduğu için her zaman geçerlidir.
+  const qhavuzWizardStepValid = (step) => {
+    if (step === 0) return !!(qhavuzPendingTrack && qhavuzPendingSubject);
+    if (step === 1) {
+      return qhavuzPendingAnswerMode === 'mc'
+        ? !!qhavuzPendingAnswer
+        : !!qhavuzAddAnswerTextInput.value.trim();
+    }
+    return true;
+  };
+
   const qhavuzUpdateConfirmState = () => {
-    const hasAnswer = !!qhavuzPendingAnswer || !!qhavuzAddAnswerTextInput.value.trim();
-    qhavuzAddConfirm.disabled = !(qhavuzPendingImage && qhavuzPendingTrack && qhavuzPendingSubject && hasAnswer);
+    qhavuzAddConfirm.disabled = !qhavuzWizardStepValid(qhavuzWizardStep);
   };
 
   qhavuzAddAnswerTextInput.addEventListener('input', qhavuzUpdateConfirmState);
+
+  // Track'i ilgili adıma kaydırır, nokta göstergesini ve Geri/İleri
+  // butonlarının durumunu günceller. translateX yüzdesi track'in kendi
+  // genişliğine (%300) göre hesaplandığı için %33.3334 * adım, görünürde
+  // tam olarak bir viewport genişliği kadar kaydırır.
+  const qhavuzGoToWizardStep = (step) => {
+    qhavuzWizardStep = step;
+    if (qhavuzWizardTrack) qhavuzWizardTrack.style.transform = `translateX(-${step * 33.3334}%)`;
+    qhavuzWizardStepEls.forEach((el, i) => { if (el) el.classList.toggle('is-active', i === step); });
+    qhavuzWizardDotEls.forEach((dot, i) => {
+      dot.classList.toggle('is-active', i === step);
+      dot.classList.toggle('is-done', i < step);
+    });
+    if (qhavuzWizardBack) qhavuzWizardBack.classList.toggle('is-hidden', step === 0);
+    if (qhavuzAddSubtitle) qhavuzAddSubtitle.textContent = QHAVUZ_WIZARD_SUBTITLES[step] || '';
+    qhavuzAddConfirm.textContent = step === 2 ? 'Kaydet' : 'İleri';
+    qhavuzUpdateConfirmState();
+  };
+
+  const qhavuzMoveAnswerTypeSlider = () => {
+    if (!qhavuzAnswerTypeSlider) return;
+    const idx = qhavuzPendingAnswerMode === 'open' ? 1 : 0;
+    qhavuzAnswerTypeSlider.style.transform = `translateX(${idx * 100}%)`;
+  };
+
+  // Cevap türü (şıklı/açık uçlu) arasında geçiş: ilgili alt bölümü
+  // gösterip diğerini gizler, seçilmemiş moddaki değeri sıfırlamaz
+  // (kullanıcı fikrini değiştirip geri dönerse girdiği yazı kaybolmasın).
+  const qhavuzSetAnswerMode = (mode) => {
+    qhavuzPendingAnswerMode = mode;
+    qhavuzAnswerTypeOptions.forEach((b) => b.classList.toggle('is-active', b.dataset.value === mode));
+    qhavuzMoveAnswerTypeSlider();
+    if (qhavuzAnswerMcWrap) qhavuzAnswerMcWrap.classList.toggle('is-hidden', mode !== 'mc');
+    if (qhavuzAnswerOpenWrap) qhavuzAnswerOpenWrap.classList.toggle('is-hidden', mode !== 'open');
+    qhavuzUpdateConfirmState();
+  };
+
+  qhavuzAnswerTypeOptions.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.value === qhavuzPendingAnswerMode) return;
+      qhavuzSetAnswerMode(btn.dataset.value);
+    });
+  });
+
+  if (qhavuzWizardBack) {
+    qhavuzWizardBack.addEventListener('click', () => {
+      if (qhavuzWizardStep > 0) qhavuzGoToWizardStep(qhavuzWizardStep - 1);
+    });
+  }
 
   const qhavuzBuildTrackGrid = () => {
     qhavuzAddTrackGrid.innerHTML = '';
@@ -19310,10 +20032,12 @@
     qhavuzAddBookInput.value = '';
     qhavuzAddPageInput.value = '';
     qhavuzAddAnswerTextInput.value = '';
+    qhavuzAddDescInput.value = '';
     qhavuzBuildTrackGrid();
     qhavuzBuildSubjectGrid();
     qhavuzBuildAnswerGrid();
-    qhavuzUpdateConfirmState();
+    qhavuzSetAnswerMode('mc');
+    qhavuzGoToWizardStep(0);
     qhavuzAddBackdrop.classList.add('is-open');
   };
 
@@ -19323,15 +20047,362 @@
     qhavuzPendingTrack = null;
     qhavuzPendingSubject = null;
     qhavuzPendingAnswer = null;
+    qhavuzPendingAnswerMode = 'mc';
     qhavuzAddBookInput.value = '';
     qhavuzAddPageInput.value = '';
     qhavuzAddAnswerTextInput.value = '';
+    qhavuzAddDescInput.value = '';
     qhavuzFileInput.value = '';
   };
 
+  // ---- Soru Havuzu: görsel ekleme öncesi sabit kare çerçeveyle kırpma ----
+  // Fotoğraf seçildiği an, henüz sıkıştırılmamış orijinal çözünürlükle bu
+  // ekran açılır (yakınlaştırırken kalite kaybı olmasın diye); kullanıcı
+  // iki parmakla yakınlaştırıp tek parmakla/fare ile sürükleyerek kareyi
+  // doldurur. Onaylanan kare, ızgaradaki kart kadrajıyla (.qhavuz-thumb,
+  // aspect-ratio:1) birebir aynıdır — böylece önizlemede görülen kare ile
+  // kartta sonradan görünen kare her zaman aynı kalır.
+  const qhavuzCropBackdrop = document.getElementById('qhavuzCropBackdrop');
+  const qhavuzCropClose = document.getElementById('qhavuzCropClose');
+  const qhavuzCropViewport = document.getElementById('qhavuzCropViewport');
+  const qhavuzCropImg = document.getElementById('qhavuzCropImg');
+  const qhavuzCropZoomSlider = document.getElementById('qhavuzCropZoomSlider');
+  const qhavuzCropZoomValue = document.getElementById('qhavuzCropZoomValue');
+  const qhavuzCropConfirm = document.getElementById('qhavuzCropConfirm');
+
+  // Kırpılan kare, kaynak görselin çözünürlüğünden veya kullanıcının
+  // yakınlaştırma seviyesinden bağımsız olarak HER ZAMAN bu sabit piksel
+  // boyutunda kaydedilir. Böylece soru havuzundaki tüm kartlar birebir
+  // aynı kare boyutuna sahip olur; ne boşluk ne de orantısız
+  // uzama/küçülme oluşur (daha "premium" ve tutarlı bir görünüm).
+  const QHAVUZ_CROP_OUTPUT_SIZE = 800;
+  const QHAVUZ_CROP_MAX_ZOOM_FACTOR = 3; // Çerçeveyi kaplayan ölçeğin kaç katına kadar yakınlaşılabilir
+
+  // Sürükleme sırasında görselin göründüğü konum (qhavuzCropPanX/Y), her
+  // zaman parmağın/farenin anlık konumuna değil, sınır içinde kalan bir
+  // "hedef" konuma (qhavuzCropPanTargetX/Y) yumuşakça yaklaşır. Hedef zaten
+  // her an kesin sınırlar içinde tutulduğu için görüntülenen konum da asla
+  // bu sınırların dışına çıkamaz (boşluk oluşamaz); ama hedef sınıra
+  // yaklaşırken/sabitlenirken görüntülenen konumun ona yetişmesi kısa bir
+  // yumuşama payı alır — bu da sert bir "dur" hissi yerine hafif bir
+  // direnç/akıcılık hissi yaratır. Parmak kaldırıldığında da aynı döngü,
+  // görseli son geçerli konuma yumuşakça oturtur.
+  const QHAVUZ_CROP_PAN_EASE_DRAG = 0.42;   // Sürükleme sırasında yakalama hızı
+  const QHAVUZ_CROP_PAN_EASE_SETTLE = 0.24; // Bırakıldıktan sonra oturma hızı
+  const QHAVUZ_CROP_PAN_SETTLE_EPSILON = 0.35; // px — bu mesafenin altında döngü durur
+
+  let qhavuzCropNaturalW = 0;
+  let qhavuzCropNaturalH = 0;
+  let qhavuzCropCoverScale = 1; // Görselin kareyi boşluksuz kaplaması için gereken minimum ölçek
+  let qhavuzCropScale = 1;
+  let qhavuzCropPanX = 0;
+  let qhavuzCropPanY = 0;
+  let qhavuzCropPanTargetX = 0;
+  let qhavuzCropPanTargetY = 0;
+  let qhavuzCropIsDragging = false;
+  let qhavuzCropPanRafId = null;
+  let qhavuzCropZoomBadgeHideTimer = null;
+  let qhavuzCropResolve = null; // Kırpma tamamlanınca (ya da iptalde) sonucu döndüren Promise resolve'u
+
+  // O anki ölçekte, görselin çerçeveyi boşluksuz kaplaması için pan
+  // değerlerinin hareket edebileceği azami mesafe (x/y ekseni ayrı ayrı).
+  const qhavuzCropPanBounds = () => {
+    const viewportSize = qhavuzCropViewport.clientWidth || 1;
+    const displayedW = qhavuzCropNaturalW * qhavuzCropScale;
+    const displayedH = qhavuzCropNaturalH * qhavuzCropScale;
+    return {
+      maxX: Math.max(0, (displayedW - viewportSize) / 2),
+      maxY: Math.max(0, (displayedH - viewportSize) / 2)
+    };
+  };
+
+  const qhavuzCropClampValue = (value, max) => Math.min(max, Math.max(-max, value));
+
+  // Görsel, çerçeveyi her zaman tam kaplasın diye pan değerlerini
+  // (kenarlarda boşluk kalmayacak şekilde) sınırlar. Bu, gösterilen
+  // konumun uygulandığı HER karede çağrılır; dolayısıyla yumuşatma
+  // (easing) sırasında dahi sınırların dışına çıkılması mümkün değildir.
+  const qhavuzCropClampPan = () => {
+    const { maxX, maxY } = qhavuzCropPanBounds();
+    qhavuzCropPanX = qhavuzCropClampValue(qhavuzCropPanX, maxX);
+    qhavuzCropPanY = qhavuzCropClampValue(qhavuzCropPanY, maxY);
+  };
+
+  const qhavuzCropApply = () => {
+    qhavuzCropClampPan();
+    qhavuzCropImg.style.width = `${qhavuzCropNaturalW * qhavuzCropScale}px`;
+    qhavuzCropImg.style.height = `${qhavuzCropNaturalH * qhavuzCropScale}px`;
+    qhavuzCropImg.style.transform = `translate(-50%, -50%) translate(${qhavuzCropPanX}px, ${qhavuzCropPanY}px)`;
+  };
+
+  // Her kare, görüntülenen pan konumunu hedefe bir miktar yaklaştırır.
+  // Sürükleme sürerken hızlı (duyarlı), bırakıldıktan sonra ise daha
+  // yumuşak bir yakalama hızı kullanılır. Hedef zaten sınır içinde
+  // olduğundan (bkz. touchmove/mousemove), bu döngü asla boşluk yaratmaz.
+  const qhavuzCropStepPan = () => {
+    const ease = qhavuzCropIsDragging ? QHAVUZ_CROP_PAN_EASE_DRAG : QHAVUZ_CROP_PAN_EASE_SETTLE;
+    qhavuzCropPanX += (qhavuzCropPanTargetX - qhavuzCropPanX) * ease;
+    qhavuzCropPanY += (qhavuzCropPanTargetY - qhavuzCropPanY) * ease;
+    qhavuzCropApply();
+    const dist = Math.hypot(
+      qhavuzCropPanTargetX - qhavuzCropPanX,
+      qhavuzCropPanTargetY - qhavuzCropPanY
+    );
+    if (qhavuzCropIsDragging || dist > QHAVUZ_CROP_PAN_SETTLE_EPSILON) {
+      qhavuzCropPanRafId = requestAnimationFrame(qhavuzCropStepPan);
+    } else {
+      // Kalan mikroskobik farkı sıfırlayıp döngüyü durdur: hem gereksiz
+      // CPU kullanımı önlenir hem de son konum tam olarak hedefe oturur.
+      qhavuzCropPanX = qhavuzCropPanTargetX;
+      qhavuzCropPanY = qhavuzCropPanTargetY;
+      qhavuzCropApply();
+      qhavuzCropPanRafId = null;
+    }
+  };
+
+  const qhavuzCropStartPanLoop = () => {
+    if (qhavuzCropPanRafId == null) {
+      qhavuzCropPanRafId = requestAnimationFrame(qhavuzCropStepPan);
+    }
+  };
+
+  // Sürükleme/pinch sırasında geçerli olmayan bir hedefle çakışma
+  // yaşanmaması için (ör. ölçek değişip sınırlar küçülünce), hedefi anlık
+  // konumla senkronize eder.
+  const qhavuzCropSyncPanTarget = () => {
+    qhavuzCropPanTargetX = qhavuzCropPanX;
+    qhavuzCropPanTargetY = qhavuzCropPanY;
+  };
+
+  // Yakınlaştırma çubuğu (0..1) ile gerçek ölçek (coverScale..maxScale)
+  // arasında dönüşüm; çubuğun sol ucu her zaman "çerçeveyi tam kaplar"
+  // haline denk gelir.
+  const qhavuzCropMaxScale = () => qhavuzCropCoverScale * QHAVUZ_CROP_MAX_ZOOM_FACTOR;
+  const qhavuzCropScaleFromSlider = (t) => qhavuzCropCoverScale + t * (qhavuzCropMaxScale() - qhavuzCropCoverScale);
+  const qhavuzCropSliderFromScale = (s) => {
+    const range = qhavuzCropMaxScale() - qhavuzCropCoverScale;
+    return range > 0 ? (s - qhavuzCropCoverScale) / range : 0;
+  };
+
+  // Slider'ın gerçek zoom değerini yansıtan küçük etiketi günceller ve
+  // thumb'ın yatay konumuna hizalar (0.001 hassasiyetli slider değeri,
+  // track genişliği üzerinden yüzdeye çevrilir).
+  const qhavuzCropUpdateZoomBadge = () => {
+    if (!qhavuzCropZoomValue) return;
+    const multiplier = qhavuzCropCoverScale > 0 ? (qhavuzCropScale / qhavuzCropCoverScale) : 1;
+    qhavuzCropZoomValue.textContent = `${multiplier.toFixed(1)}×`;
+    const t = parseFloat(qhavuzCropZoomSlider.value) || 0;
+    const posPercent = Math.min(96, Math.max(4, t * 100));
+    qhavuzCropZoomValue.style.left = `${posPercent}%`;
+  };
+
+  const qhavuzCropShowZoomBadge = () => {
+    if (!qhavuzCropZoomValue) return;
+    qhavuzCropZoomValue.classList.add('is-visible');
+    if (qhavuzCropZoomBadgeHideTimer) clearTimeout(qhavuzCropZoomBadgeHideTimer);
+    qhavuzCropZoomBadgeHideTimer = setTimeout(() => {
+      qhavuzCropZoomValue.classList.remove('is-visible');
+      qhavuzCropZoomBadgeHideTimer = null;
+    }, 900);
+  };
+
+  const qhavuzCropSetScale = (newScale, syncSlider = true) => {
+    qhavuzCropScale = Math.min(qhavuzCropMaxScale(), Math.max(qhavuzCropCoverScale, newScale));
+    if (syncSlider) qhavuzCropZoomSlider.value = String(qhavuzCropSliderFromScale(qhavuzCropScale));
+    qhavuzCropApply();
+    qhavuzCropUpdateZoomBadge();
+  };
+
+  qhavuzCropZoomSlider.addEventListener('input', () => {
+    qhavuzCropSetScale(qhavuzCropScaleFromSlider(parseFloat(qhavuzCropZoomSlider.value)), false);
+    // Zoom değişince pan sınırları da değişir; sürükleme hedefini anlık
+    // (zaten sınır içindeki) konumla senkronize ederek olası bir zıplamayı
+    // önle.
+    qhavuzCropSyncPanTarget();
+    qhavuzCropShowZoomBadge();
+  });
+  qhavuzCropZoomSlider.addEventListener('pointerdown', qhavuzCropShowZoomBadge);
+  qhavuzCropZoomSlider.addEventListener('touchstart', qhavuzCropShowZoomBadge, { passive: true });
+
+  // Ham (henüz sıkıştırılmamış) görseli kırpma ekranında açar; kullanıcı
+  // onaylayınca kırpılmış kare data URL ile, iptal ederse null ile
+  // resolve olan bir Promise döner.
+  const qhavuzOpenCropModal = (rawDataUrl) => new Promise((resolve) => {
+    qhavuzCropResolve = resolve;
+    const img = new Image();
+    img.onload = () => {
+      qhavuzCropNaturalW = img.naturalWidth;
+      qhavuzCropNaturalH = img.naturalHeight;
+      qhavuzCropImg.src = rawDataUrl;
+      qhavuzCropBackdrop.classList.add('is-open');
+      // Çerçevenin gerçek piksel genişliği ancak layout oturduktan sonra
+      // doğru ölçülebildiği için ilk kare yerleşimi bir sonraki frame'e
+      // bırakılır.
+      requestAnimationFrame(() => {
+        const viewportSize = qhavuzCropViewport.clientWidth || 1;
+        qhavuzCropCoverScale = Math.max(
+          viewportSize / qhavuzCropNaturalW,
+          viewportSize / qhavuzCropNaturalH
+        ) || 1;
+        qhavuzCropPanX = 0;
+        qhavuzCropPanY = 0;
+        qhavuzCropPanTargetX = 0;
+        qhavuzCropPanTargetY = 0;
+        qhavuzCropZoomSlider.value = '0';
+        qhavuzCropSetScale(qhavuzCropCoverScale, false);
+      });
+    };
+    img.onerror = () => resolve(null);
+    img.src = rawDataUrl;
+  });
+
+  const qhavuzCloseCropModal = (result) => {
+    qhavuzCropBackdrop.classList.remove('is-open');
+    qhavuzCropImg.src = '';
+    qhavuzCropIsDragging = false;
+    if (qhavuzCropPanRafId != null) {
+      cancelAnimationFrame(qhavuzCropPanRafId);
+      qhavuzCropPanRafId = null;
+    }
+    if (qhavuzCropZoomBadgeHideTimer) {
+      clearTimeout(qhavuzCropZoomBadgeHideTimer);
+      qhavuzCropZoomBadgeHideTimer = null;
+    }
+    if (qhavuzCropZoomValue) qhavuzCropZoomValue.classList.remove('is-visible');
+    const resolve = qhavuzCropResolve;
+    qhavuzCropResolve = null;
+    if (resolve) resolve(result);
+  };
+
+  qhavuzCropClose.addEventListener('click', () => qhavuzCloseCropModal(null));
+  qhavuzCropBackdrop.addEventListener('click', (e) => {
+    if (e.target === qhavuzCropBackdrop) qhavuzCloseCropModal(null);
+  });
+
+  // Tek parmakla/fare ile sürükleyerek kaydırma, iki parmakla yakınlaştırma.
+  (() => {
+    let isPanning = false;
+    let panStartX = 0, panStartY = 0, startPanX = 0, startPanY = 0;
+    let pinchStartDist = 0, pinchStartScale = 1;
+
+    const touchDist = (t0, t1) => Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+
+    qhavuzCropViewport.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        isPanning = true;
+        qhavuzCropIsDragging = true;
+        panStartX = e.touches[0].clientX;
+        panStartY = e.touches[0].clientY;
+        // Sürüklemeye görüntülenen (zaten sınır içindeki) konumdan başla,
+        // ani bir zıplama olmasın diye hedefi de aynı noktaya senkronize et.
+        startPanX = qhavuzCropPanX;
+        startPanY = qhavuzCropPanY;
+        qhavuzCropSyncPanTarget();
+      } else if (e.touches.length === 2) {
+        isPanning = false;
+        qhavuzCropIsDragging = false;
+        qhavuzCropSyncPanTarget();
+        pinchStartDist = touchDist(e.touches[0], e.touches[1]);
+        pinchStartScale = qhavuzCropScale;
+      }
+    }, { passive: true });
+
+    qhavuzCropViewport.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const newDist = touchDist(e.touches[0], e.touches[1]);
+        if (pinchStartDist > 0) {
+          qhavuzCropSetScale(pinchStartScale * (newDist / pinchStartDist));
+          qhavuzCropSyncPanTarget();
+          qhavuzCropShowZoomBadge();
+        }
+      } else if (e.touches.length === 1 && isPanning) {
+        e.preventDefault();
+        const { maxX, maxY } = qhavuzCropPanBounds();
+        qhavuzCropPanTargetX = qhavuzCropClampValue(
+          startPanX + (e.touches[0].clientX - panStartX), maxX
+        );
+        qhavuzCropPanTargetY = qhavuzCropClampValue(
+          startPanY + (e.touches[0].clientY - panStartY), maxY
+        );
+        qhavuzCropStartPanLoop();
+      }
+    }, { passive: false });
+
+    const endTouch = () => {
+      isPanning = false;
+      qhavuzCropIsDragging = false;
+      pinchStartDist = 0;
+      // Bırakıldığında görsel, geçerli (sınır içi) hedefe yumuşakça otursun.
+      qhavuzCropStartPanLoop();
+    };
+    qhavuzCropViewport.addEventListener('touchend', endTouch);
+    qhavuzCropViewport.addEventListener('touchcancel', endTouch);
+
+    // Masaüstü (fare) ile sürükleme desteği.
+    qhavuzCropViewport.addEventListener('mousedown', (e) => {
+      isPanning = true;
+      qhavuzCropIsDragging = true;
+      panStartX = e.clientX;
+      panStartY = e.clientY;
+      startPanX = qhavuzCropPanX;
+      startPanY = qhavuzCropPanY;
+      qhavuzCropSyncPanTarget();
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      const { maxX, maxY } = qhavuzCropPanBounds();
+      qhavuzCropPanTargetX = qhavuzCropClampValue(startPanX + (e.clientX - panStartX), maxX);
+      qhavuzCropPanTargetY = qhavuzCropClampValue(startPanY + (e.clientY - panStartY), maxY);
+      qhavuzCropStartPanLoop();
+    });
+    window.addEventListener('mouseup', () => {
+      if (!isPanning) return;
+      isPanning = false;
+      qhavuzCropIsDragging = false;
+      // Fare bırakıldığında da görsel, geçerli hedefe yumuşakça otursun.
+      qhavuzCropStartPanLoop();
+    });
+  })();
+
+  // O an çerçevede görünen kareyi, sabit çözünürlüklü bir canvas'a
+  // çizip JPEG data URL olarak döndürür.
+  const qhavuzRenderCroppedDataUrl = () => {
+    const viewportSize = qhavuzCropViewport.clientWidth || 1;
+    const cropSizeNatural = viewportSize / qhavuzCropScale;
+    const centerNaturalX = (qhavuzCropNaturalW / 2) - (qhavuzCropPanX / qhavuzCropScale);
+    const centerNaturalY = (qhavuzCropNaturalH / 2) - (qhavuzCropPanY / qhavuzCropScale);
+    let sx = centerNaturalX - cropSizeNatural / 2;
+    let sy = centerNaturalY - cropSizeNatural / 2;
+    // Yuvarlama hatalarına karşı emniyet: kaynak dikdörtgen her zaman
+    // görselin sınırları içinde kalsın.
+    sx = Math.min(Math.max(sx, 0), Math.max(0, qhavuzCropNaturalW - cropSizeNatural));
+    sy = Math.min(Math.max(sy, 0), Math.max(0, qhavuzCropNaturalH - cropSizeNatural));
+
+    // Çıktı her zaman sabit QHAVUZ_CROP_OUTPUT_SIZE x QHAVUZ_CROP_OUTPUT_SIZE
+    // piksel olarak üretilir; kaynak görselin boyutu veya seçilen kare
+    // (cropSizeNatural) ne olursa olsun bu kare her zaman aynı hedef
+    // boyuta çizilir, yani her soru görseli tam olarak aynı piksel
+    // boyutuyla kaydedilir.
+    const outputSize = QHAVUZ_CROP_OUTPUT_SIZE;
+    const canvas = document.createElement('canvas');
+    canvas.width = outputSize;
+    canvas.height = outputSize;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(qhavuzCropImg, sx, sy, cropSizeNatural, cropSizeNatural, 0, 0, outputSize, outputSize);
+    return canvas.toDataURL('image/jpeg', 0.9);
+  };
+
+  qhavuzCropConfirm.addEventListener('click', () => {
+    qhavuzCloseCropModal(qhavuzRenderCroppedDataUrl());
+  });
+
   // "+ Görsel Yükle" butonu, görünmez dosya seçiciyi tetikler (galeri
   // veya kamera arasında seçim, tarayıcının/telefonun kendi arayüzüyle
-  // sunulur).
+  // sunulur). Seçilen fotoğraf önce kırpma ekranında karesi alınır,
+  // ardından sıkıştırılıp "Soru Ekle" pop-up'ına önizleme olarak konur.
   qhavuzAddBtn.addEventListener('click', () => qhavuzFileInput.click());
 
   qhavuzFileInput.addEventListener('change', () => {
@@ -19339,9 +20410,16 @@
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async () => {
+      const croppedDataUrl = await qhavuzOpenCropModal(reader.result);
+      if (!croppedDataUrl) {
+        // Kullanıcı kırpmayı iptal etti; aynı dosyayı tekrar seçebilsin
+        // diye input'u sıfırlıyoruz.
+        qhavuzFileInput.value = '';
+        return;
+      }
       const compressed = typeof compressImageDataUrl === 'function'
-        ? await compressImageDataUrl(reader.result)
-        : reader.result;
+        ? await compressImageDataUrl(croppedDataUrl)
+        : croppedDataUrl;
       openQhavuzAddModal(compressed);
     };
     reader.readAsDataURL(file);
@@ -19353,8 +20431,20 @@
   });
 
   qhavuzAddConfirm.addEventListener('click', async () => {
+    // Son adıma gelene kadar buton sadece bir sonraki adıma geçirir;
+    // geçerli adım tamamlanmadan (bkz. qhavuzWizardStepValid) zaten
+    // disabled olduğu için buraya kadar gelinmesi adımın geçerli
+    // olduğunu garantiler.
+    if (!qhavuzWizardStepValid(qhavuzWizardStep)) return;
+    if (qhavuzWizardStep < 2) {
+      qhavuzGoToWizardStep(qhavuzWizardStep + 1);
+      return;
+    }
+
     const answerText = qhavuzAddAnswerTextInput.value.trim();
-    if (!qhavuzPendingImage || !qhavuzPendingTrack || !qhavuzPendingSubject || !(qhavuzPendingAnswer || answerText)) return;
+    const hasAnswer = qhavuzPendingAnswerMode === 'mc' ? !!qhavuzPendingAnswer : !!answerText;
+    if (!qhavuzPendingImage || !qhavuzPendingTrack || !qhavuzPendingSubject || !hasAnswer) return;
+    const description = qhavuzAddDescInput.value.trim();
     const book = qhavuzAddBookInput.value.trim();
     const page = qhavuzAddPageInput.value.trim();
     // Ham base64 yerine görsel IndexedDB'ye Blob olarak yazılır; APP_STATE
@@ -19365,8 +20455,9 @@
       image: imageRef,
       track: qhavuzPendingTrack,
       subject: qhavuzPendingSubject,
-      answer: qhavuzPendingAnswer || null,
-      answerText: answerText || null,
+      answer: qhavuzPendingAnswerMode === 'mc' ? (qhavuzPendingAnswer || null) : null,
+      answerText: qhavuzPendingAnswerMode === 'open' ? (answerText || null) : null,
+      description: description || null,
       book: book || null,
       page: page || null,
       ts: Date.now()
@@ -19519,6 +20610,12 @@
   const qhavuzLightboxAnswerRow = document.getElementById('qhavuzLightboxAnswerRow');
   const qhavuzLightboxSolveBtn = document.getElementById('qhavuzLightboxSolveBtn');
   let qhavuzLightboxItem = null;
+  // Düzenleme modunda şıklı/açık uçlu arasında geçiş yapılabildiği için
+  // hangi türün gösterildiği artık salt item.answer/item.answerText'in
+  // dolu olup olmamasından değil, bu ayrı değişkenden okunuyor; böylece
+  // bir türden diğerine geçilip alan boşaltıldığında ekran yanlış türe
+  // geri düşmüyor.
+  let qhavuzLightboxAnswerMode = 'mc';
 
   const qhavuzSyncLightboxSolveBtn = () => {
     const isSolved = !!(qhavuzLightboxItem && qhavuzLightboxItem.solved);
@@ -19529,11 +20626,61 @@
   const renderQhavuzLightboxAnswers = (item) => {
     qhavuzLightboxAnswerRow.innerHTML = '';
 
+    const inner = document.createElement('div');
+    inner.className = 'qhavuz-lightbox-answer-inner';
+
+    // Düzenleme modundayken, şıklı ile açık uçlu cevap arasında geçiş
+    // yapılabilsin diye ekleme sihirbazındakiyle aynı segmented seçici
+    // gösterilir. Bir türden diğerine geçilince önceki türün alanı
+    // (answer veya answerText) sıfırlanır ki ikisi asla aynı anda dolu
+    // kalmasın.
+    if (qhavuzEditMode) {
+      const modeToggle = document.createElement('div');
+      modeToggle.className = 'settings-segmented qhavuz-lightbox-answer-mode-segmented';
+
+      const slider = document.createElement('div');
+      slider.className = 'settings-segmented-slider';
+      modeToggle.appendChild(slider);
+
+      [
+        { value: 'mc', label: 'Şıklı' },
+        { value: 'open', label: 'Açık Uçlu' }
+      ].forEach(({ value, label }) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'settings-segmented-option';
+        btn.textContent = label;
+        btn.dataset.value = value;
+        if (value === qhavuzLightboxAnswerMode) btn.classList.add('is-active');
+        btn.addEventListener('click', () => {
+          if (value === qhavuzLightboxAnswerMode) return;
+          qhavuzLightboxAnswerMode = value;
+          // Şıklı seçilince açık uçlu cevap, açık uçlu seçilince şıklı
+          // cevap sıfırlanır; ikisi aynı anda yazılamaz.
+          if (value === 'mc') {
+            item.answerText = null;
+          } else {
+            item.answer = null;
+          }
+          saveQhavuzState();
+          renderQhavuzLightboxAnswers(item);
+          qhavuzUpdateCardUI(item);
+        });
+        modeToggle.appendChild(btn);
+      });
+
+      slider.style.transform = `translateX(${qhavuzLightboxAnswerMode === 'open' ? 100 : 0}%)`;
+      inner.appendChild(modeToggle);
+    }
+
+    const content = document.createElement('div');
+    content.className = 'qhavuz-lightbox-answer-content';
+
     // Açık uçlu (yazılı cevaplı, şıksız) sorularda şık ızgarası yerine
     // girilen cevap metni gösterilir. Düzenleme modundayken bu metin
     // tıklanıp yerinde değiştirilebilir; kapalıyken sadece salt-okunur
     // bir etiket olarak durur.
-    if (!item.answer && item.answerText) {
+    if (qhavuzLightboxAnswerMode === 'open') {
       const wrap = document.createElement('div');
       wrap.className = 'qhavuz-lightbox-open-answer';
 
@@ -19546,20 +20693,19 @@
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'page9-add-custom-input qhavuz-lightbox-open-answer-input';
-        input.value = item.answerText;
+        input.value = item.answerText || '';
         input.maxLength = 120;
+        input.placeholder = 'Cevabı yaz...';
 
         const commit = () => {
           const value = input.value.trim();
-          if (value) {
-            item.answerText = value;
-            saveQhavuzState();
-            qhavuzUpdateCardUI(item);
-          }
+          item.answerText = value || null;
+          saveQhavuzState();
+          qhavuzUpdateCardUI(item);
         };
         input.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
-          else if (e.key === 'Escape') { input.value = item.answerText; input.blur(); }
+          else if (e.key === 'Escape') { input.value = item.answerText || ''; input.blur(); }
         });
         input.addEventListener('blur', commit, { once: true });
         wrap.appendChild(input);
@@ -19570,7 +20716,9 @@
         wrap.appendChild(text);
       }
 
-      qhavuzLightboxAnswerRow.appendChild(wrap);
+      content.appendChild(wrap);
+      inner.appendChild(content);
+      qhavuzLightboxAnswerRow.appendChild(inner);
       return;
     }
 
@@ -19597,13 +20745,17 @@
         btn.disabled = true;
       }
 
-      qhavuzLightboxAnswerRow.appendChild(btn);
+      content.appendChild(btn);
     });
+
+    inner.appendChild(content);
+    qhavuzLightboxAnswerRow.appendChild(inner);
   };
 
   const openQhavuzLightbox = (item) => {
     qhavuzLightboxZoom.reset();
     qhavuzLightboxItem = item;
+    qhavuzLightboxAnswerMode = (!item.answer && item.answerText) ? 'open' : 'mc';
     qhavuzLightboxImg.src = '';
     resolveImageSrc(item.image).then((url) => { qhavuzLightboxImg.src = url; });
     qhavuzSyncLightboxSolveBtn();
@@ -19626,11 +20778,64 @@
   const closeQhavuzLightbox = () => {
     qhavuzLightboxBackdrop.classList.remove('is-open');
     qhavuzLightboxZoom.reset();
+    qhavuzInfoBackdrop.classList.remove('is-open');
   };
 
   qhavuzLightboxClose.addEventListener('click', closeQhavuzLightbox);
   qhavuzLightboxBackdrop.addEventListener('click', (e) => {
     if (e.target === qhavuzLightboxBackdrop) closeQhavuzLightbox();
+  });
+
+  // ---- Soru Havuzu: lightbox'taki "i" butonuyla açılan bilgi pop-up'ı ----
+  // Kendi backdrop'u (z-index 260) fotoğraf lightbox'ının (z-index 200)
+  // üzerinde durduğu için lightbox açıkken üstüne binse de her zaman ön
+  // planda görünür, arkada kalmaz.
+  const qhavuzInfoBtn = document.getElementById('qhavuzLightboxInfoBtn');
+  const qhavuzInfoBackdrop = document.getElementById('qhavuzInfoBackdrop');
+  const qhavuzInfoClose = document.getElementById('qhavuzInfoClose');
+  const qhavuzInfoSubjectBadge = document.getElementById('qhavuzInfoSubjectBadge');
+  const qhavuzInfoBookRow = document.getElementById('qhavuzInfoBookRow');
+  const qhavuzInfoBookValue = document.getElementById('qhavuzInfoBookValue');
+  const qhavuzInfoPageRow = document.getElementById('qhavuzInfoPageRow');
+  const qhavuzInfoPageValue = document.getElementById('qhavuzInfoPageValue');
+  const qhavuzInfoDescRow = document.getElementById('qhavuzInfoDescRow');
+  const qhavuzInfoDescValue = document.getElementById('qhavuzInfoDescValue');
+
+  const fillQhavuzInfoRow = (row, valueEl, text) => {
+    const trimmed = (text || '').toString().trim();
+    if (trimmed) {
+      valueEl.textContent = trimmed;
+      row.classList.remove('is-hidden');
+    } else {
+      valueEl.textContent = '';
+      row.classList.add('is-hidden');
+    }
+  };
+
+  const openQhavuzInfoPopup = (item) => {
+    if (!item) return;
+    qhavuzInfoSubjectBadge.textContent = qhavuzSubjectLabel(item);
+    qhavuzInfoSubjectBadge.style.background = qhavuzSubjectColor(item.subject);
+    fillQhavuzInfoRow(qhavuzInfoBookRow, qhavuzInfoBookValue, item.book);
+    fillQhavuzInfoRow(qhavuzInfoPageRow, qhavuzInfoPageValue, item.page);
+    fillQhavuzInfoRow(qhavuzInfoDescRow, qhavuzInfoDescValue, item.description);
+    qhavuzInfoBackdrop.classList.add('is-open');
+  };
+
+  const closeQhavuzInfoPopup = () => {
+    qhavuzInfoBackdrop.classList.remove('is-open');
+  };
+
+  if (qhavuzInfoBtn) {
+    qhavuzInfoBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openQhavuzInfoPopup(qhavuzLightboxItem);
+    });
+  }
+
+  qhavuzInfoClose.addEventListener('click', closeQhavuzInfoPopup);
+  qhavuzInfoBackdrop.addEventListener('click', (e) => {
+    if (e.target === qhavuzInfoBackdrop) closeQhavuzInfoPopup();
   });
 
   // Lightbox içinden doğru cevabı değiştirmek veya "çözüldü" durumunu
