@@ -3706,8 +3706,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     border: none;
     border-radius: 50%;
@@ -4414,6 +4414,19 @@
     color: rgba(18, 18, 18, 0.4);
     font-weight: 500;
     font-style: italic;
+  }
+
+  /* Düzenleme modunda .qhavuz-info-value içine basılan input/textarea:
+     kartın tam genişliğini kullanır, Açıklama alanı çok satırlı olabildiği
+     için serbestçe dikeyde büyütülebilir (resize) bırakılıyor. */
+  .qhavuz-info-input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .qhavuz-info-input--desc {
+    resize: vertical;
+    min-height: 3.2rem;
   }
 
   body.is-anthracite .qhavuz-info-row {
@@ -12295,9 +12308,8 @@
     <div class="qhavuz-tear">
       <span class="qhavuz-tear-line" aria-hidden="true"></span>
       <button type="button" class="qhavuz-tear-pencil" id="qhavuzEditBtn" aria-label="Soruları düzenle" aria-pressed="false">
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 20l4.5-1 10.2-10.2-3.5-3.5L5 15.5 4 20z"/>
-          <path d="M13.3 6.8l3.5 3.5"/>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
         </svg>
       </button>
       <span class="qhavuz-tear-line" aria-hidden="true"></span>
@@ -12581,8 +12593,10 @@
 
 <!-- Soru Havuzu: lightbox'taki (i) butonuna basınca açılan bilgi
      pop-up'ı. Ders/branş etiketini ve soru eklenirken girilen Kaynak
-     (kitap adı), Sayfa ve Açıklama bilgilerini salt-okunur şekilde
-     gösterir; alanlardan biri girilmediyse "—" ile boş olduğu belirtilir. -->
+     (kitap adı), Sayfa ve Açıklama bilgilerini gösterir; düzenleme modu
+     kapalıyken salt-okunur, açıkken bu üç alan yerinde düzenlenebilir
+     (bkz. renderQhavuzInfoField). Bir alan doldurulmadıysa salt-okunur
+     halde "—" ile boş olduğu belirtilir. -->
 <div class="settings-confirm-backdrop" id="qhavuzInfoBackdrop">
   <div class="settings-confirm-card qhavuz-info-card">
     <span class="settings-confirm-title">Soru Bilgisi</span>
@@ -12590,15 +12604,15 @@
     <div class="qhavuz-info-rows">
       <div class="qhavuz-info-row">
         <span class="qhavuz-info-label">Kaynak</span>
-        <span class="qhavuz-info-value" id="qhavuzInfoBook"></span>
+        <div class="qhavuz-info-value" id="qhavuzInfoBook"></div>
       </div>
       <div class="qhavuz-info-row">
         <span class="qhavuz-info-label">Sayfa</span>
-        <span class="qhavuz-info-value" id="qhavuzInfoPage"></span>
+        <div class="qhavuz-info-value" id="qhavuzInfoPage"></div>
       </div>
       <div class="qhavuz-info-row qhavuz-info-row--desc">
         <span class="qhavuz-info-label">Açıklama</span>
-        <span class="qhavuz-info-value" id="qhavuzInfoDesc"></span>
+        <div class="qhavuz-info-value" id="qhavuzInfoDesc"></div>
       </div>
     </div>
     <div class="settings-confirm-actions">
@@ -13448,17 +13462,27 @@
       updateThemeColorMeta(baseColor);
       return;
     }
-    // Birden fazla pop-up üst üste açık olabilir (ör. Soru Havuzu'nda
-    // "Bilgi" pop-up'ı, soru lightbox'ının üstünde açılıyor); üst şeridi
-    // o an GÖRÜNÜRDE en üstte olan (z-index'i en yüksek) pop-up'ın kendi
-    // tonuna göre boyuyoruz.
-    let topEl = null;
-    let topZ = -Infinity;
-    openThemeBackdrops.forEach((el) => {
-      const z = parseFloat(getComputedStyle(el).zIndex) || 0;
-      if (z >= topZ) { topZ = z; topEl = el; }
+    // Aynı anda birden fazla pop-up üst üste açık olabilir (ör. Soru
+    // Havuzu'nda "Bilgi" pop-up'ı, soru lightbox'ının ÜSTÜNDE açılıyor).
+    // Bu durumda üst güvenli alanda GERÇEKTEN görünen renk sadece en
+    // üstteki pop-up'ın kendi tonu değil, ALTTAKİ pop-up'ların da üst
+    // üste binmiş yarı saydam katkılarının TOPLAMIdır (gerçek CSS
+    // compositing böyle çalışır). Sadece en üsttekini kullanmak (eski
+    // davranış) alttaki pop-up ondan daha koyu/opaksa şeridin gerçek
+    // görünen renkten daha AÇIK çıkmasına yol açıyordu — tam olarak Soru
+    // Havuzu'ndaki "Bilgi" pop-up'ında (lightbox'ın üstünde) görülen
+    // uyumsuzluk buydu. Artık açık olan TÜM backdrop'ları en alttakinden
+    // en üsttekine doğru sırayla teker teker harmanlıyoruz.
+    const openList = Array.from(openThemeBackdrops).sort((a, b) => {
+      const za = parseFloat(getComputedStyle(a).zIndex) || 0;
+      const zb = parseFloat(getComputedStyle(b).zIndex) || 0;
+      return za - zb;
     });
-    updateThemeColorMeta(blendWithBackdropTint(baseColor, getBackdropTint(topEl)));
+    let color = baseColor;
+    openList.forEach((el) => {
+      color = blendWithBackdropTint(color, getBackdropTint(el));
+    });
+    updateThemeColorMeta(color);
   };
 
   const watchBackdropForThemeColor = (backdrop) => {
@@ -21540,7 +21564,9 @@
 
   // ---- Soru Havuzu: (i) bilgi pop-up'ı. Lightbox'taki soru için
   // ders/branş etiketini ve Soru Ekle adımında girilen Kaynak (kitap
-  // adı), Sayfa ve Açıklama bilgilerini salt-okunur şekilde gösterir. ----
+  // adı), Sayfa ve Açıklama bilgilerini gösterir. Düzenleme modu
+  // kapalıyken salt-okunur; açıkken bu üç alan doğrudan bu pop-up
+  // içinden düzenlenebilir/kaydedilebilir. ----
   const qhavuzInfoBackdrop = document.getElementById('qhavuzInfoBackdrop');
   const qhavuzInfoSubjectBadge = document.getElementById('qhavuzInfoSubjectBadge');
   const qhavuzInfoBook = document.getElementById('qhavuzInfoBook');
@@ -21548,12 +21574,41 @@
   const qhavuzInfoDesc = document.getElementById('qhavuzInfoDesc');
   const qhavuzInfoCloseBtn = document.getElementById('qhavuzInfoCloseBtn');
 
-  // Bir alan doldurulmadıysa metin yerine "—" gösterip .is-empty ile
-  // soluk/italik yapıyoruz; böylece boş bırakıldığı açıkça anlaşılıyor.
-  const qhavuzSetInfoValue = (el, value) => {
+  // `containerEl` (qhavuzInfoBook/Page/Desc) içine, düzenleme modu
+  // KAPALIYKEN salt-okunur bir metin (boşsa "—" ve soluk/italik), AÇIKKEN
+  // ise gerçek zamanlı düzenlenip odaktan çıkınca (blur) kaydedilen bir
+  // input/textarea basar. Diğer düzenleme alanlarıyla (cevap metni, soru
+  // açıklaması) aynı `page9-add-custom-input` dilini paylaşır.
+  const renderQhavuzInfoField = (containerEl, { value, placeholder, maxLength, multiline, numeric, onCommit }) => {
+    containerEl.innerHTML = '';
+    containerEl.classList.remove('is-empty');
+
+    if (qhavuzEditMode) {
+      const field = document.createElement(multiline ? 'textarea' : 'input');
+      if (!multiline) field.type = 'text';
+      if (numeric) field.setAttribute('inputmode', 'numeric');
+      if (multiline) field.rows = 1;
+      field.className = 'page9-add-custom-input qhavuz-info-input' + (multiline ? ' qhavuz-info-input--desc' : '');
+      if (maxLength) field.maxLength = maxLength;
+      field.placeholder = placeholder;
+      field.value = value || '';
+
+      const commit = () => {
+        const v = field.value.trim();
+        onCommit(v || null);
+      };
+      field.addEventListener('keydown', (e) => {
+        if (!multiline && e.key === 'Enter') { e.preventDefault(); field.blur(); }
+        else if (e.key === 'Escape') { field.value = value || ''; field.blur(); }
+      });
+      field.addEventListener('blur', commit, { once: true });
+      containerEl.appendChild(field);
+      return;
+    }
+
     const hasValue = value !== null && value !== undefined && String(value).trim() !== '';
-    el.textContent = hasValue ? value : '—';
-    el.classList.toggle('is-empty', !hasValue);
+    containerEl.textContent = hasValue ? value : '—';
+    containerEl.classList.toggle('is-empty', !hasValue);
   };
 
   const openQhavuzInfo = () => {
@@ -21561,9 +21616,26 @@
     const item = qhavuzLightboxItem;
     qhavuzInfoSubjectBadge.textContent = qhavuzSubjectLabel(item);
     qhavuzInfoSubjectBadge.style.background = qhavuzSubjectColor(item.subject);
-    qhavuzSetInfoValue(qhavuzInfoBook, item.book);
-    qhavuzSetInfoValue(qhavuzInfoPage, item.page);
-    qhavuzSetInfoValue(qhavuzInfoDesc, item.description);
+    renderQhavuzInfoField(qhavuzInfoBook, {
+      value: item.book,
+      placeholder: 'Kitap adı ekle...',
+      maxLength: 80,
+      onCommit: (v) => { item.book = v; saveQhavuzState(); }
+    });
+    renderQhavuzInfoField(qhavuzInfoPage, {
+      value: item.page,
+      placeholder: 'Sayfa no ekle...',
+      maxLength: 12,
+      numeric: true,
+      onCommit: (v) => { item.page = v; saveQhavuzState(); }
+    });
+    renderQhavuzInfoField(qhavuzInfoDesc, {
+      value: item.description,
+      placeholder: 'Açıklama ekle...',
+      maxLength: 500,
+      multiline: true,
+      onCommit: (v) => { item.description = v; saveQhavuzState(); }
+    });
     qhavuzInfoBackdrop.classList.add('is-open');
   };
 
