@@ -1702,9 +1702,10 @@
   }
 
   .theme-swatch-dots {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.6rem;
   }
 
   .swatch-dot {
@@ -1718,6 +1719,23 @@
   .swatch-dot.is-active {
     background: #000;
     transform: scale(1.3);
+  }
+
+  /* İlerlerken 4 sabit noktanın üzerinde/arasında kayan gösterge; renk
+     sayısı (17+) ne olursa olsun sadece bu 4 nokta görünür kalır, konumu
+     mevcut renge göre yumuşak bir animasyonla değişir. */
+  .swatch-dot-tracker {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 0.62rem;
+    height: 0.62rem;
+    border-radius: 50%;
+    background: #000;
+    transform: translate(0, -50%);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+    z-index: 1;
   }
 
   /* ---------- Sayfa 4: "Şimdi Ne Yapsam?" karar çarkı ---------- */
@@ -2199,23 +2217,35 @@
   }
 
   /* ---------- Sayfa 8: Gündelik (Görevler / Rutinler) ----------
-     Sayfa 2'den farklı olarak başlık burada sabit kalmaz: tüm sayfa
-     (başlık + segmented control + kart listesi) tek parça halinde birlikte
-     kayar. Bu yüzden iç içe ayrı bir kaydırma kutusu yok; kaydırma
-     doğrudan #page-8 üzerinde, kartlarla aynı hizada gerçekleşiyor. */
+     Soru Havuzu (#page-camera) ile aynı mantıkla çalışıyor: başlık (+
+     alt başlık, Görevler/Rutinler sekmesi, katlanır grup paneli)
+     sayfanın üstünde SABİT duruyor, aşağı kaydırıldığında kaymıyor.
+     Yalnızca altındaki .page8-scroll kutusu kendi içinde kayıyor. */
   #page-8 {
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
     justify-content: flex-start;
-    padding-top: calc(48px + env(safe-area-inset-top));
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .page8-scroll {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     overflow-y: auto;
-    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    box-sizing: border-box;
+    padding: 0.9rem 24px calc(96px + env(safe-area-inset-bottom));
   }
 
-  #page-8::-webkit-scrollbar {
+  .page8-scroll::-webkit-scrollbar {
     display: none;
   }
 
@@ -2238,8 +2268,8 @@
     display: none;
   }
 
-  /* Sayfa yatayda ortalanmış kalsın diye (justify-content artık
-     flex-start olduğundan) ölçüsü sınırlı kapsayıcı kendi kendini ortalar. */
+  /* Kaydırılan alandaki içerik (Görevler/Rutinler listeleri) kendi
+     kapsayıcısında ortalanır; artık .page8-scroll'un içinde yaşıyor. */
   .page8-wrap {
     width: 100%;
     max-width: 340px;
@@ -2249,29 +2279,252 @@
     gap: 1rem;
   }
 
+  /* Başlık kutusu Soru Havuzu'ndaki (.qhavuz-header) gibi sayfanın
+     üstünde sabit duruyor: kendi üst dolgusunu (safe-area dahil) ve
+     yatay sayfa dolgusunu kendisi taşıyor. Artık üstte tek başına, geniş
+     ve ferah duran bir başlık + altında duvara kazınmış gibi duran ince
+     kontroller var; hiçbir kontrol artık ayrı, gölgeli, "yapıştırılmış"
+     bir buton gibi durmuyor. */
   .page8-header {
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
+    gap: 0.55rem;
     width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    padding: calc(18px + env(safe-area-inset-top)) 24px 0.5rem;
   }
 
-  .page8-header-top {
+  .page8-titlebar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
+    gap: 0.5rem;
     width: 100%;
+  }
+
+  /* Başlık satırın solunda; kalem ve kategori ikonu sağda, aynı
+     satırda duruyor. */
+  .page8-titlebar h1 {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: "Playfair Display", "Archivo Expanded", "Space Grotesk", serif;
+    font-weight: 800;
+    font-size: clamp(1.6rem, 7vw, 2.2rem);
+    letter-spacing: 0.015em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--theme-text, #fff);
+    transition: color 0.5s ease;
+  }
+
+  /* ---- Düzenle kalemi ----
+     Başlığın sağında, yuvarlak, dolgusuz ve gölgesiz bir ikon butonu;
+     artık daha büyük ve dolgun (filled) çizilen bir kalem simgesi
+     taşıyor, bu yüzden daha yüksek bir temel opaklıkla daha belirgin
+     duruyor. */
+  .page8-tear-pencil {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--theme-text, #fff);
+    opacity: 0.8;
+    cursor: pointer;
+    transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  }
+
+  .page8-tear-pencil:active {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+
+  .page8-tear-pencil.is-active {
+    opacity: 1;
+    color: #000;
+    background-color: var(--accent-color, #ff90e8);
   }
 
   .page8-subtitle {
     font-family: "Space Grotesk", sans-serif;
     font-weight: 600;
     font-size: 0.85rem;
+    text-align: center;
     color: var(--theme-text, #fff);
     opacity: 0.75;
     transition: color 0.5s ease;
-    margin-top: -0.6rem;
+  }
+
+  /* ---- Kategoriler/Rutin Grupları paneli aç/kapa ikonu ----
+     Artık metin içermiyor; düzenle kalemiyle aynı boyut ve stile sahip,
+     başlığın solunda duran büyük, yuvarlak bir ikon butonu. Panel
+     açıkken kalemin "aktif" haliyle aynı şekilde vurgu rengiyle dolar. */
+  .page8-groups-toggle {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--theme-text, #fff);
+    opacity: 0.8;
+    cursor: pointer;
+    transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  }
+
+  .page8-groups-toggle:active {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+
+  .page8-groups-toggle.is-open {
+    opacity: 1;
+    color: #000;
+    background-color: var(--accent-color, #ff90e8);
+  }
+
+  /* ---- Kategoriler / Rutin Grupları pop-up'ı ----
+     settings-confirm-backdrop + page11-modal-card ile aynı dili
+     kullanır (beyaz kart, kalın siyah çerçeve). Chip'ler ve boş durum
+     metni buna göre koyu renkte çiziliyor (tema rengini değil, sabit
+     koyu rengi kullanıyorlar çünkü artık her zaman beyaz bir kart
+     üzerindeler). */
+  .page8-groups-modal-card {
+    max-width: 340px;
+    gap: 1rem;
+  }
+
+  .page8-groups-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    width: 100%;
+    max-height: 50vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 0.15rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .page8-groups-chip-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Etiketler artık düz beyaz zemin üzerinde küçük bir renk noktasıyla
+     değil, doğrudan grubun kendi rengiyle boyanmış "yapışkan" rozetler
+     olarak çiziliyor (renk JS tarafından satır-içi style ile atanıyor,
+     böylece kategori rengi değişince pop-up da anında güncelleniyor);
+     metin rengi zemin rengine göre otomatik siyah/beyaz seçiliyor.
+     Kalın siyah çerçeve + ofsetli gölge dokununca hafifçe basılıp geri
+     kalkıyor. */
+  .page8-groups-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.8rem;
+    border: 2.5px solid #000;
+    border-radius: 0.75em;
+    box-shadow: 3px 3px 0px 0px #000;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.82rem;
+    cursor: pointer;
+    max-width: 100%;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+  }
+
+  .page8-groups-chip:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px 0px #000;
+  }
+
+  .page8-groups-chip:active {
+    transform: translate(1.5px, 1.5px);
+    box-shadow: 1.5px 1.5px 0px 0px #000;
+  }
+
+  .page8-groups-chip-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .page8-groups-empty {
+    width: 100%;
+    padding: 0.3rem 0.1rem 0.15rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #121212;
+    opacity: 0.55;
+  }
+
+  /* Bir grup etiketine dokunulduğunda kaydırılıp bulunan kart, kısa süreli
+     bir vurguyla (accent renginde parlayıp sönen çerçeve) göze çarpar. */
+  /* Bir grup etiketine dokunulduğunda kaydırılıp bulunan kart, uygulamanın
+     kendi "kağıt kabartma" diliyle (buton hover/active'lerindeki
+     translate + büyüyen gölge mantığıyla aynı) iki kez hafifçe yükselip
+     iner; her yükselişte çerçeve ve gölge kısa süreliğine vurgu rengine
+     döner, böylece kart normal gölgesi hiç bozulmadan net ve göz alıcı
+     bir şekilde işaretlenir. */
+  .page8-group-card.is-highlighted {
+    animation: page8GroupHighlight 2.2s cubic-bezier(0.45, 0, 0.2, 1);
+  }
+
+  @keyframes page8GroupHighlight {
+    0% {
+      transform: translate(0, 0);
+      border-color: #000;
+      box-shadow: 5px 5px 0px 0px #000;
+    }
+    11% {
+      transform: translate(-3px, -3px);
+      border-color: var(--accent-color, #ff90e8);
+      box-shadow: 8px 8px 0px 0px var(--accent-color, #ff90e8);
+    }
+    25% {
+      transform: translate(0, 0);
+      border-color: #000;
+      box-shadow: 5px 5px 0px 0px #000;
+    }
+    36% {
+      transform: translate(-3px, -3px);
+      border-color: var(--accent-color, #ff90e8);
+      box-shadow: 8px 8px 0px 0px var(--accent-color, #ff90e8);
+    }
+    50% {
+      transform: translate(0, 0);
+      border-color: #000;
+      box-shadow: 5px 5px 0px 0px #000;
+    }
+    61% {
+      transform: translate(-3px, -3px);
+      border-color: var(--accent-color, #ff90e8);
+      box-shadow: 8px 8px 0px 0px var(--accent-color, #ff90e8);
+    }
+    78% {
+      transform: translate(0, 0);
+      border-color: #000;
+      box-shadow: 5px 5px 0px 0px #000;
+    }
+    100% {
+      transform: translate(0, 0);
+      border-color: #000;
+      box-shadow: 5px 5px 0px 0px #000;
+    }
   }
 
   /* Artık bağımsız bir kaydırma kutusu değil; sadece görünürlük
@@ -3716,7 +3969,7 @@
     opacity: 0;
     pointer-events: none;
     transform: scale(0.9);
-    transform-origin: bottom left;
+    transform-origin: bottom center;
     transition: opacity 0.15s ease, transform 0.15s ease;
   }
 
@@ -9158,6 +9411,45 @@
     backdrop-filter: blur(2px);
   }
 
+  /* ---------- Renk Paleti alt sayfası: her slayt düz bir renk zemini,
+     tam ortasında o rengin hex kodunu ve altında adını gösterir. Sadece
+     görüntüleme/öğrenme amaçlıdır; buradan tıklayıp bir renk uygulanmaz. */
+  .color-palette-preview {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .color-palette-hex {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+    backdrop-filter: blur(2px);
+    text-transform: uppercase;
+  }
+
+  .color-palette-name-tag {
+    position: absolute;
+    bottom: 0.85rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0.28rem 0.75rem;
+    border-radius: 999px;
+    backdrop-filter: blur(2px);
+    white-space: nowrap;
+  }
+
   /* ---------- Hafta başlangıcı: kayan siyah pil ile segmented control ----------
      Alt nav bar'daki (.nav-slider) mantığın birebir aynısı: seçili
      seçeneğin arkasında yumuşakça kayan siyah bir alan durur. */
@@ -11135,8 +11427,8 @@
 
           <button type="button" class="settings-row settings-row-link" id="settingsPatternsLink">
             <div class="settings-row-text">
-              <span class="settings-row-title">Desenler</span>
-              <span class="settings-row-desc">Arka plana ince bir doku ekle</span>
+              <span class="settings-row-title">Renk Paleti</span>
+              <span class="settings-row-desc">Uygulamadaki tüm renkleri ve hex kodlarını görüntüle</span>
             </div>
             <div class="settings-row-link-right">
               <span class="settings-pattern-chip" id="settingsPatternChip" aria-hidden="true"></span>
@@ -11327,34 +11619,58 @@
     </div>
   </div>
 
+  <!-- Sayfa 8: Kategoriler / Rutin Grupları pop-up'ı. Başlıktaki etiket
+       ikonuna dokununca açılır; aktif sekmeye (Görevler/Rutinler) göre
+       eklenmiş her grubu kesikli çerçeveli birer "etiket" (chip) halinde
+       listeler. Bir etikete dokununca pop-up kapanır ve o grubun kartına
+       kaydırılır. -->
+  <div class="settings-confirm-backdrop" id="page8GroupsBackdrop">
+    <div class="page11-modal-card page8-groups-modal-card">
+      <div class="exam-resources-header">
+        <div class="page11-modal-heading">
+          <span class="page11-modal-title" id="page8GroupsModalTitle">Kategoriler</span>
+          <span class="page11-modal-subtitle">Eklediğin gruplara göz at, birine dokunarak kartına git</span>
+        </div>
+        <button type="button" class="delete-btn exam-resources-close" id="page8GroupsCloseBtn" aria-label="Kapat">×</button>
+      </div>
+      <div class="page8-groups-chip-list" id="page8GroupsChipList"></div>
+    </div>
+  </div>
+
   <section class="page" id="page-8">
-    <div class="page8-wrap">
-      <div class="page8-header">
-        <div class="page8-header-top">
-          <h1>Gündelik</h1>
-          <button type="button" class="add-task-btn edit-task-btn" id="page8EditBtn" aria-label="Düzenle" aria-pressed="false">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-              <path d="M4 20l4.5-1 10.2-10.2-3.5-3.5L5 15.5 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M13.3 6.8l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </button>
-        </div>
-        <span class="page8-subtitle">Kategorilere ve rutinlere ayır, renklendir</span>
-        <div class="settings-segmented page8-segmented" id="page8Segmented">
-          <div class="settings-segmented-slider" id="page8SegmentedSlider"></div>
-          <button type="button" class="settings-segmented-option is-active" data-value="tasks">Görevler</button>
-          <button type="button" class="settings-segmented-option" data-value="routines">Rutinler</button>
-        </div>
+    <div class="page8-header">
+      <div class="page8-titlebar">
+        <h1>Gündelik</h1>
+        <button type="button" class="page8-tear-pencil" id="page8EditBtn" aria-label="Düzenle" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor">
+            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+          </svg>
+        </button>
+        <button type="button" class="page8-groups-toggle" id="page8GroupsToggle" aria-expanded="false" aria-label="Kategoriler">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor">
+            <path d="M17.63 5.84A2 2 0 0 0 16 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h11a2 2 0 0 0 1.63-.84L22 12z"/>
+          </svg>
+        </button>
       </div>
 
-      <div class="page8-view" id="page8TasksView">
-        <div class="page8-group-list" id="page8CategoryList"></div>
-        <button type="button" class="add-task-btn page8-add-group-btn" id="page8AddCategoryBtn">+ Kategori</button>
+      <div class="settings-segmented page8-segmented" id="page8Segmented">
+        <div class="settings-segmented-slider" id="page8SegmentedSlider"></div>
+        <button type="button" class="settings-segmented-option is-active" data-value="tasks">Görevler</button>
+        <button type="button" class="settings-segmented-option" data-value="routines">Rutinler</button>
       </div>
+    </div>
 
-      <div class="page8-view is-hidden" id="page8RoutinesView">
-        <div class="page8-group-list" id="page8RoutineGroupList"></div>
-        <button type="button" class="add-task-btn page8-add-group-btn" id="page8AddRoutineGroupBtn">+ Rutin Grubu</button>
+    <div class="page8-scroll" id="page8Scroll">
+      <div class="page8-wrap">
+        <div class="page8-view" id="page8TasksView">
+          <div class="page8-group-list" id="page8CategoryList"></div>
+          <button type="button" class="add-task-btn page8-add-group-btn" id="page8AddCategoryBtn">+ Kategori</button>
+        </div>
+
+        <div class="page8-view is-hidden" id="page8RoutinesView">
+          <div class="page8-group-list" id="page8RoutineGroupList"></div>
+          <button type="button" class="add-task-btn page8-add-group-btn" id="page8AddRoutineGroupBtn">+ Rutin Grubu</button>
+        </div>
       </div>
     </div>
   </section>
@@ -11903,22 +12219,22 @@
           <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-      <span class="calendar-topbar-title">Desenler</span>
+      <span class="calendar-topbar-title">Renk Paleti</span>
       <span class="calendar-topbar-spacer" aria-hidden="true"></span>
     </div>
 
     <div class="theme-swatch-card">
       <div class="theme-swatch-viewport" id="patternSwatchViewport">
-        <!-- Her desen için bir .theme-swatch-slide, JS tarafından ekleniyor -->
+        <!-- Her renk için bir .theme-swatch-slide, JS tarafından ekleniyor -->
       </div>
       <div class="theme-swatch-bar">
-        <button type="button" class="swatch-arrow" id="patternSwatchPrev" aria-label="Önceki desen">
+        <button type="button" class="swatch-arrow" id="patternSwatchPrev" aria-label="Önceki renk">
           <svg viewBox="0 0 24 24" width="16" height="16">
             <path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
         <div class="theme-swatch-dots" id="patternSwatchDots"></div>
-        <button type="button" class="swatch-arrow" id="patternSwatchNext" aria-label="Sonraki desen">
+        <button type="button" class="swatch-arrow" id="patternSwatchNext" aria-label="Sonraki renk">
           <svg viewBox="0 0 24 24" width="16" height="16">
             <path d="M9 4l8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -13181,6 +13497,23 @@
   // Ortalama parlaklığa göre tik işareti için okunabilir renk döndürür.
   const getCheckColorForGradient = (gradient) =>
     getGradientLuminance(gradient) < 0.4 ? '#ffffff' : '#000000';
+
+  // Tek bir hex renk için (#rrggbb) göreli parlaklığa göre okunabilir
+  // metin rengi döndürür; Gündelik pop-up'ındaki kategori/rutin grubu
+  // etiketleri artık doğrudan grubun rengiyle boyandığı için, üzerindeki
+  // yazının koyu renklerde beyaz, açık renklerde siyah kalmasını sağlar.
+  const getReadableTextColor = (hex) => {
+    if (!/^#[0-9a-fA-F]{6}$/.test(hex || '')) return '#000000';
+    let r = parseInt(hex.slice(1, 3), 16) / 255;
+    let g = parseInt(hex.slice(3, 5), 16) / 255;
+    let b = parseInt(hex.slice(5, 7), 16) / 255;
+    const toLinear = (v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+    r = toLinear(r);
+    g = toLinear(g);
+    b = toLinear(b);
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return luminance < 0.4 ? '#ffffff' : '#000000';
+  };
 
   // Sayfa 1'deki arka planla eşleşen, o an "seçili" olan tema; başlangıçta
   // gerçekte uygulanmış olan temayla (themeIndex, APP_STATE.theme'den okunur)
@@ -15756,46 +16089,7 @@
   };
 
   const patterns = [
-    { id: 'none', name: 'Yok', backgroundImage: 'none', backgroundSize: 'auto', alpha: 0 },
-    {
-      // Balık pulu / dalga deseni: birbirini tamamlayan iki yarım daire
-      // sırası, döşendiğinde kenarda hiçbir kesinti veya yarım motif
-      // bırakmadan sonsuza uzar; bu yüzden çentik/Dynamic Island gibi
-      // güvenli alan (safe area) kenarlarına taştığında da doğal görünür.
-      id: 'waves',
-      name: 'Dalgalar',
-      backgroundImage:
-        'radial-gradient(circle at 100% 50%, transparent 19px, currentColor 20px, currentColor 21px, transparent 22px),' +
-        'radial-gradient(circle at 0% 50%, transparent 19px, currentColor 20px, currentColor 21px, transparent 22px)',
-      backgroundSize: '42px 42px',
-      alpha: 0.16
-    },
-    {
-      // Birbirini kesen iki çapraz çizgi grubu elmas/baklava dilimi
-      // ızgarası oluşturur; çizgiler kart kenarında da kesintisiz devam
-      // ettiğinden safe area'da kırpılmış/garip görünen bir motif kalmaz.
-      id: 'diamonds',
-      name: 'Elmas',
-      backgroundImage:
-        'repeating-linear-gradient(45deg, currentColor 0 1.6px, transparent 1.6px 22px),' +
-        'repeating-linear-gradient(-45deg, currentColor 0 1.6px, transparent 1.6px 22px)',
-      backgroundSize: 'auto',
-      alpha: 0.14
-    },
-    {
-      // Her karonun dört köşesinde küçük bir nokta kümesi: yonca/dört
-      // yapraklı bir doku hissi verir, her karo kendi içinde tamamlandığı
-      // için kenarda yarım kalan bir şekil oluşmaz.
-      id: 'clover',
-      name: 'Yonca',
-      backgroundImage:
-        'radial-gradient(circle at 25% 25%, currentColor 5px, transparent 5.6px),' +
-        'radial-gradient(circle at 75% 25%, currentColor 5px, transparent 5.6px),' +
-        'radial-gradient(circle at 25% 75%, currentColor 5px, transparent 5.6px),' +
-        'radial-gradient(circle at 75% 75%, currentColor 5px, transparent 5.6px)',
-      backgroundSize: '30px 30px',
-      alpha: 0.2
-    }
+    { id: 'none', name: 'Yok', backgroundImage: 'none', backgroundSize: 'auto', alpha: 0 }
   ];
 
   const patternById = (id) => patterns.find((p) => p.id === id) || patterns[0];
@@ -15856,7 +16150,6 @@
     currentPatternId = id;
     applyPatternLayer(id, persist); // sadece kullanıcı bir desen SEÇTİĞİNDE solduruyoruz
     updateSettingsPatternChip();
-    updatePatternSwatchSelection();
     if (persist) saveAppState({ pattern: id });
   };
 
@@ -15870,91 +16163,129 @@
     refreshPatternSlideColors();
   };
 
-  // ---- Desenler alt sayfası: Sayfa 3'teki kart/viewport/dots/ok
+  // ---- Renk Paleti alt sayfası: Sayfa 3'teki kart/viewport/dots/ok
   //      bileşenlerini (.theme-swatch-card ve alt sınıfları) aynen
-  //      kullanır; farkı hex-kod açma efekti olmaması ve her slaytın bir
-  //      gradyan yerine gerçek desen önizlemesi göstermesidir. ----
+  //      kullanır. Uygulamada kullanılan tüm renkleri (Renk teması,
+  //      Vurgu rengi ve çark/kategori paletindeki renkler) hex koduna göre
+  //      tekilleştirip sırayla gösterir. Sadece görüntüleme/öğrenme
+  //      amaçlıdır: tıklanıp herhangi bir renk "uygulanmaz", her slaytın
+  //      tam ortasında o rengin hex kodu, altında da adı yazar. ----
+  const WHEEL_PALETTE_COLOR_NAMES = {
+    '#ff90e8': 'Pembe',
+    '#ffd23f': 'Sarı',
+    '#6ec6ff': 'Mavi',
+    '#ff5c5c': 'Kırmızı',
+    '#8fe3a0': 'Yeşil',
+    '#c9a6ff': 'Mor',
+    '#ffb46e': 'Turuncu',
+    '#9fb8ff': 'Açık Mavi',
+    '#3f5aa8': 'Çivit Mavisi',
+    '#7452a8': 'Eflatun',
+    '#272727': 'Antresit'
+  };
+
+  // Tema (themes), Vurgu rengi (ACCENT_COLOR_PALETTE) ve çark/kategori
+  // paletindeki (WHEEL_PALETTE) tüm renkleri, hex koduna göre tekilleştirip
+  // tek bir listede birleştirir (aynı renk birden fazla listede geçiyorsa
+  // sadece bir kez gösterilir).
+  const buildAppColorPalette = () => {
+    const byHex = new Map();
+    themes.forEach((t) => {
+      const key = t.color.toLowerCase();
+      if (!byHex.has(key)) byHex.set(key, { name: t.name, color: t.color });
+    });
+    ACCENT_COLOR_PALETTE.forEach((a) => {
+      const key = a.color.toLowerCase();
+      if (!byHex.has(key)) byHex.set(key, { name: a.name, color: a.color });
+    });
+    WHEEL_PALETTE.forEach((hex) => {
+      const key = hex.toLowerCase();
+      if (!byHex.has(key)) byHex.set(key, { name: WHEEL_PALETTE_COLOR_NAMES[key] || hex.toUpperCase(), color: hex });
+    });
+    return Array.from(byHex.values());
+  };
+
+  const appColorPalette = buildAppColorPalette();
+
   const patternSwatchViewport = document.getElementById('patternSwatchViewport');
   const patternSwatchDots = document.getElementById('patternSwatchDots');
   const patternSwatchPrev = document.getElementById('patternSwatchPrev');
   const patternSwatchNext = document.getElementById('patternSwatchNext');
 
-  let patternSlideIndex = Math.max(
-    patterns.findIndex((p) => p.id === currentPatternId),
-    0
-  );
+  let patternSlideIndex = 0;
   const patternSlideEls = [];
 
-  patterns.forEach((pattern, i) => {
+  appColorPalette.forEach((item, i) => {
     const slide = document.createElement('div');
     slide.className = 'theme-swatch-slide' + (i === patternSlideIndex ? ' is-active' : '');
 
-    const preview = document.createElement('button');
-    preview.type = 'button';
-    preview.className = 'pattern-preview';
-    const previewColorStr = hexToRgba(themes[themeIndex].text, pattern.alpha);
-    preview.style.backgroundColor = themes[themeIndex].gradient;
-    preview.style.backgroundImage = renderPatternBackground(pattern, previewColorStr);
-    preview.style.backgroundSize = pattern.backgroundSize;
-    preview.style.color = previewColorStr;
-    preview.setAttribute('aria-label', pattern.name + ' desenini seç');
+    // Zemin rengine göre okunaklı yazı rengi ve karşıt, yarı saydam rozet
+    // zemini seçilir (koyu renk zemininde beyaz yazı/koyu rozet, açık renk
+    // zemininde siyah yazı/açık rozet).
+    const textColor = getCheckColorForGradient(item.color);
+    const badgeBg = textColor === '#ffffff' ? 'rgba(0, 0, 0, 0.35)' : 'rgba(255, 255, 255, 0.55)';
 
-    const label = document.createElement('span');
-    label.className = 'pattern-preview-label';
-    label.textContent = pattern.name;
-    preview.appendChild(label);
+    const preview = document.createElement('div');
+    preview.className = 'color-palette-preview';
+    preview.style.backgroundColor = item.color;
+    preview.setAttribute('aria-label', item.name + ' — ' + item.color.toUpperCase());
 
-    const check = document.createElement('span');
-    check.className = 'swatch-check' + (pattern.id === currentPatternId ? ' is-selected' : '');
-    check.style.setProperty('--swatch-check-color', getCheckColorForGradient(themes[themeIndex].gradient));
-    check.textContent = '✓';
+    const hex = document.createElement('span');
+    hex.className = 'color-palette-hex';
+    hex.style.color = textColor;
+    hex.style.background = badgeBg;
+    hex.textContent = item.color.toUpperCase();
+    preview.appendChild(hex);
 
-    preview.addEventListener('click', () => {
-      if (pattern.id === currentPatternId) return; // zaten seçiliyse tekrar tetikleme
-      setPattern(pattern.id);
-    });
+    const nameTag = document.createElement('span');
+    nameTag.className = 'color-palette-name-tag';
+    nameTag.style.color = textColor;
+    nameTag.style.background = badgeBg;
+    nameTag.textContent = item.name;
+    preview.appendChild(nameTag);
 
     slide.appendChild(preview);
-    slide.appendChild(check);
     patternSwatchViewport.appendChild(slide);
     patternSlideEls.push(slide);
-
-    const dot = document.createElement('span');
-    dot.className = 'swatch-dot' + (i === patternSlideIndex ? ' is-active' : '');
-    patternSwatchDots.appendChild(dot);
   });
 
+  // ---- Takip noktaları: renk sayısı kadar (17+) nokta yerine, her zaman
+  //      sabit 4 nokta gösterilir. İlerlerken bu 4 nokta arasında kayan
+  //      küçük bir gösterge (tracker), o an listenin neresinde olduğumuz
+  //      hissini vermek için yumuşak bir animasyonla konum değiştirir. ----
+  const TRACK_DOT_COUNT = 4;
+  const trackDotEls = [];
+  for (let i = 0; i < TRACK_DOT_COUNT; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'swatch-dot';
+    patternSwatchDots.appendChild(dot);
+    trackDotEls.push(dot);
+  }
+  const swatchDotTracker = document.createElement('span');
+  swatchDotTracker.className = 'swatch-dot-tracker';
+  patternSwatchDots.appendChild(swatchDotTracker);
+
   const updatePatternSwatchDots = () => {
-    Array.from(patternSwatchDots.children).forEach((dot, i) => {
-      dot.classList.toggle('is-active', i === patternSlideIndex);
-    });
+    const total = patternSlideEls.length;
+    // Toplam renk sayısı 4'ten fazla olsa da göstergeyi hep 0-3 aralığındaki
+    // en yakın noktaya orantılı olarak yerleştiriyoruz (ilk renkte 1. nokta,
+    // son renkte 4. nokta, aradakiler orantıyla dağılıyor).
+    const progress = total > 1 ? patternSlideIndex / (total - 1) : 0;
+    const groupIndex = Math.min(TRACK_DOT_COUNT - 1, Math.round(progress * (TRACK_DOT_COUNT - 1)));
+    const targetDot = trackDotEls[groupIndex];
+    const targetCenter = targetDot.offsetLeft + targetDot.offsetWidth / 2;
+    const trackerOffset = targetCenter - swatchDotTracker.offsetWidth / 2;
+    swatchDotTracker.style.transform = `translate(${trackerOffset}px, -50%)`;
   };
+  updatePatternSwatchDots();
 
-  const updatePatternSwatchSelection = () => {
-    patternSlideEls.forEach((slide, i) => {
-      const check = slide.querySelector('.swatch-check');
-      if (check) check.classList.toggle('is-selected', patterns[i].id === currentPatternId);
-    });
-  };
+  // Renk Paleti sabit renkler gösterdiği için tema değişince yeniden
+  // boyanmaları gerekmez; eski tema-değişim kancasının (bkz. yukarıdaki
+  // window.onThemeSelectionChanged) hâlâ çağırdığı bu fonksiyon adını
+  // geriye dönük uyumluluk için boş bırakıyoruz.
+  const refreshPatternSlideColors = () => {};
 
-  // Slaytların içindeki önizlemelerin zeminini/rengini tema değişince
-  // (veya ilk açılışta) günceller.
-  const refreshPatternSlideColors = () => {
-    patternSlideEls.forEach((slide, i) => {
-      const pattern = patterns[i];
-      const preview = slide.querySelector('.pattern-preview');
-      const check = slide.querySelector('.swatch-check');
-      if (preview) {
-        const colorStr = hexToRgba(themes[themeIndex].text, pattern.alpha);
-        preview.style.backgroundColor = themes[themeIndex].gradient;
-        preview.style.backgroundImage = renderPatternBackground(pattern, colorStr);
-        preview.style.color = colorStr;
-      }
-      if (check) check.style.setProperty('--swatch-check-color', getCheckColorForGradient(themes[themeIndex].gradient));
-    });
-  };
-
-  // direction: 1 = sağa (sonraki desen), -1 = sola (önceki desen)
+  // direction: 1 = sağa (sonraki renk), -1 = sola (önceki renk)
   const goToPatternSwatch = (newIndex, direction) => {
     const total = patternSlideEls.length;
     newIndex = (newIndex + total) % total;
@@ -15980,6 +16311,20 @@
 
   patternSwatchPrev.addEventListener('click', () => goToPatternSwatch(patternSlideIndex - 1, -1));
   patternSwatchNext.addEventListener('click', () => goToPatternSwatch(patternSlideIndex + 1, 1));
+
+  // Sağ/sol ok tuşlarıyla da renkler arasında gezinilebilir; sadece Renk
+  // Paleti sayfası açıkken (body.is-patterns-open) çalışır, böylece diğer
+  // sayfalardaki olası ok tuşu kullanımlarıyla çakışmaz.
+  document.addEventListener('keydown', (e) => {
+    if (!document.body.classList.contains('is-patterns-open')) return;
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      goToPatternSwatch(patternSlideIndex + 1, 1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      goToPatternSwatch(patternSlideIndex - 1, -1);
+    }
+  });
 
   // ---- Ayarlar > Desenler satırı: alt sayfayı aç/kapat (Sayfa 5 -> Sayfa 6
   //      Takvim geçişiyle birebir aynı goToPage akışı, nav bar aynı şekilde
@@ -16167,10 +16512,13 @@
       clearPressTimer();
       pressTimer = setTimeout(() => {
         if (!pressMoved) {
+          // Balon, satırın sabit bir köşesine değil, parmağın/imlecin
+          // gerçekten bastığı noktaya göre açılsın diye o anki koordinatlar
+          // da iletiliyor (bkz. showPage8CopyBubble).
           showPage8CopyBubble(text, item.text, {
             onEdit: () => { if (typeof onEditText === 'function') onEditText(); },
             onDelete
-          });
+          }, pressStartX, pressStartY);
         }
       }, LONG_PRESS_MS);
     };
@@ -16273,7 +16621,13 @@
   // Düzenle, Sil. `actions.onEdit` verilmişse Düzenle satırı, `actions.onDelete`
   // verilmişse Sil satırı da menüye eklenir; verilmemişse o satır hiç
   // gösterilmez (ör. grup ismi için sadece Kopyala anlamlı olabilir).
-  const showPage8CopyBubble = (anchorEl, value, actions) => {
+  // `touchX`/`touchY` verilmişse (basılı tutmanın gerçek koordinatı), menü
+  // -- Soru Havuzu'ndaki bağlam menüsüyle aynı mantıkla -- satırın sabit bir
+  // köşesine değil, parmağın gerçekten bastığı noktaya göre, o noktanın tam
+  // üstünde ve yatayda ortalanmış olarak açılır. Koordinat verilmezse (ör.
+  // ileride başka bir yerden anchor tabanlı çağrılırsa) eski davranışa,
+  // anchorEl'in kendi merkezine göre konumlanmaya geri düşülür.
+  const showPage8CopyBubble = (anchorEl, value, actions, touchX, touchY) => {
     closePage8CopyBubble();
     actions = actions || {};
 
@@ -16320,12 +16674,23 @@
 
     document.body.appendChild(menu);
 
-    const rect = anchorEl.getBoundingClientRect();
+    // Menü, dokunulan NOKTANIN (varsa) TAM ÜSTÜNDE ve yatayda ortalanmış
+    // açılır. GAP, ortalama bir parmak ucunun kapladığı alanı hesaba
+    // katacak kadar büyük tutuluyor (10px'lik eski değer gerçek bir
+    // parmakla menünün altını örtüyordu); böylece yazılar parmak hâlâ
+    // ekranda dururken de tam okunur kalıyor. Üstte yeterli yer yoksa
+    // menü istisnaen noktanın/satırın altına döner.
+    const GAP = 26;
     const bubbleRect = menu.getBoundingClientRect();
-    let left = rect.left + rect.width / 2 - bubbleRect.width / 2;
+    const hasTouchPoint = typeof touchX === 'number' && typeof touchY === 'number';
+    const rect = anchorEl.getBoundingClientRect();
+    const centerX = hasTouchPoint ? touchX : rect.left + rect.width / 2;
+    let left = centerX - bubbleRect.width / 2;
     left = Math.max(8, Math.min(left, window.innerWidth - bubbleRect.width - 8));
-    let top = rect.top - bubbleRect.height - 10;
-    if (top < 8) top = rect.bottom + 10;
+    let top = hasTouchPoint
+      ? touchY - GAP - bubbleRect.height
+      : rect.top - bubbleRect.height - GAP;
+    if (top < 8) top = hasTouchPoint ? touchY + GAP : rect.bottom + GAP;
     menu.style.left = `${left}px`;
     menu.style.top = `${top}px`;
 
@@ -16350,6 +16715,9 @@
   const createPage8GroupCard = (group, itemsKey, opts) => {
     const card = document.createElement('div');
     card.className = 'page8-group-card';
+    // Grup listesi paneli (chip'ler) tıklanınca ilgili karta kaydırıp
+    // kısaca vurgulayabilmek için sabit bir id taşıyor.
+    card.id = `page8-group-${group.id}`;
 
     const accent = document.createElement('div');
     accent.className = 'page8-group-accent';
@@ -16383,6 +16751,7 @@
           el.style.setProperty('--item-color', color);
         });
         opts.onChange();
+        renderPage8GroupsPanel();
       });
     });
 
@@ -16626,6 +16995,7 @@
       });
       page8CategoryList.appendChild(card);
     });
+    if (page8ActiveView === 'tasks') renderPage8GroupsPanel();
   };
 
   const renderPage8RoutineGroups = () => {
@@ -16644,10 +17014,83 @@
       });
       page8RoutineGroupList.appendChild(card);
     });
+    if (page8ActiveView === 'routines') renderPage8GroupsPanel();
   };
+
+  // ---- Kategoriler / Rutin Grupları pop-up'ı ----
+  // Başlıktaki etiket ikonuna dokununca tam ekran değil, ortalanmış bir
+  // pop-up açılır; aktif sekmeye (Görevler/Rutinler) göre eklenmiş her
+  // grubu küçük, kesikli çerçeveli bir etiket (chip) halinde listeler.
+  // Bir etikete dokununca pop-up kapanır ve o grubun kartına kaydırılır.
+  const page8GroupsToggle = document.getElementById('page8GroupsToggle');
+  const page8GroupsBackdrop = document.getElementById('page8GroupsBackdrop');
+  const page8GroupsModalTitle = document.getElementById('page8GroupsModalTitle');
+  const page8GroupsCloseBtn = document.getElementById('page8GroupsCloseBtn');
+  const page8GroupsChipList = document.getElementById('page8GroupsChipList');
+  let page8GroupsPanelOpen = false;
+  let page8ActiveView = 'tasks';
+
+  const renderPage8GroupsPanel = () => {
+    const isTasks = page8ActiveView === 'tasks';
+    const label = isTasks ? 'Kategoriler' : 'Rutin Grupları';
+    page8GroupsToggle.setAttribute('aria-label', label);
+    page8GroupsModalTitle.textContent = label;
+
+    const list = isTasks ? page8State.categories : page8State.routineGroups;
+    page8GroupsChipList.innerHTML = '';
+
+    if (!list.length) {
+      const empty = document.createElement('span');
+      empty.className = 'page8-groups-empty';
+      empty.textContent = isTasks ? 'Henüz kategori eklenmedi.' : 'Henüz rutin grubu eklenmedi.';
+      page8GroupsChipList.appendChild(empty);
+    } else {
+      list.forEach((group) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'page8-groups-chip';
+        chip.style.background = group.color;
+        chip.style.color = getReadableTextColor(group.color);
+
+        const name = document.createElement('span');
+        name.className = 'page8-groups-chip-name';
+        name.textContent = group.name;
+
+        chip.appendChild(name);
+        chip.addEventListener('click', () => {
+          const card = document.getElementById(`page8-group-${group.id}`);
+          if (!card) return;
+          setPage8GroupsPanel(false);
+          window.setTimeout(() => {
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            card.classList.remove('is-highlighted');
+            // Reflow tetikleyerek animasyonun tekrar oynatılabilmesini sağlar.
+            void card.offsetWidth;
+            card.classList.add('is-highlighted');
+            card.addEventListener('animationend', () => card.classList.remove('is-highlighted'), { once: true });
+          }, 180);
+        });
+        page8GroupsChipList.appendChild(chip);
+      });
+    }
+  };
+
+  const setPage8GroupsPanel = (open) => {
+    page8GroupsPanelOpen = open;
+    page8GroupsToggle.classList.toggle('is-open', open);
+    page8GroupsToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    page8GroupsBackdrop.classList.toggle('is-open', open);
+  };
+
+  page8GroupsToggle.addEventListener('click', () => setPage8GroupsPanel(!page8GroupsPanelOpen));
+  page8GroupsCloseBtn.addEventListener('click', () => setPage8GroupsPanel(false));
+  page8GroupsBackdrop.addEventListener('click', (e) => {
+    if (e.target === page8GroupsBackdrop) setPage8GroupsPanel(false);
+  });
 
   renderPage8Categories();
   renderPage8RoutineGroups();
+  renderPage8GroupsPanel();
 
   // ---- Yeni kategori/rutin grubu isim pop-up'ı: "+ Kategori" ya da
   //      "+ Rutin Grubu" tıklanınca grup hemen oluşturulmaz; önce burada
@@ -16738,6 +17181,12 @@
     page8SegOptions.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.value === value));
     page8TasksView.classList.toggle('is-hidden', value !== 'tasks');
     page8RoutinesView.classList.toggle('is-hidden', value !== 'routines');
+    // Üstteki katlanır panel, sekmeye göre kategorileri ya da rutin
+    // gruplarını göstermeli; sekme değişince içeriği tazeleyip paneli
+    // kapatıyoruz (yeni sekmenin listesiyle karışıklık olmasın diye).
+    page8ActiveView = value;
+    setPage8GroupsPanel(false);
+    renderPage8GroupsPanel();
   };
 
   page8SegOptions.forEach((btn) => btn.addEventListener('click', () => setPage8View(btn.dataset.value)));
@@ -21163,27 +21612,33 @@
   const openQhavuzContextMenu = (itemId, x, y) => {
     if (!qhavuzContextMenu) return;
     qhavuzContextMenuItemId = itemId;
-    // Menü, basılı tutulan noktanın TAM ÜZERİNDE değil, sağ-yukarı
-    // çaprazında açılıyor: sol kenarı noktanın biraz sağında, alt kenarı
-    // noktanın biraz üstünde duracak şekilde konumlanıyor. GAP, menüyle
-    // parmağın/imlecin arasındaki boşluk.
-    const GAP = 10;
+    // Menü artık basılı tutulan noktanın çaprazında değil, TAM ÜSTÜNDE ve
+    // yatayda ortalanmış olarak açılıyor. GAP, ortalama bir parmak ucunun
+    // kapladığı alanı hesaba katacak kadar büyük tutuluyor (10px'lik eski
+    // değer gerçek bir parmakla menünün altını örtüyordu); böylece "Sil"
+    // yazısı parmak hâlâ ekranda dururken de tam okunur kalıyor.
+    const GAP = 26;
     // İlk konumlandırma: menü henüz ölçülmeden önce yaklaşık bir
-    // yükseklik varsayılıyor; gerçek boyutu ölçülür ölçülmez netleştirilir
-    // (aşağıdaki requestAnimationFrame), böylece ilk karede yanlış yerde
-    // görünüp zıplamıyor.
-    qhavuzContextMenu.style.left = `${x + GAP}px`;
-    qhavuzContextMenu.style.top = `${Math.max(8, y - GAP - 90)}px`;
+    // genişlik/yükseklik varsayılıyor; gerçek boyutu ölçülür ölçülmez
+    // netleştirilir (aşağıdaki requestAnimationFrame), böylece ilk karede
+    // yanlış yerde görünüp zıplamıyor.
+    const GUESS_WIDTH = 128;
+    const GUESS_HEIGHT = 50;
+    qhavuzContextMenu.style.left = `${x - GUESS_WIDTH / 2}px`;
+    qhavuzContextMenu.style.top = `${Math.max(8, y - GAP - GUESS_HEIGHT)}px`;
     qhavuzContextMenu.classList.add('is-open');
-    // Menü ekranın sağından/üstünden/altından taşıyorsa, açıldıktan hemen
+    // Menü ekranın sağından/solundan/üstünden taşıyorsa, açıldıktan hemen
     // sonra gerçek boyutunu ölçüp konumu ekranın içine geri çekiyoruz.
+    // Basılan nokta ekranın çok üstündeyse (üstte menüye yer yoksa) menü
+    // istisnaen noktanın ALTINA döner; bu durumda da yatayda ortalanmış
+    // kalır, sadece dikeyde parmağın diğer tarafına geçer.
     requestAnimationFrame(() => {
       if (!qhavuzContextMenu.classList.contains('is-open')) return;
       const rect = qhavuzContextMenu.getBoundingClientRect();
-      let adjLeft = x + GAP;
+      let adjLeft = x - rect.width / 2;
       let adjTop = y - GAP - rect.height;
+      if (adjTop < 8) adjTop = y + GAP;
       if (adjLeft + rect.width > window.innerWidth - 8) adjLeft = window.innerWidth - 8 - rect.width;
-      if (adjTop < 8) adjTop = 8;
       if (adjLeft < 8) adjLeft = 8;
       qhavuzContextMenu.style.left = `${adjLeft}px`;
       qhavuzContextMenu.style.top = `${adjTop}px`;
