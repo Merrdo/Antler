@@ -2570,6 +2570,15 @@
     border-radius: 1.1em;
     box-shadow: 5px 5px 0px 0px #000;
     overflow: hidden;
+    /* Kategori pop-up'ından bir karta kaydırılınca (scrollIntoView,
+       block:'start') tarayıcı kartın üst kenarını kaydırma kutusunun
+       tam üst sınırına, yani yırtık kenarın (clip-path zigzag) hemen
+       arkasına dayıyordu; bu da kartın üst kısmının dişler tarafından
+       kesilmiş gibi görünmesine yol açıyordu. scroll-margin-top ile
+       kaydırma hedefinin üstünde her zaman dişlerin + biraz boşluğun
+       sığacağı bir pay bırakıyoruz, böylece kart artık kesilmeden,
+       dişlerin hemen altında tam görünür duruyor. */
+    scroll-margin-top: 28px;
   }
 
   .page8-group-accent {
