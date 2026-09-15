@@ -115,6 +115,19 @@
   body {
     background: #272727;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color-scheme: light;
+  }
+
+  /* Kırpma ekranındaki yakınlaştırma çubuğu (input[type=range]) gibi
+     native form kontrolleri, sayfa kendi renklerini tanımlamış olsa
+     bile tarayıcı/işletim sistemi tarafından bağımsızca karanlık ya da
+     açık "sistem" görünümüyle çizilebiliyordu (color-scheme
+     tanımlanmadığı için). Bu yüzden imlecin/topuzun şekli ve rengi bazen
+     açık moddaki kart renkleriyle uyuşmuyordu. Artık açık modda daima
+     "light", anahtar aktifken daima "dark" zorlanıyor; böylece kontrol
+     her iki modda da bizim tasarladığımız renklerle tutarlı çiziliyor. */
+  body.is-anthracite {
+    color-scheme: dark;
   }
 
   /* ---------- Tema Katmanları ---------- */
@@ -828,6 +841,16 @@
     color: #f2f2f4;
   }
 
+  /* "Çevir" butonu (spinBtn) kendi vurgulu (accent) rengini
+     --button_color üzerinden alıyor; yukarıdaki genel body.is-anthracite
+     .button_top kuralı ondan daha spesifik olduğu için koyu modda bu
+     rengi eziyordu ve buton düz gri bir kutuya dönüyordu. Aşağıdaki
+     kural aynı öğeyi hedefleyip vurgulu rengi koyu modda da geri getirir. */
+  body.is-anthracite #spinBtn .button_top {
+    background: var(--button_color, var(--accent-color, #ff90e8));
+    color: #121212;
+  }
+
   body.is-anthracite button {
     --button_outline_color: #000;
   }
@@ -926,6 +949,12 @@
   body.is-anthracite .page8-item-text,
   body.is-anthracite .page8-item-input {
     color: #f2f2f4;
+  }
+
+  /* Tamamlanan görevin üstü çizili çizgisi sabit siyahtı; metin koyu
+     modda açık renge dönünce bu çizgi kontrastsız/tutarsız kalıyordu. */
+  body.is-anthracite .page8-item-row.is-done .page8-item-text {
+    text-decoration-color: #f2f2f4;
   }
 
   body.is-anthracite .page8-item-input::placeholder {
@@ -1086,12 +1115,12 @@
   }
 
   body.is-anthracite .page9-add-selectall {
-    background-color: #2a2c2f;
+    background-color: var(--dark-card-color, #32343a);
     color: #f2f2f4;
   }
 
   body.is-anthracite .page9-add-chip {
-    background-color: #2a2c2f;
+    background-color: var(--dark-card-color, #32343a);
   }
 
   body.is-anthracite .page9-add-chip-name,
@@ -1104,7 +1133,7 @@
   }
 
   body.is-anthracite .page9-add-custom-input {
-    background-color: #2a2c2f;
+    background-color: var(--dark-card-color, #32343a);
     color: #f2f2f4;
   }
 
@@ -1185,6 +1214,22 @@
     color: rgba(255, 92, 114, 0.4);
   }
 
+  /* "Bugün" çerçevesi ve hover çerçevesi açık modda siyah olduğu için
+     belirgindi; koyu modda kart zemini de antresite dönünce siyah
+     çerçeve neredeyse görünmez kalıyordu. Koyu moddaki metin rengiyle
+     (#f2f2f4) aynı açık tonu kullanarak kontrastı geri getiriyoruz. */
+  body.is-anthracite .calendar-day:hover {
+    border-color: #f2f2f4;
+  }
+
+  body.is-anthracite .calendar-day.is-today {
+    border-color: #f2f2f4;
+  }
+
+  body.is-anthracite .calendar-day.is-outside:hover {
+    border-color: transparent;
+  }
+
   body.is-anthracite .laps-page-card {
     background: var(--dark-card-color, #32343a);
     color: #f2f2f4;
@@ -1246,6 +1291,62 @@
   body.is-anthracite .calendar-nav-btn:active,
   body.is-anthracite .calendar-nav-btn.is-pressed {
     background-color: var(--accent-color, #ff90e8);
+  }
+
+  /* Ana sayfadaki widget kartları da yukarıdakilerle aynı sorunu
+     yaşıyordu: body.is-anthracite .home-widget kuralı normal
+     .home-widget:active kuralından daha spesifik olduğu için koyu
+     modda basma anındaki pembe vurgu hiç görünmüyordu. */
+  body.is-anthracite .home-widget:active {
+    background-color: var(--accent-color, #ff90e8);
+  }
+
+  /* Kronometre / Zamanlayıcı sayfası: aynı sorun (body.is-anthracite'ın
+     genel kart rengi kuralı, öğenin kendi basma/aktif pembe vurgusunu
+     eziyor) sayaç ayar butonunda, dk/sn adım butonlarında ve Hazır
+     Süreler pop-up'ındaki çiplerde de vardı. */
+  body.is-anthracite .countdown-sound-btn:active {
+    background-color: var(--accent-color, #ff90e8);
+  }
+
+  body.is-anthracite .countdown-step-btn:active,
+  body.is-anthracite .countdown-step-btn.is-pressed {
+    background-color: var(--accent-color, #ff90e8);
+  }
+
+  body.is-anthracite .countdown-preset-chip:active {
+    background-color: var(--accent-color, #ff90e8);
+  }
+
+  /* Bunlar anlık basma efekti değil, KALICI bir durumu (bildirim açık /
+     düzenleme modu açık) gösteriyor; koyu modda görünmez kalmaları daha
+     ciddi bir sorundu çünkü kullanıcı durumu hiç anlayamıyordu. */
+  body.is-anthracite .countdown-presets-notif-btn.is-active {
+    background-color: var(--accent-color, #ff90e8);
+  }
+
+  body.is-anthracite .countdown-presets-edit-btn.is-active {
+    background-color: var(--accent-color, #ff90e8);
+  }
+
+  /* "Branşlarım" pop-up'ındaki (ve aynı bileşeni paylaşan diğer
+     pop-up'lardaki) "Tümünü Seç" butonu da aynı sorunu yaşıyordu. */
+  body.is-anthracite .page9-add-selectall.is-active {
+    background-color: var(--accent-color, #ff90e8);
+  }
+
+  /* Silme ("×") butonları: .delete-btn:hover/:active kırmızıya dönüyordu
+     ama body.is-anthracite .delete-btn kuralı daha spesifik olduğu için
+     koyu modda bu kırmızı uyarı rengi hiç görünmüyordu (Gündelik'teki
+     kategori/rutin ve görev/rutin silme butonları dahil, bu sınıfı
+     paylaşan tüm silme butonlarını kapsar). */
+  body.is-anthracite .delete-btn:hover {
+    background-color: #ff5c5c;
+  }
+
+  body.is-anthracite .delete-btn:active,
+  body.is-anthracite .delete-btn.is-pressed {
+    background-color: #ff5c5c;
   }
 
   /* Sayfa 1: karşılama sayfası (selamlama + tarih başlığı, tema düğmesi,
@@ -2345,6 +2446,15 @@
     cursor: pointer;
   }
 
+  /* Metin tek satıra sığıyorsa kutu satırın üstüne değil, tam ortasına
+     hizalanır (JS ölçüp bu class'ı ekliyor/kaldırıyor, bkz.
+     syncPage8ItemLineAlign); birden çok satıra yayılan görevlerde ise
+     yukarıdaki varsayılan flex-start korunur (kutu ilk satıra hizalı
+     kalır ki hangi kutunun hangi metne ait olduğu net olsun). */
+  .page8-item-check-label.is-page8-single-line {
+    align-items: center;
+  }
+
   .page8-item-check {
     display: none;
   }
@@ -2426,6 +2536,11 @@
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
     font-size: 0.92rem;
+    /* Sabit, sayısal bir line-height gerekli: tanımlanmazsa tarayıcı
+       "normal" (birimsiz) döndürür ve JS tarafındaki tek satır/çok satır
+       ölçümü (syncPage8ItemLineAlign) bunu piksele çeviremeyip sessizce
+       başarısız olur — checkbox hep üstte hizalı kalırdı. */
+    line-height: 1.35;
     color: #121212;
     text-decoration-line: line-through;
     text-decoration-thickness: 2px;
@@ -3404,7 +3519,7 @@
   }
 
   body.is-anthracite .qhavuz-filter-chip {
-    background-color: #2a2c2f;
+    background-color: var(--dark-card-color, #32343a);
     color: #f2f2f4;
   }
 
@@ -3666,6 +3781,9 @@
     position: relative;
     width: 100%;
     max-width: 420px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
     background: #fff;
     border: 4px solid #000;
     border-radius: 1.1em;
@@ -3679,13 +3797,37 @@
     transform: scale(1);
   }
 
+  /* Görselin kendi sabit (1:1) boyutlu, kırpılan (overflow: hidden) kutusu.
+     Sorular zaten Soru Ekle adımında .qhavuz-thumb ile birebir aynı 1:1
+     kutuya kırpılıyor (bkz. .qhavuz-crop-box); yani gösterilecek alan
+     zaten bellidir, ne daha fazlası ne daha azı olabilir. Bu yüzden kart
+     içeriğe göre büyüyüp küçülmez: her soru için birebir aynı sabit
+     kare boyutunu kullanır ve object-fit: cover ile kutuyu eksiksiz
+     doldurur, kenarlarda boşluk kalmaz — Test Modu'ndaki (.qhavuz-test-image)
+     ve ızgaradaki (.qhavuz-thumb) kırpma mantığıyla birebir tutarlı.
+     Pinch-zoom/pan transform'u da bu sabit kutunun İÇİNDE kalır: eskiden
+     <img> doğrudan karta gömülüydü ve büyütülünce transform kutunun
+     dışına taşıp altındaki cevap satırının/açıklamanın üzerine biniyordu. */
+  .qhavuz-lightbox-img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: #f2f2f2;
+  }
+
   .qhavuz-lightbox-card img {
     display: block;
     width: 100%;
-    max-height: 80vh;
-    object-fit: contain;
+    height: 100%;
+    object-fit: cover;
     background: #f2f2f2;
     touch-action: none;
+  }
+
+  body.is-anthracite .qhavuz-lightbox-img-wrap {
+    background: var(--dark-card-color, #32343a);
   }
 
   .qhavuz-lightbox-close {
@@ -3704,7 +3846,7 @@
     top: 0.5rem;
     right: 2.9rem;
     z-index: 2;
-    color: transparent;
+    color: #000;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
   }
 
@@ -3755,7 +3897,7 @@
   }
 
   body.is-anthracite .qhavuz-lightbox-card img {
-    background: #2a2c2f;
+    background: var(--dark-card-color, #32343a);
   }
 
   /* Lightbox altında, kapat (×) butonuyla aynı yuvarlak brutalist
@@ -3763,6 +3905,7 @@
      .is-correct alır ve yeşile döner; diğerleri nötr kalır. */
   .qhavuz-lightbox-answer-row {
     display: flex;
+    flex-shrink: 0;
     justify-content: center;
     gap: 0.6rem;
     padding: 0.9rem 1rem 1.1rem;
@@ -3813,7 +3956,7 @@
   }
 
   body.is-anthracite .qhavuz-lightbox-answer-btn {
-    background-color: #2a2c2f;
+    background-color: var(--dark-card-color, #32343a);
     color: #f2f2f4;
     border-color: #000;
   }
@@ -3822,6 +3965,7 @@
      bandı. Açıklama girilmediyse (.is-empty) tamamen gizlenir; düzenleme
      modundayken metin yerine düzenlenebilir bir textarea gösterilir. */
   .qhavuz-lightbox-desc {
+    flex-shrink: 0;
     padding: 0 1rem 1rem;
     background: #fff;
     font-family: "Space Grotesk", sans-serif;
@@ -3895,6 +4039,103 @@
 
   body.is-anthracite .qhavuz-lightbox-open-answer-text {
     color: #f2f2f4;
+  }
+
+  /* ---- Soru Havuzu: lightbox'taki (i) butonuyla açılan "Soru Bilgisi"
+       pop-up'ı. settings-confirm-card'ın brutalist kart zeminini
+       (kenarlık + katı gölge) aynen kullanır, sadece kendi içerik
+       düzenini (rozet + Kaynak/Sayfa/Açıklama satırları) ekler.
+       z-index: settings-confirm-backdrop'ın paylaşılan 60 katmanı,
+       lightbox'ın kendi 200 katmanının ALTINDA kalır; bu pop-up
+       lightbox'ın üzerinden açıldığı için kendi z-index'ini onun
+       üstüne (210) çekiyoruz. ---- */
+  #qhavuzInfoBackdrop {
+    z-index: 210;
+  }
+
+  .qhavuz-info-card {
+    text-align: left;
+  }
+
+  .qhavuz-info-card .settings-confirm-title {
+    text-align: center;
+    display: block;
+  }
+
+  .qhavuz-info-badge {
+    display: block;
+    width: fit-content;
+    margin: 0.5rem auto 1rem;
+    padding: 0.4rem 0.95rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.78rem;
+    color: #121212;
+    border: 2.5px solid #000;
+    border-radius: 999px;
+    box-shadow: 2.5px 2.5px 0px 0px #000;
+  }
+
+  .qhavuz-info-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .qhavuz-info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1.5px dashed rgba(18, 18, 18, 0.14);
+  }
+
+  .qhavuz-info-row:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .qhavuz-info-label {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: rgba(18, 18, 18, 0.5);
+  }
+
+  .qhavuz-info-value {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #121212;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .qhavuz-info-value.is-empty {
+    color: rgba(18, 18, 18, 0.4);
+    font-weight: 500;
+    font-style: italic;
+  }
+
+  body.is-anthracite .qhavuz-info-row {
+    border-bottom-color: rgba(242, 242, 244, 0.14);
+  }
+
+  body.is-anthracite .qhavuz-info-label {
+    color: rgba(242, 242, 244, 0.55);
+  }
+
+  body.is-anthracite .qhavuz-info-value {
+    color: #f2f2f4;
+  }
+
+  body.is-anthracite .qhavuz-info-value.is-empty {
+    color: rgba(242, 242, 244, 0.45);
   }
 
   /* ---- Soru Havuzu: görsel ekleme pop-up'ı (page9-add-card ile aynı
@@ -4169,7 +4410,7 @@
   }
 
   body.is-anthracite .qhavuz-add-answer-preview {
-    background: #2a2c2f;
+    background: var(--dark-card-color, #32343a);
   }
 
   body.is-anthracite .qhavuz-add-answer-preview-subject {
@@ -4272,6 +4513,14 @@
     gap: 0.5rem;
   }
 
+  /* Açık uçlu cevap metni doluyken şık ızgarası kilitlenir: tıklanamaz
+     hale gelir ve soluklaşır, böylece iki cevap türü aynı anda
+     girilemez. */
+  .qhavuz-add-answer-grid.is-locked {
+    pointer-events: none;
+    opacity: 0.35;
+  }
+
   /* .qhavuz-add-answer-grid birden fazla yerde (test modu, Sayfa 11 soru
      ekleme) paylaşılan ortak bir sınıf; sağ kenarın kesik göründüğü
      sorun sadece Soru Ekle pop-up'ının 3. adımında (şıklı cevap seçimi)
@@ -4315,11 +4564,11 @@
   }
 
   body.is-anthracite .qhavuz-thumb {
-    background: #2a2c2f;
+    background: var(--dark-card-color, #32343a);
   }
 
   body.is-anthracite .qhavuz-crop-box {
-    background: #2a2c2f;
+    background: var(--dark-card-color, #32343a);
   }
 
   body.is-anthracite .qhavuz-crop-hint {
@@ -4338,8 +4587,18 @@
     background: #fff;
   }
 
+  /* .qhavuz-add-step-dot.is-done (0,2,0 özgüllük) karanlık moddaki genel
+     nokta kuralından (body.is-anthracite .qhavuz-add-step-dot, 0,2,1
+     özgüllük) daha DÜŞÜK özgüllüğe sahip olduğu için eziliyordu; tamamlanan
+     adımlar pembe yerine soluk/beyaz görünüyordu. Burada is-anthracite'a
+     özel, en az onun kadar özgül bir kural tanımlayıp pembeyi geri
+     kazandırıyoruz. */
+  body.is-anthracite .qhavuz-add-step-dot.is-done {
+    background: var(--accent-color, #ff90e8);
+  }
+
   body.is-anthracite .qhavuz-add-preview {
-    background: #2a2c2f;
+    background: var(--dark-card-color, #32343a);
   }
 
   body.is-anthracite .qhavuz-add-label {
@@ -4347,7 +4606,7 @@
   }
 
   body.is-anthracite .qhavuz-add-subject-chip {
-    background-color: #2a2c2f;
+    background-color: var(--dark-card-color, #32343a);
     color: #f2f2f4;
   }
 
@@ -4357,7 +4616,7 @@
   }
 
   body.is-anthracite .qhavuz-add-answer-btn {
-    background-color: #2a2c2f;
+    background-color: var(--dark-card-color, #32343a);
     color: #f2f2f4;
   }
 
@@ -4372,6 +4631,13 @@
      görünmez/ayırt edilemez hale geliyordu. Pembe vurgu rengini burada
      tekrar zorluyoruz ki buton karanlık modda da öne çıksın. */
   body.is-anthracite .qhavuz-test-start-btn {
+    background-color: var(--accent-color, #ff90e8);
+    color: #000;
+  }
+
+  /* Aynı sorun "Sonraki Soru" butonunda da vardı: .qhavuz-test-next-btn
+     de add-task-btn taşıyor, genel koyu mod kuralı vurgulu rengi eziyordu. */
+  body.is-anthracite .qhavuz-test-next-btn {
     background-color: var(--accent-color, #ff90e8);
     color: #000;
   }
@@ -4432,13 +4698,32 @@
     display: none;
   }
 
+  /* Test Modu'ndaki branş/ders rozeti: ızgaradaki tam genişlikte, kenarı
+     olmayan düz şeritten (.qhavuz-card-subject) farklı olarak burada
+     bağımsız, ortalanmış küçük bir rozet olarak duruyor; bu yüzden
+     uygulamanın geri kalanındaki brutalist çip diliyle (kalın siyah
+     kenarlık + katı gölge + hap biçimi, bkz. .qhavuz-filter-chip)
+     eşleşecek şekilde kendi kenarlığını/gölgesini/yuvarlaklığını alır. */
   .qhavuz-test-subject-badge {
     align-self: center;
+    flex: 0 0 auto;
+    display: inline-block;
+    padding: 0.5rem 1.15rem;
+    border: 3px solid #000;
+    border-radius: 999px;
+    box-shadow: 3px 3px 0px 0px #000;
+    font-size: 0.85rem;
   }
 
+  /* Test Modu'ndaki soru görseli de ızgaradaki (.qhavuz-thumb) ve
+     lightbox'taki (.qhavuz-lightbox-img-wrap) ile birebir aynı 1:1
+     kırpma oranını kullanır: gösterilecek alan Soru Ekle adımında zaten
+     sabitlenmiştir, bu yüzden kutu her soruda aynı sabit büyüklükte
+     kalır ve object-fit: cover ile eksiksiz doldurulur — kenarlarda
+     boşluk kalmaz. */
   .qhavuz-test-image {
     width: 100%;
-    max-height: 48vh;
+    aspect-ratio: 1;
     overflow: hidden;
     background: #fff;
     border: 4px solid #000;
@@ -4449,9 +4734,8 @@
 
   .qhavuz-test-image img {
     width: 100%;
-    height: auto;
-    max-height: 48vh;
-    object-fit: contain;
+    height: 100%;
+    object-fit: cover;
     display: block;
     touch-action: none;
   }
@@ -4599,6 +4883,21 @@
     color: #5c0011;
   }
 
+  /* "Kontrol Et" sonrası açık uçlu sorularda beliren kendi kendini
+     değerlendirme butonları (✓ Bildim / ✗ Bilemedim) da add-task-btn
+     sınıfını taşıdığı için, genel body.is-anthracite .add-task-btn
+     kuralı yeşil/kırmızı rengini eziyor ve koyu modda ikisi de aynı
+     gri butona dönüşüyordu. */
+  body.is-anthracite .qhavuz-test-selfgrade-btn.is-correct {
+    background-color: #5cd68a;
+    color: #0d3d20;
+  }
+
+  body.is-anthracite .qhavuz-test-selfgrade-btn.is-wrong {
+    background-color: #ff8a8a;
+    color: #4a0d0d;
+  }
+
   .qhavuz-add-answer-btn:disabled {
     cursor: default;
   }
@@ -4651,7 +4950,7 @@
   }
 
   body.is-anthracite .page11-question-change-btn {
-    background-color: #2a2c2f;
+    background-color: var(--dark-card-color, #32343a);
     color: #f2f2f4;
   }
 
@@ -4755,7 +5054,7 @@
   }
 
   body.is-anthracite .qhavuz-test-image {
-    background: #2a2c2f;
+    background: var(--dark-card-color, #32343a);
   }
 
 
@@ -5725,7 +6024,7 @@
   }
 
   body.is-anthracite .exam-resources-section-icon {
-    background: #2a2c2f;
+    background: var(--dark-card-color, #32343a);
     color: rgba(242, 242, 244, 0.72);
     border-color: rgba(242, 242, 244, 0.32);
   }
@@ -5778,7 +6077,7 @@
   }
 
   body.is-anthracite .exam-resources-thumb {
-    background: #2a2c2f;
+    background: var(--dark-card-color, #32343a);
   }
 
   /* ---- Kaynaklar: cevap anahtarı görselleri arasında sağa/sola
@@ -5853,7 +6152,7 @@
 
   body.is-anthracite .exam-res-gallery-viewport,
   body.is-anthracite .exam-res-gallery-viewport img {
-    background: #2a2c2f;
+    background: var(--dark-card-color, #32343a);
   }
 
   body.is-anthracite .exam-res-gallery-counter {
@@ -5862,7 +6161,7 @@
   }
 
   body.is-anthracite .exam-res-gallery-arrow {
-    background-color: #2a2c2f;
+    background-color: var(--dark-card-color, #32343a);
     color: #f2f2f4;
     border-color: #000;
   }
@@ -5977,7 +6276,7 @@
   }
 
   body.is-anthracite .exam-resources-video-input {
-    background-color: #2a2c2f;
+    background-color: var(--dark-card-color, #32343a);
     border-color: #f2f2f4;
     color: #f2f2f4;
   }
@@ -5987,7 +6286,7 @@
   }
 
   body.is-anthracite .exam-resources-video-link {
-    background-color: #2a2c2f;
+    background-color: var(--dark-card-color, #32343a);
     border-color: #f2f2f4;
   }
 
@@ -6525,7 +6824,7 @@
   }
 
   body.is-anthracite .analytics-trend-badge {
-    background: #2c2e31;
+    background: var(--dark-card-color, #32343a);
     color: #f2f2f4;
   }
 
@@ -6888,7 +7187,7 @@
   }
 
   body.is-anthracite .page11-datepicker-nav-btn {
-    background-color: #2c2e31;
+    background-color: var(--dark-card-color, #32343a);
     color: #f2f2f4;
   }
 
@@ -6919,8 +7218,16 @@
     color: rgba(255, 92, 114, 0.4);
   }
 
+  /* Seçili gün her zaman pembe (--accent-color) zemin üzerinde duruyor;
+     ama karanlık moddaki genel ".page11-datepicker-day" kuralı metni
+     açık renge (#f2f2f4) çeviriyordu, bu da pembe zemin üzerinde
+     okunaksız kalıyordu. Açık moddaki gibi koyu metne sabitliyoruz. */
+  body.is-anthracite .page11-datepicker-day.is-selected {
+    color: #121212;
+  }
+
   body.is-anthracite .page11-datepicker-today-btn {
-    background: #2c2e31;
+    background: var(--dark-card-color, #32343a);
     color: #f2f2f4;
     border-color: #000;
   }
@@ -8895,6 +9202,15 @@
     color: #fff;
   }
 
+  /* Şıklı/Açık Uçlu cevap türü arasında geçiş: karşı taraftan zaten
+     veri girilmişse (bir şık işaretlendi veya açık uçlu metni yazıldı)
+     diğer seçeneğe geçiş kilitlenir; kullanıcı önce mevcut veriyi
+     temizlemeli. Kilitliyken buton hem tıklanamaz hem de soluklaşır. */
+  .settings-segmented-option:disabled {
+    cursor: not-allowed;
+    opacity: 0.35;
+  }
+
   /* "Hafta başlangıcı" artık Soru Takibi (Sayfa 9) Özet kartındaki desenin
      birebir aynısı: küçük gri bir üst başlık (.page9-summary-title) +
      hemen altında TYT/AYT ile aynı segmented control (.page9-segmented).
@@ -9113,10 +9429,31 @@
     color: #f2f2f4;
   }
 
+  /* Karanlık moddaki genel ".settings-danger-btn" kuralı (element+2 sınıf,
+     0-2-1 özgüllük) ".settings-danger-btn:hover/:active" kuralından
+     (2 sınıf, 0-2-0 özgüllük) daha yüksek olduğu için basınca/üzerine
+     gelince beliren kırmızı uyarı rengini eziyordu. Burada aynı renk
+     karanlık moda özel olarak tekrar zorlanıyor. */
+  body.is-anthracite .settings-danger-btn:hover,
+  body.is-anthracite .settings-danger-btn:active {
+    background-color: #ff5c5c;
+  }
+
   body.is-anthracite .settings-outline-btn {
     background-color: var(--dark-card-color, #32343a);
     border-color: #000;
     color: #f2f2f4;
+  }
+
+  /* Aynı özgüllük sorunu ".settings-outline-btn"da da vardı; basma/üzerine
+     gelme geri bildirimi karanlık modda tamamen kayboluyordu. Açık moddaki
+     sabit gri (#e4e4e4) yerine, seçilen kart rengini otomatik hafifçe
+     aydınlatan bir filtre kullanıyoruz — böylece "Antresit" veya "Siyah"
+     hangi kart rengi seçili olursa olsun basma efekti doğru görünür. */
+  body.is-anthracite .settings-outline-btn:hover,
+  body.is-anthracite .settings-outline-btn:active {
+    background-color: var(--dark-card-color, #32343a);
+    filter: brightness(1.35);
   }
 
   body.is-anthracite .settings-confirm-card {
@@ -11877,9 +12214,39 @@
       <svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
     <button type="button" class="delete-btn qhavuz-lightbox-close" id="qhavuzLightboxClose" aria-label="Kapat">×</button>
-    <img id="qhavuzLightboxImg" alt="Soru görseli">
+    <div class="qhavuz-lightbox-img-wrap">
+      <img id="qhavuzLightboxImg" alt="Soru görseli">
+    </div>
     <div class="qhavuz-lightbox-answer-row" id="qhavuzLightboxAnswerRow"></div>
     <div class="qhavuz-lightbox-desc" id="qhavuzLightboxDesc"></div>
+  </div>
+</div>
+
+<!-- Soru Havuzu: lightbox'taki (i) butonuna basınca açılan bilgi
+     pop-up'ı. Ders/branş etiketini ve soru eklenirken girilen Kaynak
+     (kitap adı), Sayfa ve Açıklama bilgilerini salt-okunur şekilde
+     gösterir; alanlardan biri girilmediyse "—" ile boş olduğu belirtilir. -->
+<div class="settings-confirm-backdrop" id="qhavuzInfoBackdrop">
+  <div class="settings-confirm-card qhavuz-info-card">
+    <span class="settings-confirm-title">Soru Bilgisi</span>
+    <span class="qhavuz-info-badge" id="qhavuzInfoSubjectBadge"></span>
+    <div class="qhavuz-info-rows">
+      <div class="qhavuz-info-row">
+        <span class="qhavuz-info-label">Kaynak</span>
+        <span class="qhavuz-info-value" id="qhavuzInfoBook"></span>
+      </div>
+      <div class="qhavuz-info-row">
+        <span class="qhavuz-info-label">Sayfa</span>
+        <span class="qhavuz-info-value" id="qhavuzInfoPage"></span>
+      </div>
+      <div class="qhavuz-info-row qhavuz-info-row--desc">
+        <span class="qhavuz-info-label">Açıklama</span>
+        <span class="qhavuz-info-value" id="qhavuzInfoDesc"></span>
+      </div>
+    </div>
+    <div class="settings-confirm-actions">
+      <button type="button" class="settings-confirm-cancel" id="qhavuzInfoCloseBtn">Kapat</button>
+    </div>
   </div>
 </div>
 
@@ -12710,7 +13077,15 @@
     });
     observer.observe(backdrop, { attributes: true, attributeFilter: ['class'] });
   };
-  document.querySelectorAll('.page9-add-backdrop').forEach(watchBackdropForThemeColor);
+  // Uygulamadaki tüm pop-up'lar aynı backdrop sınıfını paylaşmıyor: Soru
+  // Ekle gibi pop-up'lar .page9-add-backdrop kullanırken, tekli soru
+  // görüntüleme/galeri .qhavuz-lightbox-backdrop, onay/tarih/isim gibi
+  // pop-up'lar .settings-confirm-backdrop, renk seçici de
+  // .wheel-color-backdrop kullanıyor. Yalnızca .page9-add-backdrop
+  // dinlendiği için üst güvenli alan rengi sadece o pop-up'larda
+  // değişiyor, diğerlerinde eski tema rengiyle kalıyordu. Artık hepsini
+  // aynı anda dinliyoruz.
+  document.querySelectorAll('.page9-add-backdrop, .qhavuz-lightbox-backdrop, .settings-confirm-backdrop, .wheel-color-backdrop').forEach(watchBackdropForThemeColor);
 
   const layerA = document.getElementById('themeLayerA');
   const layerB = document.getElementById('themeLayerB');
@@ -15383,48 +15758,43 @@
   const patterns = [
     { id: 'none', name: 'Yok', backgroundImage: 'none', backgroundSize: 'auto', alpha: 0 },
     {
-      id: 'dots',
-      name: 'Noktalar',
-      backgroundImage: 'radial-gradient(currentColor 2.4px, transparent 2.6px)',
-      backgroundSize: '22px 22px',
-      alpha: 0.22
+      // Balık pulu / dalga deseni: birbirini tamamlayan iki yarım daire
+      // sırası, döşendiğinde kenarda hiçbir kesinti veya yarım motif
+      // bırakmadan sonsuza uzar; bu yüzden çentik/Dynamic Island gibi
+      // güvenli alan (safe area) kenarlarına taştığında da doğal görünür.
+      id: 'waves',
+      name: 'Dalgalar',
+      backgroundImage:
+        'radial-gradient(circle at 100% 50%, transparent 19px, currentColor 20px, currentColor 21px, transparent 22px),' +
+        'radial-gradient(circle at 0% 50%, transparent 19px, currentColor 20px, currentColor 21px, transparent 22px)',
+      backgroundSize: '42px 42px',
+      alpha: 0.16
     },
     {
-      id: 'stripes',
-      name: 'Çizgiler',
-      backgroundImage: 'repeating-linear-gradient(45deg, currentColor 0 3px, transparent 3px 16px)',
+      // Birbirini kesen iki çapraz çizgi grubu elmas/baklava dilimi
+      // ızgarası oluşturur; çizgiler kart kenarında da kesintisiz devam
+      // ettiğinden safe area'da kırpılmış/garip görünen bir motif kalmaz.
+      id: 'diamonds',
+      name: 'Elmas',
+      backgroundImage:
+        'repeating-linear-gradient(45deg, currentColor 0 1.6px, transparent 1.6px 22px),' +
+        'repeating-linear-gradient(-45deg, currentColor 0 1.6px, transparent 1.6px 22px)',
       backgroundSize: 'auto',
-      alpha: 0.16
+      alpha: 0.14
     },
     {
-      id: 'grid',
-      name: 'Izgara',
+      // Her karonun dört köşesinde küçük bir nokta kümesi: yonca/dört
+      // yapraklı bir doku hissi verir, her karo kendi içinde tamamlandığı
+      // için kenarda yarım kalan bir şekil oluşmaz.
+      id: 'clover',
+      name: 'Yonca',
       backgroundImage:
-        'linear-gradient(currentColor 1.5px, transparent 1.5px), linear-gradient(90deg, currentColor 1.5px, transparent 1.5px)',
-      backgroundSize: '26px 26px',
-      alpha: 0.16
-    },
-    {
-      id: 'checker',
-      name: 'Dama',
-      backgroundImage:
-        'conic-gradient(currentColor 90deg, transparent 90deg 180deg, currentColor 180deg 270deg, transparent 270deg)',
-      backgroundSize: '28px 28px',
-      alpha: 0.12
-    },
-    {
-      id: 'confetti',
-      name: 'Konfeti',
-      backgroundImage:
-        'radial-gradient(circle at 12% 22%, currentColor 3px, transparent 3.6px),' +
-        'radial-gradient(circle at 62% 12%, currentColor 2px, transparent 2.6px),' +
-        'radial-gradient(circle at 82% 58%, currentColor 4px, transparent 4.6px),' +
-        'radial-gradient(circle at 32% 68%, currentColor 2.4px, transparent 3px),' +
-        'radial-gradient(circle at 55% 88%, currentColor 3px, transparent 3.6px),' +
-        'radial-gradient(circle at 92% 92%, currentColor 2px, transparent 2.6px),' +
-        'radial-gradient(circle at 15% 52%, currentColor 1.8px, transparent 2.3px)',
-      backgroundSize: '140px 140px',
-      alpha: 0.28
+        'radial-gradient(circle at 25% 25%, currentColor 5px, transparent 5.6px),' +
+        'radial-gradient(circle at 75% 25%, currentColor 5px, transparent 5.6px),' +
+        'radial-gradient(circle at 25% 75%, currentColor 5px, transparent 5.6px),' +
+        'radial-gradient(circle at 75% 75%, currentColor 5px, transparent 5.6px)',
+      backgroundSize: '30px 30px',
+      alpha: 0.2
     }
   ];
 
@@ -15718,6 +16088,34 @@
     const text = document.createElement('span');
     text.className = 'page8-item-text';
     text.textContent = item.text;
+
+    // Metin tek satır mı yoksa birden çok satıra mı yayılıyor ölçüp
+    // etikete uygun class'ı ekler/kaldırır (bkz. yukarıdaki
+    // .page8-item-check-label.is-page8-single-line kuralı). ResizeObserver
+    // kullanılıyor ki hem ilk çizimde hem pencere/font genişliği
+    // değiştiğinde hem de metin satır içi düzenlemeyle değiştiğinde
+    // hizalama otomatik güncellensin.
+    const syncPage8ItemLineAlign = () => {
+      const style = getComputedStyle(text);
+      let lineHeight = parseFloat(style.lineHeight);
+      // "normal" gibi birimsiz bir değer parseFloat'tan NaN döner; bu
+      // durumda font-size üzerinden makul bir yaklaşık satır yüksekliği
+      // hesaplıyoruz ki ölçüm hiçbir zaman sessizce başarısız olup class
+      // eklemeden çıkmasın.
+      if (!lineHeight || Number.isNaN(lineHeight)) {
+        const fontSize = parseFloat(style.fontSize) || 16;
+        lineHeight = fontSize * 1.2;
+      }
+      const isSingleLine = text.scrollHeight <= lineHeight * 1.4;
+      label.classList.toggle('is-page8-single-line', isSingleLine);
+    };
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(syncPage8ItemLineAlign).observe(text);
+    } else {
+      // ResizeObserver yoksa (çok eski tarayıcı) en azından ilk çizimde bir
+      // kez ölç; pencere boyutu değişince hizalama güncellenmeyebilir.
+      window.setTimeout(syncPage8ItemLineAlign, 0);
+    }
 
     const toggleDone = () => {
       item.done = !item.done;
@@ -19846,20 +20244,47 @@
   };
 
   // Şıklı/Açık Uçlu geçişi: hangi modun aktif olduğuna göre ilgili alan
-  // gösterilir, diğeri gizlenir; iki modun girdileri birbirini geçersiz
-  // kılmaz, sadece o an aktif olan doğrulamaya dahil edilir.
+  // gösterilir, diğeri gizlenir. Şık işaretlenmişse (qhavuzPendingAnswer)
+  // "Açık Uçlu" seçeneğine, açık uçlu metni girilmişse "Şıklı" seçeneğine
+  // geçiş kilitlenir; böylece iki cevap türü asla aynı anda dolu olamaz.
   const setQhavuzAnswerType = (type) => {
     qhavuzPendingAnswerType = type;
     qhavuzAnswerTypeOptions.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.value === type));
     setQhavuzAnswerTypeSlider(type);
     qhavuzAnswerModeChoice.classList.toggle('is-hidden', type !== 'choice');
     qhavuzAnswerModeOpen.classList.toggle('is-hidden', type !== 'open');
+    qhavuzUpdateAnswerTypeLock();
     qhavuzAddSyncNav();
+  };
+
+  // Karşı tarafta veri varken ilgili segmented seçeneğini ve o moda ait
+  // girdi alanını kilitler: bir şık seçiliyken "Açık Uçlu" butonu ve
+  // yazılı cevap alanı devre dışı kalır; açık uçlu metin doluyken de
+  // "Şıklı" butonu ve şık ızgarası devre dışı kalır. Aktif modun kendi
+  // alanı asla kilitlenmez (kullanıcı o alanı temizleyebilsin diye).
+  const qhavuzUpdateAnswerTypeLock = () => {
+    const hasChoiceAnswer = !!qhavuzPendingAnswer;
+    const hasOpenAnswer = !!(qhavuzAddAnswerTextInput && qhavuzAddAnswerTextInput.value.trim());
+
+    qhavuzAnswerTypeOptions.forEach((btn) => {
+      if (btn.dataset.value === 'open') {
+        btn.disabled = hasChoiceAnswer && qhavuzPendingAnswerType !== 'open';
+      } else if (btn.dataset.value === 'choice') {
+        btn.disabled = hasOpenAnswer && qhavuzPendingAnswerType !== 'choice';
+      }
+    });
+
+    if (qhavuzAddAnswerTextInput) {
+      qhavuzAddAnswerTextInput.disabled = hasChoiceAnswer && qhavuzPendingAnswerType !== 'open';
+    }
+    if (qhavuzAddAnswerGrid) {
+      qhavuzAddAnswerGrid.classList.toggle('is-locked', hasOpenAnswer && qhavuzPendingAnswerType !== 'choice');
+    }
   };
 
   qhavuzAnswerTypeOptions.forEach((btn) => {
     btn.addEventListener('click', () => {
-      if (btn.classList.contains('is-active')) return;
+      if (btn.disabled || btn.classList.contains('is-active')) return;
       setQhavuzAnswerType(btn.dataset.value);
     });
   });
@@ -19899,7 +20324,10 @@
     qhavuzAddConfirm.disabled = !stepValid;
   };
 
-  qhavuzAddAnswerTextInput.addEventListener('input', qhavuzAddSyncNav);
+  qhavuzAddAnswerTextInput.addEventListener('input', () => {
+    qhavuzUpdateAnswerTypeLock();
+    qhavuzAddSyncNav();
+  });
 
   // ---- Soru Ekle Adım 1: görsel kırpma ----
   // Kırpma kutusu her zaman ızgaradaki kartla (.qhavuz-thumb) aynı 1:1
@@ -20098,11 +20526,15 @@
       btn.setAttribute('aria-label', `Doğru cevap ${letter}`);
       if (qhavuzPendingAnswer === letter) btn.classList.add('is-selected');
       btn.addEventListener('click', () => {
+        // Açık uçlu metni doluyken şık ızgarası kilitlidir (aynı anda iki
+        // cevap türü girilemesin diye); bu durumda tıklama yok sayılır.
+        if (qhavuzAddAnswerGrid && qhavuzAddAnswerGrid.classList.contains('is-locked')) return;
         // Zaten seçili olan şıkka tekrar dokununca seçimi kaldır (toggle);
         // açık uçlu bir soru için şık seçmek artık zorunlu değil, bu
         // yüzden yanlışlıkla seçilen bir şıktan vazgeçebilmek gerekiyor.
         qhavuzPendingAnswer = (qhavuzPendingAnswer === letter) ? null : letter;
         qhavuzBuildAnswerGrid();
+        qhavuzUpdateAnswerTypeLock();
         qhavuzAddSyncNav();
       });
       qhavuzAddAnswerGrid.appendChild(btn);
@@ -20279,27 +20711,18 @@
       img.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
     };
 
-    // object-fit: contain kullanıldığı için <img> kutusu ile üzerindeki
-    // gerçek fotoğraf içeriği farklı boyutta olabilir (en/boy oranı
-    // uyuşmazsa kutunun sağında/solunda veya üstünde/altında boşluk
-    // kalır). offsetWidth/offsetHeight kasıtlı olarak kullanılıyor:
-    // bunlar transform (scale/translate) uygulanmadan ÖNCEKİ, düzen
-    // (layout) boyutunu verir — getBoundingClientRect ise zaten
-    // uygulanmış olan zoom'u da işin içine katıp yanlış sonuç üretir.
+    // object-fit: cover kullanıldığı için <img> içeriği zaten scale=1
+    // konumunda kutunun tamamını dolduracak şekilde (taşan kenarı
+    // kırpılarak) render edilir — contain'deki gibi kutunun içinde
+    // boşluk kalan bir "içerik kutusu" artık söz konusu değil; içerik
+    // boyutu her zaman kutunun kendisiyle (boxW × boxH) aynıdır.
+    // offsetWidth/offsetHeight kasıtlı olarak kullanılıyor: bunlar
+    // transform (scale/translate) uygulanmadan ÖNCEKİ, düzen (layout)
+    // boyutunu verir — getBoundingClientRect ise zaten uygulanmış olan
+    // zoom'u da işin içine katıp yanlış sonuç üretir.
     const getContentBox = () => {
       const boxW = img.offsetWidth, boxH = img.offsetHeight;
-      const natW = img.naturalWidth || boxW, natH = img.naturalHeight || boxH;
-      const boxRatio = boxW / boxH;
-      const natRatio = natW / natH;
-      let contentW, contentH;
-      if (natRatio > boxRatio) {
-        contentW = boxW;
-        contentH = boxW / natRatio;
-      } else {
-        contentH = boxH;
-        contentW = boxH * natRatio;
-      }
-      return { boxW, boxH, contentW, contentH };
+      return { boxW, boxH, contentW: boxW, contentH: boxH };
     };
 
     // Galeri uygulamalarında olduğu gibi: fotoğrafın kenarı asla kutunun
@@ -20377,8 +20800,6 @@
   const qhavuzLightboxAnswerRow = document.getElementById('qhavuzLightboxAnswerRow');
   const qhavuzLightboxDesc = document.getElementById('qhavuzLightboxDesc');
   const qhavuzLightboxSolveBtn = document.getElementById('qhavuzLightboxSolveBtn');
-  // Şimdilik herhangi bir işlevi yok; ileride eklenecek bilgi
-  // gösterimi için yer tutucu olarak bırakıldı.
   const qhavuzLightboxInfoBtn = document.getElementById('qhavuzLightboxInfoBtn');
   let qhavuzLightboxItem = null;
 
@@ -20528,6 +20949,45 @@
     if (e.target === qhavuzLightboxBackdrop) closeQhavuzLightbox();
   });
 
+  // ---- Soru Havuzu: (i) bilgi pop-up'ı. Lightbox'taki soru için
+  // ders/branş etiketini ve Soru Ekle adımında girilen Kaynak (kitap
+  // adı), Sayfa ve Açıklama bilgilerini salt-okunur şekilde gösterir. ----
+  const qhavuzInfoBackdrop = document.getElementById('qhavuzInfoBackdrop');
+  const qhavuzInfoSubjectBadge = document.getElementById('qhavuzInfoSubjectBadge');
+  const qhavuzInfoBook = document.getElementById('qhavuzInfoBook');
+  const qhavuzInfoPage = document.getElementById('qhavuzInfoPage');
+  const qhavuzInfoDesc = document.getElementById('qhavuzInfoDesc');
+  const qhavuzInfoCloseBtn = document.getElementById('qhavuzInfoCloseBtn');
+
+  // Bir alan doldurulmadıysa metin yerine "—" gösterip .is-empty ile
+  // soluk/italik yapıyoruz; böylece boş bırakıldığı açıkça anlaşılıyor.
+  const qhavuzSetInfoValue = (el, value) => {
+    const hasValue = value !== null && value !== undefined && String(value).trim() !== '';
+    el.textContent = hasValue ? value : '—';
+    el.classList.toggle('is-empty', !hasValue);
+  };
+
+  const openQhavuzInfo = () => {
+    if (!qhavuzLightboxItem) return;
+    const item = qhavuzLightboxItem;
+    qhavuzInfoSubjectBadge.textContent = qhavuzSubjectLabel(item);
+    qhavuzInfoSubjectBadge.style.background = qhavuzSubjectColor(item.subject);
+    qhavuzSetInfoValue(qhavuzInfoBook, item.book);
+    qhavuzSetInfoValue(qhavuzInfoPage, item.page);
+    qhavuzSetInfoValue(qhavuzInfoDesc, item.description);
+    qhavuzInfoBackdrop.classList.add('is-open');
+  };
+
+  const closeQhavuzInfo = () => {
+    qhavuzInfoBackdrop.classList.remove('is-open');
+  };
+
+  qhavuzLightboxInfoBtn.addEventListener('click', openQhavuzInfo);
+  qhavuzInfoCloseBtn.addEventListener('click', closeQhavuzInfo);
+  qhavuzInfoBackdrop.addEventListener('click', (e) => {
+    if (e.target === qhavuzInfoBackdrop) closeQhavuzInfo();
+  });
+
   // Lightbox içinden doğru cevabı değiştirmek veya "çözüldü" durumunu
   // işaretlemek her seferinde tüm ızgarayı (tüm görseller dahil) baştan
   // çizip gözle görülür bir gecikmeye yol açıyordu. Bunun yerine tam
@@ -20604,7 +21064,10 @@
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'qhavuz-filter-chip';
-      if (value !== 'all') chip.style.setProperty('--qhavuz-chip-color', qhavuzSubjectColor(value));
+      // "Tümü" çipi sabit pembeye değil, kullanıcının o an seçili olduğu
+      // vurgu rengine (--accent-color) göre boyanır; diğer ders çipleri
+      // kendi sabit ders rengini kullanmaya devam eder.
+      chip.style.setProperty('--qhavuz-chip-color', value === 'all' ? 'var(--accent-color, #ff90e8)' : qhavuzSubjectColor(value));
       chip.textContent = label;
       chip.classList.toggle('is-active', qhavuzFilterSubject === value);
       chip.addEventListener('click', () => {
@@ -21120,6 +21583,12 @@
         item.solved = true;
         saveQhavuzState();
       }
+    } else if (item.solved && qhavuzState.items.includes(item)) {
+      // Daha önce "çözüldü" işaretlenmiş bir soru testte yanlış
+      // yapılırsa, havuzdaki yeşil tik artık gerçeği yansıtmıyor demektir;
+      // tiki kaldırıp soruyu tekrar "çözülmedi" durumuna alıyoruz.
+      item.solved = false;
+      saveQhavuzState();
     }
 
     const buttons = qhavuzTestAnswerGrid.querySelectorAll('.qhavuz-add-answer-btn');
@@ -21157,6 +21626,9 @@
         item.solved = true;
         saveQhavuzState();
       }
+    } else if (item.solved && qhavuzState.items.includes(item)) {
+      item.solved = false;
+      saveQhavuzState();
     }
 
     qhavuzTestOpenAnswerInput.disabled = true;
@@ -21197,6 +21669,9 @@
         item.solved = true;
         saveQhavuzState();
       }
+    } else if (item.solved && qhavuzState.items.includes(item)) {
+      item.solved = false;
+      saveQhavuzState();
     }
 
     qhavuzTestOpenAnswerSelfGrade.classList.add('is-hidden');
