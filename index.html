@@ -13400,27 +13400,65 @@
 
   // ---------- Pop-up backdrop'ları açıkken üst güvenli alanı da boya ----------
   // "Soru Ekle" gibi pop-up'lar (.page9-add-backdrop) açıldığında arka planı
-  // koyu/blur'lu bir katmanla (rgba(18,18,28,0.55)) örtüyor; ama üstteki
-  // çentik/Dynamic Island şeridi sadece <meta name="theme-color"> rengine
-  // göre boyandığı için hâlâ eski (aktif temanın) rengiyle kalıp, blur'lanmış
-  // arka planla uyumsuz duruyordu. Backdrop'un kendi tonunu o an aktif tema
-  // rengiyle harmanlayıp üst şeride de uyguluyoruz; pop-up kapanınca (ya da
-  // hiç açık backdrop kalmayınca) şerit eski tema rengine geri dönüyor.
-  const BACKDROP_TINT = { r: 18, g: 18, b: 28, alpha: 0.55 };
-  const blendWithBackdropTint = (hex) => {
+  // koyu/blur'lu bir katmanla örtüyor; ama üstteki çentik/Dynamic Island
+  // şeridi sadece <meta name="theme-color"> rengine göre boyandığı için
+  // hâlâ eski (aktif temanın) rengiyle kalıp, blur'lanmış arka planla
+  // uyumsuz duruyordu. Backdrop'un kendi tonunu o an aktif tema rengiyle
+  // harmanlayıp üst şeride de uyguluyoruz; pop-up kapanınca (ya da hiç açık
+  // backdrop kalmayınca) şerit eski tema rengine geri dönüyor.
+  //
+  // ÖNEMLİ: tüm backdrop'lar AYNI koyulukta değil — ör. Soru Havuzu'ndaki
+  // soru lightbox'ı (.qhavuz-lightbox-backdrop) rgba(12,12,16,0.88)
+  // kullanırken diğerleri (.page9-add-backdrop, .settings-confirm-backdrop,
+  // .wheel-color-backdrop) rgba(18,18,28,0.55) kullanıyor. Eskiden TEK bir
+  // sabit ton (18,18,28,0.55) her pop-up için harmanlanıyordu; bu yüzden
+  // Soru Havuzu'nun daha koyu/opak arka planıyla üst şerit tam eşleşmiyordu.
+  // Artık her backdrop'un GERÇEK arka plan rengini (getComputedStyle ile)
+  // okuyup onunla harmanlıyoruz, böylece hangi pop-up açılırsa açılsın şerit
+  // o pop-up'ın kendi tonuyla birebir eşleşiyor.
+  const DEFAULT_BACKDROP_TINT = { r: 18, g: 18, b: 28, alpha: 0.55 };
+  const parseRgbaString = (str) => {
+    const m = typeof str === 'string' && str.match(/rgba?\(([^)]+)\)/);
+    if (!m) return null;
+    const parts = m[1].split(',').map((s) => parseFloat(s.trim()));
+    if (parts.length < 3 || parts.some((n) => Number.isNaN(n))) return null;
+    return { r: parts[0], g: parts[1], b: parts[2], alpha: parts.length > 3 ? parts[3] : 1 };
+  };
+  const getBackdropTint = (el) => {
+    if (!el) return DEFAULT_BACKDROP_TINT;
+    if (!el._themeTint) {
+      el._themeTint = parseRgbaString(getComputedStyle(el).backgroundColor) || DEFAULT_BACKDROP_TINT;
+    }
+    return el._themeTint;
+  };
+  const blendWithBackdropTint = (hex, tint) => {
     const clean = hex.replace('#', '');
     const r = parseInt(clean.substring(0, 2), 16);
     const g = parseInt(clean.substring(2, 4), 16);
     const b = parseInt(clean.substring(4, 6), 16);
-    const mix = (base, overlay) => Math.round(overlay * BACKDROP_TINT.alpha + base * (1 - BACKDROP_TINT.alpha));
+    const mix = (base, overlay) => Math.round(overlay * tint.alpha + base * (1 - tint.alpha));
     const toHex = (n) => n.toString(16).padStart(2, '0');
-    return `#${toHex(mix(r, BACKDROP_TINT.r))}${toHex(mix(g, BACKDROP_TINT.g))}${toHex(mix(b, BACKDROP_TINT.b))}`;
+    return `#${toHex(mix(r, tint.r))}${toHex(mix(g, tint.g))}${toHex(mix(b, tint.b))}`;
   };
 
   const openThemeBackdrops = new Set();
   const refreshThemeColorMeta = () => {
     const baseColor = themes[themeIndex].color;
-    updateThemeColorMeta(openThemeBackdrops.size > 0 ? blendWithBackdropTint(baseColor) : baseColor);
+    if (openThemeBackdrops.size === 0) {
+      updateThemeColorMeta(baseColor);
+      return;
+    }
+    // Birden fazla pop-up üst üste açık olabilir (ör. Soru Havuzu'nda
+    // "Bilgi" pop-up'ı, soru lightbox'ının üstünde açılıyor); üst şeridi
+    // o an GÖRÜNÜRDE en üstte olan (z-index'i en yüksek) pop-up'ın kendi
+    // tonuna göre boyuyoruz.
+    let topEl = null;
+    let topZ = -Infinity;
+    openThemeBackdrops.forEach((el) => {
+      const z = parseFloat(getComputedStyle(el).zIndex) || 0;
+      if (z >= topZ) { topZ = z; topEl = el; }
+    });
+    updateThemeColorMeta(blendWithBackdropTint(baseColor, getBackdropTint(topEl)));
   };
 
   const watchBackdropForThemeColor = (backdrop) => {
