@@ -17063,11 +17063,42 @@
           setPage8GroupsPanel(false);
           window.setTimeout(() => {
             card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            card.classList.remove('is-highlighted');
-            // Reflow tetikleyerek animasyonun tekrar oynatılabilmesini sağlar.
-            void card.offsetWidth;
-            card.classList.add('is-highlighted');
-            card.addEventListener('animationend', () => card.classList.remove('is-highlighted'), { once: true });
+
+            // Kaydırma animasyonu (smooth scroll) asenkron sürdüğü için,
+            // vurgu efektini hemen değil, kart gerçekten hedef konuma
+            // varıp ekrandaki pozisyonu art arda birkaç karede sabitlendikten
+            // sonra uyguluyoruz. Aksi halde efekt, kart henüz kayarken,
+            // tıklanır tıklanmaz başlıyordu.
+            let lastTop = card.getBoundingClientRect().top;
+            let stableFrames = 0;
+            let totalFrames = 0;
+            const maxFrames = 120; // ~2 sn güvenlik sınırı
+
+            const applyHighlight = () => {
+              card.classList.remove('is-highlighted');
+              // Reflow tetikleyerek animasyonun tekrar oynatılabilmesini sağlar.
+              void card.offsetWidth;
+              card.classList.add('is-highlighted');
+              card.addEventListener('animationend', () => card.classList.remove('is-highlighted'), { once: true });
+            };
+
+            const waitForScrollEnd = () => {
+              const top = card.getBoundingClientRect().top;
+              if (Math.abs(top - lastTop) < 0.5) {
+                stableFrames += 1;
+              } else {
+                stableFrames = 0;
+              }
+              lastTop = top;
+              totalFrames += 1;
+
+              if (stableFrames >= 4 || totalFrames >= maxFrames) {
+                applyHighlight();
+                return;
+              }
+              requestAnimationFrame(waitForScrollEnd);
+            };
+            requestAnimationFrame(waitForScrollEnd);
           }, 180);
         });
         page8GroupsChipList.appendChild(chip);
