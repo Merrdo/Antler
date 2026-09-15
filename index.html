@@ -2808,9 +2808,19 @@
     animation: page8BoxPop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  .page8-item-text {
+  /* Metin ve sil butonunu birlikte saran, label'ın (flex satırının)
+     esnek/genişleyen tek hücresi. Sil butonu artık burada FLOAT ile
+     sağ üst köşeye "gömülü" duruyor: düzenleme modu kapalıyken negatif
+     margin ile kendini görünmez ve yer kaplamaz hale getiriyor (metin
+     tam genişlikte akmaya devam eder), düzenleme modu açılınca da
+     gerçek yerine oturup SADECE üst üste bindiği satırı iterek metnin
+     o satırının bir altına kaymasını sağlıyor — tüm kutu daralmıyor. */
+  .page8-item-content {
     flex: 1 1 auto;
     min-width: 0;
+  }
+
+  .page8-item-text {
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
     font-size: 0.92rem;
@@ -2840,25 +2850,31 @@
   }
 
   .page8-item-delete {
-    flex-shrink: 0;
+    float: right;
     width: 1.5rem;
     height: 1.5rem;
     font-size: 0.85rem;
     border-width: 2.5px;
     box-shadow: 2px 2px 0px 0px #000;
+    margin-left: 0.5rem;
+    margin-bottom: 0.15rem;
     opacity: 0;
     transform: scale(0.6);
     pointer-events: none;
-    margin-left: -2.1rem;
+    /* ÖNEMLİ: bu köşe düzenleme modu kapalıyken de HER ZAMAN ayrılmış
+       durumda (margin-right burada yok / 0) — yani metin, düzenleme modu
+       hiç açılmasa bile daha en baştan bu köşeye hiç girmeyecek şekilde
+       yazılıyor/sarılıyor. Böylece kalem simgesine basılınca sadece
+       görünmez butonun kendisi görünür hale geliyor (opacity/transform),
+       hiçbir satır o an kaymıyor/yeniden dizilmiyor. */
     transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease,
-      margin 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+      box-shadow 0.2s ease, background-color 0.2s ease;
   }
 
   .page8-group-list.is-edit-mode .page8-item-delete {
     opacity: 1;
     transform: scale(1);
     pointer-events: auto;
-    margin-left: 0;
   }
 
   .page8-add-item-row {
@@ -16563,10 +16579,6 @@
     // araya girmesini engelle; kendi "Kopyala" balonumuzu gösteriyoruz.
     text.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    label.appendChild(checkbox);
-    label.appendChild(box);
-    label.appendChild(text);
-
     const del = document.createElement('button');
     del.type = 'button';
     del.className = 'delete-btn page8-item-delete';
@@ -16574,8 +16586,22 @@
     del.textContent = '×';
     del.addEventListener('click', onDelete);
 
+    // Sil butonu artık metnin İÇİNDE değil ama metinle AYNI kapsayıcıda
+    // (content), DOM'da metinden ÖNCE: böylece float:right ile sağ üst
+    // köşeye oturur ve sadece o köşeyle çakışan satırı aşağı iter, metin
+    // kutusunun tamamı daralmaz. `text.textContent` ile ayrıca değiştiği
+    // için (bkz. startItemTextEdit) del, text'in kendisine değil bir üst
+    // kapsayıcıya ekleniyor — yoksa textContent ataması onu silerdi.
+    const content = document.createElement('div');
+    content.className = 'page8-item-content';
+    content.appendChild(del);
+    content.appendChild(text);
+
+    label.appendChild(checkbox);
+    label.appendChild(box);
+    label.appendChild(content);
+
     row.appendChild(label);
-    row.appendChild(del);
     row._page8Box = box;
     row._page8Checkbox = checkbox;
     row._page8Text = text;
@@ -16845,14 +16871,23 @@
 
       // Yazı uzadıkça kutunun boyunu otomatik büyüterek tüm metnin
       // paragraf halinde, kesilmeden görünmesini sağlar.
+      // NOT: height'ı doğrudan 'input' olayı İÇİNDE, senkron olarak
+      // değiştirmek iPhone'da (Mobile Safari) imlecin rastgele bir yere
+      // "zıplamasına" neden oluyordu — Safari o an harfi yerleştirip
+      // imleci konumlandırırken araya girip düzeni değiştirmiş oluyorduk.
+      // Bunun yerine bir sonraki animasyon karesine erteliyoruz ki
+      // tarayıcı önce kendi imleç/metin güncellemesini bitirsin.
+      let autoGrowRaf = null;
       const autoGrow = () => {
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + 'px';
       };
-      input.addEventListener('input', autoGrow);
+      const scheduleAutoGrow = () => {
+        if (autoGrowRaf) cancelAnimationFrame(autoGrowRaf);
+        autoGrowRaf = requestAnimationFrame(autoGrow);
+      };
+      input.addEventListener('input', scheduleAutoGrow);
       requestAnimationFrame(autoGrow);
-
-      input.focus();
       // Metnin tamamını seçili bırakmak yerine imleci sona koyuyoruz;
       // böylece düzenleme açıldığında yanlışlıkla tüm metni silme riski
       // olmuyor, kullanıcı ne değiştirmek istiyorsa kendi seçiyor.
@@ -16909,11 +16944,18 @@
 
       // Eklerken de tıpkı düzenlemede olduğu gibi metin uzayınca aşağı
       // satıra geçtiğini anlık görebilelim; kutunun boyu yazdıkça büyür.
+      // (Aynı iPhone imleç zıplaması sorunu için height değişimi bir
+      // sonraki kareye erteleniyor, bkz. startItemTextEdit içindeki not.)
+      let autoGrowRaf = null;
       const autoGrow = () => {
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + 'px';
       };
-      input.addEventListener('input', autoGrow);
+      const scheduleAutoGrow = () => {
+        if (autoGrowRaf) cancelAnimationFrame(autoGrowRaf);
+        autoGrowRaf = requestAnimationFrame(autoGrow);
+      };
+      input.addEventListener('input', scheduleAutoGrow);
       requestAnimationFrame(autoGrow);
 
       const commit = () => {
