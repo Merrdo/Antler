@@ -3175,21 +3175,19 @@
   /* ---------- Soru Havuzu (eski "Kamera" sekmesi) ----------
      Sayfa 11 ile aynı üstte hizalı, kaydırmalı düzen. Yüklenen her
      görsel; branş ve doğru cevap şıkkıyla birlikte 2 sütunlu bir kart
-     ızgarasında birikir. */
+     ızgarasında birikir.
+     Başlık ve kesim çizgisi artık Ayarlar sayfasındaki (#page-settings)
+     ile birebir aynı mantıkla çalışıyor: bunlar sayfanın üstünde SABİT
+     duruyor, aşağı kaydırıldığında kaymıyor. Yalnızca altlarındaki
+     .qhavuz-scroll kutusu kendi içinde kayıyor, içerik başlığın
+     ARKASINA değil, bu kutunun üst kenarında düzgünce kesilerek
+     kayboluyor. */
   #page-camera {
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
     justify-content: flex-start;
-    padding-top: calc(48px + env(safe-area-inset-top));
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  #page-camera::-webkit-scrollbar {
-    display: none;
+    padding: 0;
+    overflow: hidden;
   }
 
   .qhavuz-wrap {
@@ -3201,21 +3199,25 @@
     gap: 1rem;
   }
 
+  /* Başlık artık Ayarlar sayfasındaki (.settings-hero / .settings-title)
+     ile birebir aynı tasarımı ve davranışı kullanıyor: sabit, büyük,
+     kalın, ortalanmış Playfair Display başlığı. Üstte fazla boşluk
+     kalmasın diye üst dolgu ve yazı boyutu Ayarlar'dakinden de biraz
+     daha küçük tutuldu; başlık böylece bir miktar yukarı kayıyor. */
   .qhavuz-header {
     display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
+    justify-content: center;
     width: 100%;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    padding: calc(18px + env(safe-area-inset-top)) 24px 0.4rem;
   }
 
-  /* Başlık artık Ayarlar sayfasındaki (.settings-title) ile birebir aynı
-     tasarımı kullanıyor: büyük, kalın, ortalanmış Playfair Display
-     başlığı. */
   .qhavuz-header .qhavuz-title {
     width: 100%;
     font-family: "Playfair Display", "Archivo Expanded", "Space Grotesk", serif;
     font-weight: 800;
-    font-size: clamp(2.1rem, 9.5vw, 2.8rem);
+    font-size: clamp(1.8rem, 8vw, 2.4rem);
     letter-spacing: 0.015em;
     text-transform: uppercase;
     text-align: center;
@@ -3229,19 +3231,45 @@
 
   /* Ayarlar'daki "kesim çizgisi" (.settings-tear) ile aynı kesikli
      çizgi + ortada ikon deseni; burada makas yerine düzenleme kalemi
-     var ve gerçekten tıklanabilir (Soru Havuzu düzenleme modunu açar). */
+     var ve gerçekten tıklanabilir (Soru Havuzu düzenleme modunu açar).
+     Başlık gibi bu da sabit kalıyor, kendi yatay boşluğunu taşıyor
+     (artık üst kutunun 24px'lik sayfa dolgusuna güvenmiyor). */
   .qhavuz-tear {
     flex: 0 0 auto;
     width: 100%;
     max-width: 360px;
     margin: 0 auto;
-    padding-top: 0.2rem;
+    padding: 0.1rem 24px 0;
     box-sizing: border-box;
     display: flex;
     align-items: center;
     gap: 8px;
     color: var(--theme-text, #fff);
     transition: color 0.5s ease;
+  }
+
+  /* Başlık+kesim çizgisinin altındaki her şey (Görsel Yükle/Test Modu
+     butonları, filtre çubuğu, kart ızgarası) artık kendi kutusunda
+     kayıyor; böylece yukarı kaydırıldığında öğeler başlığın ARKASINA
+     değil, bu kutunun üst kenarında kesilerek kayboluyor. */
+  .qhavuz-scroll {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    box-sizing: border-box;
+    padding: 0.75rem 24px calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .qhavuz-scroll::-webkit-scrollbar {
+    display: none;
   }
 
   .qhavuz-tear-line {
@@ -3436,40 +3464,42 @@
     overflow: hidden;
   }
 
-  /* Sınav türü (TYT/AYT) etiketi: görselin sağ üst köşesinde, klasik
-     "corner ribbon" tekniğiyle çaprazlamasına duran bir şerit. Şeridin
-     sağ/sol uçları .qhavuz-thumb'ın overflow:hidden'ı sayesinde kutunun
-     dışına taşmadan kırpılıyor, böylece köşeye "yapıştırılmış" bir etiket
-     görünümü oluşuyor. */
+  /* Sınav türü (TYT/AYT) etiketi: eskiden görselin sağ üst köşesine
+     çaprazlamasına oturan büyük bir "corner ribbon" şeridiydi; artık
+     görselin sol üst köşesinde duran, küçük, dikdörtgen olmayan
+     (tam yuvarlak köşeli/hap biçimli), yarı saydam ve döndürülmemiş
+     minimal bir rozet. Uygulamanın geri kalanındaki sade etiket/çip
+     diliyle (ör. ders çipleri) daha tutarlı. */
   .qhavuz-card-track-ribbon {
     position: absolute;
-    top: 13px;
-    right: -33px;
-    width: 118px;
-    transform: rotate(45deg);
-    background: #000;
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.22rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     color: #fff;
     text-align: center;
     font-family: "Space Grotesk", sans-serif;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 0.62rem;
-    letter-spacing: 0.04em;
-    padding: 0.24rem 0;
-    z-index: 2;
+    letter-spacing: 0.05em;
+    z-index: 3;
     pointer-events: none;
   }
 
-  /* TYT/AYT şeritleri artık tek tip siyah değil; sade ve göz yormayan iki
+  /* TYT/AYT rozetleri artık tek tip siyah değil; sade ve göz yormayan iki
      ayrı, olgun tonla ayrışıyor. Renkler Sayfa 11 (Denemelerim) TYT/AYT
      ayrımıyla aynı aileden seçildi (lacivert/mor) ve genel renk paneline
      (WHEEL_PALETTE) de eklendi, böylece uygulama genelinde tutarlı bir
      renk dili kuruluyor. */
   .qhavuz-card-track-ribbon.is-tyt {
-    background: #3f5aa8;
+    background: rgba(63, 90, 168, 0.82);
   }
 
   .qhavuz-card-track-ribbon.is-ayt {
-    background: #7452a8;
+    background: rgba(116, 82, 168, 0.82);
   }
 
   .qhavuz-thumb img {
@@ -3530,22 +3560,86 @@
     pointer-events: auto;
   }
 
-  /* Test modunda doğru yapılan sorunun kartına, havuza dönünce eklenen
-     yeşil tik rozeti. */
-  .qhavuz-card-check {
+  /* Test modunda doğru yapılan sorunun kartında, havuza dönünce görselin
+     üzerine binen hafif karartma + ortalanmış büyük tik ikonu. Eskiden
+     köşede küçük bir yeşil rozetti (.qhavuz-card-check); artık görselin
+     tamamını hafifçe karartıp ortasına büyük bir tik koyarak "çözüldü"
+     durumunu çok daha belirgin gösteriyor. Sadece .qhavuz-thumb'ın
+     (görsel kutusunun) üzerine eklenir, bilgi şeridini kaplamaz. */
+  .qhavuz-card-solved-overlay {
     position: absolute;
-    top: 0.4rem;
-    left: 0.4rem;
-    width: 1.7rem;
-    height: 1.7rem;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #3ddc84;
-    border: 2.5px solid #000;
-    border-radius: 50%;
-    box-shadow: 2px 2px 0px 0px #000;
+    background: rgba(10, 12, 10, 0.4);
     z-index: 2;
+    pointer-events: none;
+  }
+
+  .qhavuz-card-solved-overlay svg {
+    display: block;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+  }
+
+  /* ---- Soru Havuzu: karta basılı tutunca açılan "Sil" bağlam menüsü ----
+     Düzenleme moduna hiç girmeden, herhangi bir kartın üzerine parmakla
+     basılı tutunca (veya masaüstünde sağ tıklanınca) dokunulan noktanın
+     yakınında beliren küçük, brutalist bir menü. Konumu JS tarafından
+     `left`/`top` ile satır içi olarak ayarlanır. */
+  .qhavuz-context-menu {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 250;
+    min-width: 128px;
+    background: #fff;
+    border: 3px solid #000;
+    border-radius: 0.75em;
+    box-shadow: 4px 4px 0px 0px #000;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.9);
+    transform-origin: bottom left;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+
+  .qhavuz-context-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+  }
+
+  .qhavuz-context-menu-item {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1.1rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #c92a2a;
+    background: #fff;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .qhavuz-context-menu-item:active {
+    background: #f2f2f2;
+  }
+
+  body.is-anthracite .qhavuz-context-menu {
+    background: var(--dark-card-color, #32343a);
+  }
+
+  body.is-anthracite .qhavuz-context-menu-item {
+    background: var(--dark-card-color, #32343a);
+    color: #ff8a8a;
+  }
+
+  body.is-anthracite .qhavuz-context-menu-item:active {
+    background: rgba(255, 255, 255, 0.08);
   }
 
   /* ---- Soru Havuzu: soru görselini büyük gösteren lightbox ---- */
@@ -3603,7 +3697,7 @@
 
   /* Kapat butonuyla aynı yuvarlak tasarımı paylaşan, onun hemen
      solunda duran manuel "çözüldü" işaretleme butonu. İşaretliyken
-     kart listesindeki yeşil tik rozetiyle (.qhavuz-card-check) aynı
+     kart listesindeki tik ikonuyla (.qhavuz-card-solved-overlay) aynı
      yeşile döner. */
   .qhavuz-lightbox-solve {
     position: absolute;
@@ -4016,10 +4110,79 @@
     gap: 0.5rem;
   }
 
+  /* Adım 3'ün en üstündeki soru önizlemesi: eskiden "kutu içinde kutu"
+     gibi duruyordu (kendi çerçevesi olan bir görsel, ayrıca onu saran
+     ikinci bir çerçeve). Artık tek, kesintisiz bir kart: görsel kartın
+     sol kenarına tam yaslanıp kendi köşe yuvarlaklığını paylaşıyor,
+     sağında ise sınav türü (küçük siyah bir hap etiket) ve ders adı
+     (kalın başlık) daha şık bir hiyerarşiyle yer alıyor. */
+  .qhavuz-add-answer-preview {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 1rem;
+    border: 2.5px solid #000;
+    border-radius: 0.9rem;
+    overflow: hidden;
+    background: #f2f2f2;
+  }
+
+  .qhavuz-add-answer-preview img {
+    flex-shrink: 0;
+    width: 4.6rem;
+    height: 4.6rem;
+    object-fit: cover;
+    display: block;
+    border-right: 2.5px solid #000;
+  }
+
+  .qhavuz-add-answer-preview-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0 0.9rem;
+    min-width: 0;
+  }
+
+  .qhavuz-add-answer-preview-track {
+    display: inline-block;
+    align-self: flex-start;
+    padding: 0.14rem 0.55rem;
+    border-radius: 999px;
+    background: #000;
+    color: #fff;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .qhavuz-add-answer-preview-subject {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.98rem;
+    color: #121212;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body.is-anthracite .qhavuz-add-answer-preview {
+    background: #2a2c2f;
+  }
+
+  body.is-anthracite .qhavuz-add-answer-preview-subject {
+    color: #f2f2f4;
+  }
+
   /* Cevap türü (Şıklı / Açık Uçlu) segmented control: adım 3'ün en üstünde,
-     iki modu birbirinin yerine geçirmek için kullanılır. */
+     iki modu birbirinin yerine geçirmek için kullanılır. Sağ kenarı
+     kartın iç boşluğuna tam yaslanınca kesik görünüyordu; hafifçe sola
+     kaydırıp sağda küçük bir boşluk bırakıyoruz. */
   .qhavuz-answer-type-segmented {
     margin-bottom: 0.9rem;
+    margin-right: 0.5rem;
   }
 
   .qhavuz-add-answer-mode.is-hidden {
@@ -4107,6 +4270,15 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 0.5rem;
+  }
+
+  /* .qhavuz-add-answer-grid birden fazla yerde (test modu, Sayfa 11 soru
+     ekleme) paylaşılan ortak bir sınıf; sağ kenarın kesik göründüğü
+     sorun sadece Soru Ekle pop-up'ının 3. adımında (şıklı cevap seçimi)
+     olduğu için kaydırmayı sadece o ızgaraya (#qhavuzAddAnswerGrid)
+     uyguluyoruz, diğer kullanımları etkilemiyoruz. */
+  #qhavuzAddAnswerGrid {
+    margin-right: 0.5rem;
   }
 
   .qhavuz-add-answer-btn {
@@ -11422,39 +11594,41 @@
        soruların görseli yüklenir, açılan pop-up'ta branş ve doğru cevap
        şıkkı işaretlenir, kart olarak listede birikir. -->
   <section class="page" id="page-camera">
-    <div class="qhavuz-wrap">
-      <div class="qhavuz-header">
-        <h1 class="qhavuz-title">Soru Havuzu</h1>
+    <div class="qhavuz-header">
+      <h1 class="qhavuz-title">Soru Havuzu</h1>
+    </div>
 
-        <div class="qhavuz-tear">
-          <span class="qhavuz-tear-line" aria-hidden="true"></span>
-          <button type="button" class="qhavuz-tear-pencil" id="qhavuzEditBtn" aria-label="Soruları düzenle" aria-pressed="false">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 20l4.5-1 10.2-10.2-3.5-3.5L5 15.5 4 20z"/>
-              <path d="M13.3 6.8l3.5 3.5"/>
-            </svg>
-          </button>
-          <span class="qhavuz-tear-line" aria-hidden="true"></span>
+    <div class="qhavuz-tear">
+      <span class="qhavuz-tear-line" aria-hidden="true"></span>
+      <button type="button" class="qhavuz-tear-pencil" id="qhavuzEditBtn" aria-label="Soruları düzenle" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 20l4.5-1 10.2-10.2-3.5-3.5L5 15.5 4 20z"/>
+          <path d="M13.3 6.8l3.5 3.5"/>
+        </svg>
+      </button>
+      <span class="qhavuz-tear-line" aria-hidden="true"></span>
+    </div>
+
+    <div class="qhavuz-scroll" id="qhavuzScroll">
+      <div class="qhavuz-wrap">
+        <div class="qhavuz-actions">
+          <button type="button" class="add-task-btn qhavuz-add-btn" id="qhavuzAddBtn">+ Görsel Yükle</button>
+          <button type="button" class="add-task-btn qhavuz-test-start-btn" id="qhavuzTestBtn">Test Modu</button>
         </div>
-      </div>
+        <input type="file" accept="image/*" id="qhavuzFileInput" class="qhavuz-file-input">
 
-      <div class="qhavuz-actions">
-        <button type="button" class="add-task-btn qhavuz-add-btn" id="qhavuzAddBtn">+ Görsel Yükle</button>
-        <button type="button" class="add-task-btn qhavuz-test-start-btn" id="qhavuzTestBtn">Test Modu</button>
-      </div>
-      <input type="file" accept="image/*" id="qhavuzFileInput" class="qhavuz-file-input">
-
-      <div class="qhavuz-filter-bar" id="qhavuzFilterBar">
-        <div class="settings-segmented qhavuz-filter-track-segmented" id="qhavuzFilterTrackSegmented">
-          <div class="settings-segmented-slider" id="qhavuzFilterTrackSlider"></div>
-          <button type="button" class="settings-segmented-option is-active" data-value="all">Tümü</button>
-          <button type="button" class="settings-segmented-option" data-value="tyt">TYT</button>
-          <button type="button" class="settings-segmented-option" data-value="ayt">AYT</button>
+        <div class="qhavuz-filter-bar" id="qhavuzFilterBar">
+          <div class="settings-segmented qhavuz-filter-track-segmented" id="qhavuzFilterTrackSegmented">
+            <div class="settings-segmented-slider" id="qhavuzFilterTrackSlider"></div>
+            <button type="button" class="settings-segmented-option is-active" data-value="all">Tümü</button>
+            <button type="button" class="settings-segmented-option" data-value="tyt">TYT</button>
+            <button type="button" class="settings-segmented-option" data-value="ayt">AYT</button>
+          </div>
+          <div class="qhavuz-filter-subjects" id="qhavuzFilterSubjects"></div>
         </div>
-        <div class="qhavuz-filter-subjects" id="qhavuzFilterSubjects"></div>
-      </div>
 
-      <div class="qhavuz-grid" id="qhavuzGrid"></div>
+        <div class="qhavuz-grid" id="qhavuzGrid"></div>
+      </div>
     </div>
   </section>
 
@@ -11511,6 +11685,26 @@
       <button type="button" class="settings-confirm-confirm" id="page9RemoveConfirmConfirm">Evet, çıkar</button>
     </div>
   </div>
+</div>
+
+<!-- Soru Havuzu: bir soruyu silmeden önce sorulan onay pop-up'ı. Hem
+     düzenleme modundaki × butonundan hem de karta basılı tutunca açılan
+     bağlam menüsündeki "Sil" seçeneğinden tetiklenir. -->
+<div class="settings-confirm-backdrop" id="qhavuzDeleteConfirmBackdrop">
+  <div class="settings-confirm-card">
+    <span class="settings-confirm-title">Emin misin?</span>
+    <span class="settings-confirm-desc">Bu soru havuzdan tamamen silinecek.</span>
+    <div class="settings-confirm-actions">
+      <button type="button" class="settings-confirm-cancel" id="qhavuzDeleteConfirmCancel">Vazgeç</button>
+      <button type="button" class="settings-confirm-confirm" id="qhavuzDeleteConfirmConfirm">Evet, sil</button>
+    </div>
+  </div>
+</div>
+
+<!-- Soru Havuzu: bir karta basılı tutunca (veya sağ tıklanınca) dokunulan
+     noktanın yakınında beliren "Sil" bağlam menüsü. -->
+<div class="qhavuz-context-menu" id="qhavuzContextMenu">
+  <button type="button" class="qhavuz-context-menu-item" id="qhavuzContextMenuDelete">Sil</button>
 </div>
 
 <!-- Sayfa 5: Kronometre başlığının yanındaki küçük kare buton ile açılan
@@ -11597,8 +11791,21 @@
       <div class="qhavuz-add-subject-grid" id="qhavuzAddSubjectGrid"></div>
     </div>
 
-    <!-- Adım 3: Doğru cevap -->
+    <!-- Adım 3: Doğru cevap. Eskiden bu adımda sadece iki kısa kontrol
+         (cevap türü + şık grid'i) vardı ve altı çok boş kalıyordu; artık
+         en üstte kırpılan görselin küçük bir önizlemesi + hangi sınav
+         türü/dersle işaretlendiğinin özeti gösteriliyor. Böylece hem
+         boşluk anlamlı içerikle doluyor hem de kullanıcı doğru cevabı
+         işaretlerken hangi soruya baktığını unutmuyor. -->
     <div class="qhavuz-add-step is-hidden" id="qhavuzStepAnswer">
+      <div class="qhavuz-add-answer-preview">
+        <img id="qhavuzAnswerPreviewImg" alt="Soru görseli">
+        <div class="qhavuz-add-answer-preview-info">
+          <span class="qhavuz-add-answer-preview-track" id="qhavuzAnswerPreviewTrack"></span>
+          <span class="qhavuz-add-answer-preview-subject" id="qhavuzAnswerPreviewSubject"></span>
+        </div>
+      </div>
+
       <span class="qhavuz-add-label">Cevap Türü</span>
       <div class="settings-segmented page9-segmented qhavuz-answer-type-segmented" id="qhavuzAnswerTypeSegmented">
         <div class="settings-segmented-slider" id="qhavuzAnswerTypeSlider"></div>
@@ -11644,7 +11851,7 @@
      kullanır, sadece burada tek seçim (radio gibi) yapılır ve her
      satırda o branştaki soru sayısı gösterilir. -->
 <div class="page9-add-backdrop" id="qhavuzTestSetupBackdrop">
-  <div class="page9-add-card qhavuz-add-card">
+  <div class="page9-add-card">
     <div class="page9-add-header">
       <div class="page9-add-heading">
         <span class="page9-add-title">Test Oluştur</span>
@@ -19587,6 +19794,9 @@
   const qhavuzStepCrop = document.getElementById('qhavuzStepCrop');
   const qhavuzStepSubject = document.getElementById('qhavuzStepSubject');
   const qhavuzStepAnswer = document.getElementById('qhavuzStepAnswer');
+  const qhavuzAnswerPreviewImg = document.getElementById('qhavuzAnswerPreviewImg');
+  const qhavuzAnswerPreviewTrack = document.getElementById('qhavuzAnswerPreviewTrack');
+  const qhavuzAnswerPreviewSubject = document.getElementById('qhavuzAnswerPreviewSubject');
   const qhavuzStepBook = document.getElementById('qhavuzStepBook');
   const qhavuzAddSteps = [qhavuzStepCrop, qhavuzStepSubject, qhavuzStepAnswer, qhavuzStepBook];
   const qhavuzAddBack = document.getElementById('qhavuzAddBack');
@@ -19663,6 +19873,20 @@
     qhavuzAddStepSubtitle.textContent = QHAVUZ_STEP_SUBTITLES[qhavuzAddStep];
     qhavuzAddBack.classList.toggle('is-hidden', qhavuzAddStep === 0);
     qhavuzAddConfirm.textContent = QHAVUZ_STEP_LABELS[qhavuzAddStep];
+
+    // Adım 3'e (doğru cevap) gelindiğinde, en üstteki küçük önizlemeyi
+    // kırpılmış görsel ve seçilen sınav türü/ders özetiyle güncelle;
+    // böylece kullanıcı doğru cevabı işaretlerken hangi soruya
+    // baktığını görebiliyor.
+    if (qhavuzAddStep === 2) {
+      if (qhavuzAnswerPreviewImg && qhavuzPendingImage) qhavuzAnswerPreviewImg.src = qhavuzPendingImage;
+      if (qhavuzAnswerPreviewTrack) {
+        qhavuzAnswerPreviewTrack.textContent = qhavuzPendingTrack ? PAGE9_TRACK_LABELS[qhavuzPendingTrack] : '';
+      }
+      if (qhavuzAnswerPreviewSubject) {
+        qhavuzAnswerPreviewSubject.textContent = qhavuzPendingSubject || '';
+      }
+    }
 
     let stepValid = true;
     if (qhavuzAddStep === 1) {
@@ -19888,7 +20112,10 @@
   const openQhavuzAddModal = (imageDataUrl) => {
     qhavuzRawImage = imageDataUrl;
     qhavuzPendingImage = null;
-    qhavuzPendingTrack = null;
+    // Kullanıcı genelde TYT sorusu ekliyor; "Sınav türünü seç" adımına
+    // her seferinde boş gelmesin diye TYT varsayılan olarak seçili
+    // geliyor, isterse AYT'ye değiştirebiliyor.
+    qhavuzPendingTrack = 'tyt';
     qhavuzPendingSubject = null;
     qhavuzPendingAnswer = null;
     qhavuzAddStep = 0;
@@ -20314,12 +20541,12 @@
 
     if (item.solved) {
       if (!refs.checkEl) {
-        const check = document.createElement('span');
-        check.className = 'qhavuz-card-check';
-        check.setAttribute('aria-label', 'Bu soru test modunda doğru yapıldı');
-        check.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 12l5 5L20 6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-        refs.card.appendChild(check);
-        refs.checkEl = check;
+        const overlay = document.createElement('span');
+        overlay.className = 'qhavuz-card-solved-overlay';
+        overlay.setAttribute('aria-label', 'Bu soru test modunda doğru yapıldı');
+        overlay.innerHTML = '<svg viewBox="0 0 24 24" width="40" height="40"><path d="M4 12l5 5L20 6" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        refs.thumb.appendChild(overlay);
+        refs.checkEl = overlay;
       }
     } else if (refs.checkEl) {
       refs.checkEl.remove();
@@ -20408,7 +20635,122 @@
     });
   });
 
+  // ---- Soru Havuzu: silme onay pop-up'ı ----
+  // × butonuyla silme artık anında olmuyor; hem düzenleme modundaki ×
+  // butonu hem de karta basılı tutunca açılan bağlam menüsündeki "Sil"
+  // seçeneği, gerçek silmeden önce bu ortak onay pop-up'ını açar.
+  const qhavuzDeleteConfirmBackdrop = document.getElementById('qhavuzDeleteConfirmBackdrop');
+  const qhavuzDeleteConfirmCancel = document.getElementById('qhavuzDeleteConfirmCancel');
+  const qhavuzDeleteConfirmConfirm = document.getElementById('qhavuzDeleteConfirmConfirm');
+  let qhavuzPendingDeleteId = null;
+
+  const closeQhavuzDeleteConfirm = () => {
+    qhavuzPendingDeleteId = null;
+    if (qhavuzDeleteConfirmBackdrop) qhavuzDeleteConfirmBackdrop.classList.remove('is-open');
+  };
+
+  const openQhavuzDeleteConfirm = (itemId) => {
+    qhavuzPendingDeleteId = itemId;
+    if (qhavuzDeleteConfirmBackdrop) qhavuzDeleteConfirmBackdrop.classList.add('is-open');
+  };
+
+  const qhavuzDeleteItemById = async (itemId) => {
+    const item = qhavuzState.items.find((it) => it.id === itemId);
+    if (!item) return;
+    await deleteImageRef(item.image);
+    qhavuzState.items = qhavuzState.items.filter((it) => it.id !== itemId);
+    saveQhavuzState();
+    renderQhavuzGrid();
+  };
+
+  if (qhavuzDeleteConfirmCancel) qhavuzDeleteConfirmCancel.addEventListener('click', closeQhavuzDeleteConfirm);
+  if (qhavuzDeleteConfirmBackdrop) {
+    qhavuzDeleteConfirmBackdrop.addEventListener('click', (e) => {
+      if (e.target === qhavuzDeleteConfirmBackdrop) closeQhavuzDeleteConfirm();
+    });
+  }
+  if (qhavuzDeleteConfirmConfirm) {
+    qhavuzDeleteConfirmConfirm.addEventListener('click', async () => {
+      const id = qhavuzPendingDeleteId;
+      closeQhavuzDeleteConfirm();
+      if (id) await qhavuzDeleteItemById(id);
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && qhavuzDeleteConfirmBackdrop && qhavuzDeleteConfirmBackdrop.classList.contains('is-open')) {
+      closeQhavuzDeleteConfirm();
+    }
+  });
+
+  // ---- Soru Havuzu: karta basılı tutunca açılan "Sil" bağlam menüsü ----
+  // Düzenleme moduna hiç girmeden, herhangi bir kart üzerine parmakla
+  // basılı tutulduğunda (pointerdown + bir süre pointermove olmadan
+  // beklemek) ya da masaüstünde sağ tıklandığında (contextmenu) dokunulan
+  // noktanın yakınında beliren küçük bir menü açılır; tek seçeneği olan
+  // "Sil" tıklanınca yukarıdaki ortak silme onay pop-up'ı açılır.
+  const qhavuzContextMenu = document.getElementById('qhavuzContextMenu');
+  const qhavuzContextMenuDelete = document.getElementById('qhavuzContextMenuDelete');
+  let qhavuzContextMenuItemId = null;
+
+  const closeQhavuzContextMenu = () => {
+    qhavuzContextMenuItemId = null;
+    if (qhavuzContextMenu) qhavuzContextMenu.classList.remove('is-open');
+  };
+
+  const openQhavuzContextMenu = (itemId, x, y) => {
+    if (!qhavuzContextMenu) return;
+    qhavuzContextMenuItemId = itemId;
+    // Menü, basılı tutulan noktanın TAM ÜZERİNDE değil, sağ-yukarı
+    // çaprazında açılıyor: sol kenarı noktanın biraz sağında, alt kenarı
+    // noktanın biraz üstünde duracak şekilde konumlanıyor. GAP, menüyle
+    // parmağın/imlecin arasındaki boşluk.
+    const GAP = 10;
+    // İlk konumlandırma: menü henüz ölçülmeden önce yaklaşık bir
+    // yükseklik varsayılıyor; gerçek boyutu ölçülür ölçülmez netleştirilir
+    // (aşağıdaki requestAnimationFrame), böylece ilk karede yanlış yerde
+    // görünüp zıplamıyor.
+    qhavuzContextMenu.style.left = `${x + GAP}px`;
+    qhavuzContextMenu.style.top = `${Math.max(8, y - GAP - 90)}px`;
+    qhavuzContextMenu.classList.add('is-open');
+    // Menü ekranın sağından/üstünden/altından taşıyorsa, açıldıktan hemen
+    // sonra gerçek boyutunu ölçüp konumu ekranın içine geri çekiyoruz.
+    requestAnimationFrame(() => {
+      if (!qhavuzContextMenu.classList.contains('is-open')) return;
+      const rect = qhavuzContextMenu.getBoundingClientRect();
+      let adjLeft = x + GAP;
+      let adjTop = y - GAP - rect.height;
+      if (adjLeft + rect.width > window.innerWidth - 8) adjLeft = window.innerWidth - 8 - rect.width;
+      if (adjTop < 8) adjTop = 8;
+      if (adjLeft < 8) adjLeft = 8;
+      qhavuzContextMenu.style.left = `${adjLeft}px`;
+      qhavuzContextMenu.style.top = `${adjTop}px`;
+    });
+  };
+
+  if (qhavuzContextMenuDelete) {
+    qhavuzContextMenuDelete.addEventListener('click', () => {
+      const id = qhavuzContextMenuItemId;
+      closeQhavuzContextMenu();
+      if (id) openQhavuzDeleteConfirm(id);
+    });
+  }
+
+  // Menü dışında herhangi bir yere basılınca (yeni bir kartın kendi
+  // basılı-tutma zamanlayıcısını tetiklemesiyle çakışmaması için önceki
+  // pointerdown'ın olay döngüsü tamamen bittikten sonra, yalnızca
+  // sonraki pointerdown'larda) menüyü kapatıyoruz.
+  document.addEventListener('pointerdown', (e) => {
+    if (qhavuzContextMenu && qhavuzContextMenu.classList.contains('is-open') && !qhavuzContextMenu.contains(e.target)) {
+      closeQhavuzContextMenu();
+    }
+  });
+  window.addEventListener('scroll', closeQhavuzContextMenu, true);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeQhavuzContextMenu();
+  });
+
   const renderQhavuzGrid = () => {
+    closeQhavuzContextMenu();
     qhavuzBuildFilterSubjectChips();
 
     const filteredItems = qhavuzState.items.filter((item) => {
@@ -20445,8 +20787,8 @@
       thumb.appendChild(img);
       resolveImageSrc(item.image).then((url) => { if (url) img.src = url; });
 
-      // Sınav türü (TYT/AYT) artık alttaki rozette değil, görselin sağ üst
-      // köşesinde çaprazlamasına duran bir "etiket" şeridinde gösteriliyor;
+      // Sınav türü (TYT/AYT) artık alttaki rozette değil, görselin sol üst
+      // köşesinde duran küçük, minimal bir hap (pill) etikette gösteriliyor;
       // alttaki rozette sadece ders adı kalıyor.
       if (item.track && PAGE9_TRACK_LABELS[item.track]) {
         const ribbon = document.createElement('span');
@@ -20473,11 +20815,8 @@
       delBtn.className = 'delete-btn qhavuz-card-delete';
       delBtn.setAttribute('aria-label', 'Soruyu sil');
       delBtn.textContent = '×';
-      delBtn.addEventListener('click', async () => {
-        await deleteImageRef(item.image);
-        qhavuzState.items = qhavuzState.items.filter((it) => it.id !== item.id);
-        saveQhavuzState();
-        renderQhavuzGrid();
+      delBtn.addEventListener('click', () => {
+        openQhavuzDeleteConfirm(item.id);
       });
 
       card.appendChild(delBtn);
@@ -20485,17 +20824,77 @@
       let checkEl = null;
       if (item.solved) {
         checkEl = document.createElement('span');
-        checkEl.className = 'qhavuz-card-check';
+        checkEl.className = 'qhavuz-card-solved-overlay';
         checkEl.setAttribute('aria-label', 'Bu soru test modunda doğru yapıldı');
-        checkEl.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 12l5 5L20 6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-        card.appendChild(checkEl);
+        checkEl.innerHTML = '<svg viewBox="0 0 24 24" width="40" height="40"><path d="M4 12l5 5L20 6" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        thumb.appendChild(checkEl);
       }
 
-      qhavuzCardEls[item.id] = { card, checkEl };
+      qhavuzCardEls[item.id] = { card, thumb, checkEl };
 
-      // Silme butonu haricinde karta dokununca soru görseli büyük açılır.
+      // ---- Basılı tutunca "Sil" bağlam menüsü ----
+      // Düzenleme moduna girmeden de bir soruyu silebilmek için, karta
+      // parmakla basılı tutulup (kısa bir eşik süresi boyunca belirgin
+      // hareket olmadan) bekleyince bağlam menüsü açılır. Menü açıldıktan
+      // sonra gelen "click" (lightbox'ı açan tıklama), basılı tutmanın
+      // tetiklediği sahte bir tıklama olduğu için yok sayılır.
+      let qhavuzLongPressTimer = null;
+      let qhavuzLongPressStartX = 0;
+      let qhavuzLongPressStartY = 0;
+      let qhavuzLongPressTriggered = false;
+      const QHAVUZ_LONG_PRESS_MS = 480;
+      const QHAVUZ_LONG_PRESS_MOVE_TOLERANCE = 10;
+
+      const cancelQhavuzLongPress = () => {
+        if (qhavuzLongPressTimer) {
+          clearTimeout(qhavuzLongPressTimer);
+          qhavuzLongPressTimer = null;
+        }
+      };
+
+      card.addEventListener('pointerdown', (e) => {
+        if (qhavuzEditMode) return;
+        if (e.target.closest('.qhavuz-card-delete')) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        qhavuzLongPressTriggered = false;
+        qhavuzLongPressStartX = e.clientX;
+        qhavuzLongPressStartY = e.clientY;
+        cancelQhavuzLongPress();
+        qhavuzLongPressTimer = setTimeout(() => {
+          qhavuzLongPressTimer = null;
+          qhavuzLongPressTriggered = true;
+          if (navigator.vibrate) navigator.vibrate(12);
+          openQhavuzContextMenu(item.id, e.clientX, e.clientY);
+        }, QHAVUZ_LONG_PRESS_MS);
+      });
+
+      card.addEventListener('pointermove', (e) => {
+        if (!qhavuzLongPressTimer) return;
+        const dx = e.clientX - qhavuzLongPressStartX;
+        const dy = e.clientY - qhavuzLongPressStartY;
+        if (Math.hypot(dx, dy) > QHAVUZ_LONG_PRESS_MOVE_TOLERANCE) cancelQhavuzLongPress();
+      });
+
+      card.addEventListener('pointerup', cancelQhavuzLongPress);
+      card.addEventListener('pointercancel', cancelQhavuzLongPress);
+      card.addEventListener('pointerleave', cancelQhavuzLongPress);
+
+      // Masaüstünde sağ tıklama, tarayıcının kendi sağ-tık menüsü yerine
+      // aynı bağlam menüsünü açar.
+      card.addEventListener('contextmenu', (e) => {
+        if (qhavuzEditMode) return;
+        e.preventDefault();
+        openQhavuzContextMenu(item.id, e.clientX, e.clientY);
+      });
+
+      // Silme butonu haricinde karta dokununca soru görseli büyük açılır;
+      // basılı tutma bağlam menüsünü tetiklediyse bu tıklama yok sayılır.
       card.addEventListener('click', (e) => {
         if (e.target.closest('.qhavuz-card-delete')) return;
+        if (qhavuzLongPressTriggered) {
+          qhavuzLongPressTriggered = false;
+          return;
+        }
         openQhavuzLightbox(item);
       });
 
