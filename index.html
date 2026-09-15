@@ -4255,6 +4255,60 @@
     border-color: #000;
   }
 
+  /* ---- Soru Havuzu: lightbox açılınca doğru cevabın önce görünmemesi
+       için üzerine binen mat/blurlu katman. Kart genişliğindeki cevap
+       şeridini (.qhavuz-lightbox-answer-row) birebir kaplar; "Görmek
+       için Dokun" yazısına dokununca kaybolup altındaki gerçek cevabı
+       ortaya çıkarır. Her yeni soru açıldığında (openQhavuzLightbox)
+       tekrar görünür hale getirilir, böylece cevap her seferinde
+       yeniden gizlenmiş olarak başlar. */
+  .qhavuz-lightbox-answer-wrap {
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .qhavuz-answer-reveal {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0;
+    cursor: pointer;
+    background: #fff;
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    backdrop-filter: blur(16px) saturate(1.3);
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.01em;
+    color: #121212;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+  }
+
+  .qhavuz-answer-reveal svg {
+    flex-shrink: 0;
+  }
+
+  .qhavuz-answer-reveal.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  body.is-anthracite .qhavuz-answer-reveal {
+    background: var(--dark-card-color, #32343a);
+    color: #f2f2f4;
+  }
+
   /* Soru açıklaması: cevap şıklarının altında, kart genişliğinde bir not
      bandı. Açıklama girilmediyse (.is-empty) tamamen gizlenir; düzenleme
      modundayken metin yerine düzenlenebilir bir textarea gösterilir. */
@@ -12586,7 +12640,13 @@
     <div class="qhavuz-lightbox-img-wrap">
       <img id="qhavuzLightboxImg" alt="Soru görseli">
     </div>
-    <div class="qhavuz-lightbox-answer-row" id="qhavuzLightboxAnswerRow"></div>
+    <div class="qhavuz-lightbox-answer-wrap" id="qhavuzLightboxAnswerWrap">
+      <div class="qhavuz-lightbox-answer-row" id="qhavuzLightboxAnswerRow"></div>
+      <button type="button" class="qhavuz-answer-reveal" id="qhavuzAnswerReveal">
+        <svg viewBox="0 0 24 24" width="15" height="15"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <span>Görmek için Dokun</span>
+      </button>
+    </div>
     <div class="qhavuz-lightbox-desc" id="qhavuzLightboxDesc"></div>
   </div>
 </div>
@@ -12596,7 +12656,9 @@
      (kitap adı), Sayfa ve Açıklama bilgilerini gösterir; düzenleme modu
      kapalıyken salt-okunur, açıkken bu üç alan yerinde düzenlenebilir
      (bkz. renderQhavuzInfoField). Bir alan doldurulmadıysa salt-okunur
-     halde "—" ile boş olduğu belirtilir. -->
+     halde "—" ile boş olduğu belirtilir. Eklenme Tarihi ise soru
+     eklenirken kaydedilen `ts` zaman damgasından üretilir; düzenleme
+     modunda bile değiştirilemeyen salt-okunur bir alandır. -->
 <div class="settings-confirm-backdrop" id="qhavuzInfoBackdrop">
   <div class="settings-confirm-card qhavuz-info-card">
     <span class="settings-confirm-title">Soru Bilgisi</span>
@@ -12609,6 +12671,10 @@
       <div class="qhavuz-info-row">
         <span class="qhavuz-info-label">Sayfa</span>
         <div class="qhavuz-info-value" id="qhavuzInfoPage"></div>
+      </div>
+      <div class="qhavuz-info-row">
+        <span class="qhavuz-info-label">Eklenme Tarihi</span>
+        <div class="qhavuz-info-value" id="qhavuzInfoDate"></div>
       </div>
       <div class="qhavuz-info-row qhavuz-info-row--desc">
         <span class="qhavuz-info-label">Açıklama</span>
@@ -17747,10 +17813,10 @@
     };
 
     attachHoldRepeat(minusBtn, () => {
-      commitCount((parseInt(input.value, 10) || 0) - 5);
+      commitCount((parseInt(input.value, 10) || 0) - 1);
     });
     attachHoldRepeat(plusBtn, () => {
-      commitCount((parseInt(input.value, 10) || 0) + 5);
+      commitCount((parseInt(input.value, 10) || 0) + 1);
     });
     input.addEventListener('change', () => commitCount(input.value));
     input.addEventListener('blur', () => commitCount(input.value));
@@ -21411,6 +21477,7 @@
   // ---- Soru Havuzu: soru görselini büyük gösteren lightbox ----
   const qhavuzLightboxZoom = attachPinchZoomPan(qhavuzLightboxImg);
   const qhavuzLightboxAnswerRow = document.getElementById('qhavuzLightboxAnswerRow');
+  const qhavuzAnswerReveal = document.getElementById('qhavuzAnswerReveal');
   const qhavuzLightboxDesc = document.getElementById('qhavuzLightboxDesc');
   const qhavuzLightboxSolveBtn = document.getElementById('qhavuzLightboxSolveBtn');
   const qhavuzLightboxInfoBtn = document.getElementById('qhavuzLightboxInfoBtn');
@@ -21529,6 +21596,17 @@
     }
   };
 
+  // Cevap şeridi her yeni soru açıldığında yeniden gizlenmiş (blurlu)
+  // başlar; düzenleme modundaysa doğru cevabı görmek/değiştirmek
+  // gerektiğinden blur hiç gösterilmez.
+  const resetQhavuzAnswerReveal = () => {
+    qhavuzAnswerReveal.classList.toggle('is-hidden', qhavuzEditMode);
+  };
+
+  qhavuzAnswerReveal.addEventListener('click', () => {
+    qhavuzAnswerReveal.classList.add('is-hidden');
+  });
+
   const openQhavuzLightbox = (item) => {
     qhavuzLightboxZoom.reset();
     qhavuzLightboxItem = item;
@@ -21537,6 +21615,7 @@
     qhavuzSyncLightboxSolveBtn();
     renderQhavuzLightboxAnswers(item);
     renderQhavuzLightboxDesc(item);
+    resetQhavuzAnswerReveal();
 
     qhavuzLightboxBackdrop.classList.add('is-open');
   };
@@ -21571,8 +21650,20 @@
   const qhavuzInfoSubjectBadge = document.getElementById('qhavuzInfoSubjectBadge');
   const qhavuzInfoBook = document.getElementById('qhavuzInfoBook');
   const qhavuzInfoPage = document.getElementById('qhavuzInfoPage');
+  const qhavuzInfoDate = document.getElementById('qhavuzInfoDate');
   const qhavuzInfoDesc = document.getElementById('qhavuzInfoDesc');
   const qhavuzInfoCloseBtn = document.getElementById('qhavuzInfoCloseBtn');
+
+  // Soru eklenirken kaydedilen `ts` (Date.now()) zaman damgasını "12 Eylül
+  // 2026" biçiminde okunaklı bir tarihe çevirir; eski/bozuk bir kayıtta
+  // `ts` yoksa boş döner ve alan "—" ile salt-okunur gösterilir.
+  const QHAVUZ_INFO_MONTHS_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  const qhavuzFormatAddedDate = (ts) => {
+    if (!ts) return '';
+    const d = new Date(ts);
+    if (Number.isNaN(d.getTime())) return '';
+    return `${d.getDate()} ${QHAVUZ_INFO_MONTHS_TR[d.getMonth()]} ${d.getFullYear()}`;
+  };
 
   // `containerEl` (qhavuzInfoBook/Page/Desc) içine, düzenleme modu
   // KAPALIYKEN salt-okunur bir metin (boşsa "—" ve soluk/italik), AÇIKKEN
@@ -21629,6 +21720,12 @@
       numeric: true,
       onCommit: (v) => { item.page = v; saveQhavuzState(); }
     });
+    // Eklenme tarihi düzenleme modunda dahi değiştirilemeyen salt-okunur
+    // bir alan; renderQhavuzInfoField'ı (input'a çeviren) kullanmadan
+    // doğrudan metin olarak basılır.
+    const addedDateLabel = qhavuzFormatAddedDate(item.ts);
+    qhavuzInfoDate.textContent = addedDateLabel || '—';
+    qhavuzInfoDate.classList.toggle('is-empty', !addedDateLabel);
     renderQhavuzInfoField(qhavuzInfoDesc, {
       value: item.description,
       placeholder: 'Açıklama ekle...',
